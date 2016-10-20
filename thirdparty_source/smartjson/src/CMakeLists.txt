@@ -22,5 +22,5 @@ endif()
 
 set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib/${PREFIX})
 
-install(FILES ${HEADER_FILES} DESTINATION ${PROJECT_BINARY_DIR}/smartjson/include)
-install(TARGETS ${TARGET} DESTINATION ${PROJECT_BINARY_DIR}/smartjson/lib/${PREFIX})
+install(FILES ${HEADER_FILES} DESTINATION smartjson/include)
+install(TARGETS ${TARGET} DESTINATION smartjson/lib/${PREFIX})

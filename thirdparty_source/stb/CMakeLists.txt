@@ -1,3 +1,7 @@
+cmake_minimum_required(VERSION 2.8)
+
+PROJECT(stb)
+
 # Define target name
 set (TARGET_NAME stb)
 
@@ -8,3 +12,6 @@ set (SOURCE_FILES ${C_FILES} ${H_FILES})
 
 # Setup target
 add_library(${TARGET_NAME} ${SOURCE_FILES})
+
+install(FILES ${H_FILES} DESTINATION stb/include)
+install(TARGETS ${TARGET_NAME} DESTINATION stb/lib)

@@ -1,3 +1,7 @@
+cmake_minimum_required(VERSION 2.8)
+
+PROJECT(FreeType)
+
 # Define target name
 set (TARGET_NAME FreeType)
 
@@ -56,3 +60,6 @@ include_directories(include)
 
 # Setup target
 add_library(${TARGET_NAME} ${SOURCE_FILES})
+
+install(DIRECTORY include DESTINATION FreeType/include)
+install(TARGETS ${TARGET_NAME} DESTINATION FreeType/lib)
