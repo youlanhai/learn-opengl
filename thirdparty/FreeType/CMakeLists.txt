@@ -52,7 +52,7 @@ set (SOURCE_FILES
     src/winfonts/winfnt.c)
 
 # Define dependency libs
-set (INCLUDE_DIRECTORIES include)
+include_directories(include)
 
 # Setup target
-setup_library ()
+add_library(${TARGET_NAME} ${SOURCE_FILES})

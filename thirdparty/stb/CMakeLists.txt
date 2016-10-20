@@ -7,4 +7,4 @@ file (GLOB H_FILES *.h)
 set (SOURCE_FILES ${C_FILES} ${H_FILES})
 
 # Setup target
-setup_library ()
+add_library(${TARGET_NAME} ${SOURCE_FILES})
