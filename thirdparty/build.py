@@ -19,9 +19,6 @@ def main():
 	input_path = MODULE_PATH
 	install_path = os.path.join(os.path.dirname(input_path), "dependency")
 
-	if os.path.exists(install_path):
-		shutil.rmtree(install_path)
-
 	build_path = os.path.join(MODULE_PATH, "build")
 	safe_mkdir(build_path)
 
