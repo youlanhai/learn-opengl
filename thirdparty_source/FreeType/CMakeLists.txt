@@ -61,5 +61,6 @@ include_directories(include)
 # Setup target
 add_library(${TARGET_NAME} ${SOURCE_FILES})
 
-install(DIRECTORY include DESTINATION FreeType/include)
-install(TARGETS ${TARGET_NAME} DESTINATION FreeType/lib)
+install(DIRECTORY include/freetype DESTINATION include)
+install(FILES include/ft2build.h DESTINATION include)
+install(TARGETS ${TARGET_NAME} DESTINATION lib)

@@ -13,5 +13,5 @@ set (SOURCE_FILES ${C_FILES} ${H_FILES})
 # Setup target
 add_library(${TARGET_NAME} ${SOURCE_FILES})
 
-install(FILES ${H_FILES} DESTINATION stb/include)
-install(TARGETS ${TARGET_NAME} DESTINATION stb/lib)
+install(FILES ${H_FILES} DESTINATION include/stb)
+install(TARGETS ${TARGET_NAME} DESTINATION lib)
