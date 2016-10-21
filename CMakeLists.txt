@@ -1,11 +1,6 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(LearnOpenGL)
 
-include(common.cmake)
-
-include_directories(dependency/include)
-link_directories(dependency/lib)
-
 if (WIN32)
 	message(STATUS "win32 platform")
 elseif (APPLE)
@@ -14,4 +9,11 @@ else ()
 	message(STATUS "unknown platform")
 endif ()
 
+include(common.cmake)
+
+use_cxx11()
+include_directories(common dependency/include)
+link_directories(dependency/lib)
+
+add_subdirectory(common)
 add_subdirectory(learn)
