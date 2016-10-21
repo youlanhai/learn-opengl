@@ -1,5 +1,5 @@
-attribute vec4 position;
-attribute vec4 color;
+attribute vec4 a_position;
+attribute vec4 a_color;
 
 uniform mat4 matWorldViewProj;
 

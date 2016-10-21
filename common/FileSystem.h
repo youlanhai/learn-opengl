@@ -23,6 +23,8 @@ public:
     Paths& getSearchPaths(){ return searchPaths_; }
     const Paths& getSearchPaths() const { return searchPaths_; }
 
+    void dumpSearchPath();
+
 private:
     Paths   searchPaths_;
 };

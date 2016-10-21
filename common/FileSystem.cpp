@@ -1,5 +1,6 @@
 #include "FileSystem.h"
 #include "PathTool.h"
+#include "LogTool.h"
 
 IMPLEMENT_SINGLETON(FileSystem);
 
@@ -36,6 +37,7 @@ bool FileSystem::readFile(std::string &output, const std::string &fileName, bool
     std::string fullPath = getFullPath(fileName);
     if(fullPath.empty())
     {
+        LOG_ERROR("Failed find file %s", fileName.c_str());
         return false;
     }
 
@@ -69,4 +71,12 @@ void FileSystem::addSearchPath(const std::string &path)
         }
     }
     searchPaths_.push_back(path);
+}
+
+void FileSystem::dumpSearchPath()
+{
+    for(const std::string &path : searchPaths_)
+    {
+        LOG_DEBUG("SearchPath: %s", path.c_str());
+    }
 }

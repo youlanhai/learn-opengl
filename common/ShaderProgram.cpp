@@ -88,3 +88,18 @@ std::string ShaderProgram::getLinkError() const
     
     return ret;
 }
+
+void ShaderProgram::use()
+{
+    glUseProgram(handle_);
+}
+
+int ShaderProgram::getUniformLocation(const char *name)
+{
+    return glGetUniformLocation(handle_, name);
+}
+
+int ShaderProgram::getAttribLocation(const char *name)
+{
+    return glGetAttribLocation(handle_, name);
+}

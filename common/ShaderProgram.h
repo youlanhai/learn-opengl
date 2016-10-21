@@ -16,6 +16,11 @@ public:
 
     GLuint getHandle() const { return handle_; }
     std::string getLinkError() const;
+    
+    void use();
+    
+    int getUniformLocation(const char *name);
+    int getAttribLocation(const char *name);
 
 private:
     GLuint          handle_;
