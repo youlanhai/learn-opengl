@@ -21,6 +21,30 @@ static void keyCallback(GLFWwindow *window, int key, int scancode, int action, i
     }
 }
 
+static void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
+{
+    if(window == gApp->getWindow())
+    {
+        gApp->onMouseButton(button, action, mods);
+    }
+}
+
+static void mouseMoveCallback(GLFWwindow *window, double x, double y)
+{
+    if(window == gApp->getWindow())
+    {
+        gApp->onMouseScroll(x, y);
+    }
+}
+
+static void mouseScrollCallback(GLFWwindow *window, double xoffset, double yoffset)
+{
+    if(window == gApp->getWindow())
+    {
+        gApp->onMouseScroll(xoffset, yoffset);
+    }
+}
+
 static void frameBufferSizeChangeCallback(GLFWwindow *window, int width, int height)
 {
     if(window == gApp->getWindow())
@@ -70,6 +94,9 @@ bool Application::createWindow(int width, int height, const std::string &title)
     makeCurrent();
     
     glfwSetKeyCallback(pWindow_, keyCallback);
+    glfwSetMouseButtonCallback(pWindow_, mouseButtonCallback);
+    glfwSetScrollCallback(pWindow_, mouseScrollCallback);
+    glfwSetCursorPosCallback(pWindow_, mouseMoveCallback);
     glfwSetFramebufferSizeCallback(pWindow_, frameBufferSizeChangeCallback);
     
     onCreate();
@@ -123,4 +150,19 @@ void Application::onError(int error, const char *description)
 void Application::onSizeChange(int width, int height)
 {
     glViewport(0, 0, width, height);
+}
+
+void Application::onMouseButton(int button, int action, int mods)
+{
+    
+}
+
+void Application::onMouseMove(double x, double y)
+{
+    
+}
+
+void Application::onMouseScroll(double xoffset, double yoffset)
+{
+    
 }

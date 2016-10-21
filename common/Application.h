@@ -24,7 +24,13 @@ public:
     // 内部方法，不要手动调用
     
     /** 键盘事件回调。*/
-    virtual void onKey(int key, int scancode, int action, int modes);
+    virtual void onKey(int key, int scancode, int action, int mods);
+    
+    virtual void onMouseButton(int button, int action, int mods);
+    
+    virtual void onMouseMove(double x, double y);
+    
+    virtual void onMouseScroll(double xoffset, double yoffset);
     
     /** OpenGL错误回调。*/
     virtual void onError(int error, const char *description);
