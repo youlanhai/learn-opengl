@@ -280,9 +280,9 @@ void testParser()
     "}";
     
     mjson::Parser parser(new mjson::MemoryPoolAllocator());
-    int ret = parser.parse(json, strlen(json));
-    std::cout << "parse result:" << ret << std::endl;
-    TEST_EQUAL(ret == mjson::RC_OK);
+    bool ret = parser.parseFromData(json, strlen(json));
+    std::cout << "parse result:" << parser.getErrorCode() << std::endl;
+    TEST_EQUAL(ret == true);
     
     mjson::Node root = parser.getRoot();
     TEST_EQUAL(root["name"] == "json");
@@ -339,7 +339,7 @@ void testBinaryParser()
     fp = NULL;
     
     mjson::BinaryParser parser;
-    if(parser.parse(buffer, length))
+    if(parser.parseFromData(buffer, length))
     {
         std::ofstream of("test_sheet.json");
         if(!of.bad())

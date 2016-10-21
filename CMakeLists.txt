@@ -12,6 +12,7 @@ endif ()
 include(common.cmake)
 
 use_cxx11()
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG -D_DEBUG")
 include_directories(common dependency/include)
 link_directories(dependency/lib)
 

@@ -13,7 +13,8 @@ namespace mjson
         explicit BinaryParser(IAllocator *allocator = 0);
         ~BinaryParser();
         
-        bool parse(const char *str, size_t length);
+        bool parseFromFile(const char *fileName);
+        bool parseFromData(const char *str, size_t length);
         
         Node getRoot() const{ return root_; }
         int getErrorCode() const { return errorCode_; }

@@ -1,8 +1,9 @@
-#!/bin/sh
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 import os
 import shutil
+from argparse import ArgumentParser
 
 MODULE_PATH = os.path.dirname(os.path.abspath(__file__))
 
@@ -12,14 +13,25 @@ def safe_mkdir(path):
 
 def call_cmd(cmd, quiet):
 	if quiet: cmd += " > log.txt"
+	else: print cmd
+
 	os.system(cmd)
 
 def main():
-	quiet = True
+	parser = ArgumentParser(description = "build third party tools")
+	parser.add_argument("--verbose", action="store_true", help="show more log")
+	parser.add_argument("--rebuild", action="store_true", help="rebuild all projects.")
+
+	option = parser.parse_args()
+	quiet = not option.verbose
+
 	input_path = MODULE_PATH
 	install_path = os.path.join(os.path.dirname(input_path), "dependency")
-
 	build_path = os.path.join(MODULE_PATH, "build")
+
+	if option.rebuild and os.path.exists(build_path):
+		shutil.rmtree(build_path)
+
 	safe_mkdir(build_path)
 
 	cwd = os.getcwd()

@@ -32,32 +32,8 @@ int main(int argc, char** argv)
         outputFile = inputFile + ".out";
     }
     
-    std::ifstream fs(inputFile.c_str());
-    if(fs.bad())
-    {
-        std::cout << "Failed to open input file:" << inputFile << std::endl;
-        return 0;
-    }
-    
-    size_t blockSize = 16 * 1024;
-    size_t offset = 0;
-    std::string buffer(blockSize, 0);
-    while(true)
-    {
-        buffer.resize(offset + blockSize);
-        fs.read(&buffer[offset], blockSize);
-        size_t bytes = fs.gcount();
-        
-        offset += bytes;
-        if(bytes < blockSize)
-        {
-            buffer.resize(offset);
-            break;
-        }
-    }
-    
     mjson::Parser parser;
-    if(mjson::RC_OK != parser.parse(buffer.c_str(), buffer.size()))
+    if(mjson::RC_OK != parser.parseFromFile(inputFile.c_str()))
     {
         std::cout << "Parse json Failed" << std::endl;
         return 0;

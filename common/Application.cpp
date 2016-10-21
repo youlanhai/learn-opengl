@@ -1,7 +1,9 @@
 #include "Application.h"
+
 #include <cstdlib>
 #include <cassert>
 
+#include "FileSystem.h"
 
 Application *gApp = nullptr;
 
@@ -60,10 +62,12 @@ Application::Application()
     gApp = this;
     
     glfwSetErrorCallback(errorCallback);
-	if(!glfwInit())
-	{
-		exit(0);
-	}
+    if(!glfwInit())
+    {
+        exit(0);
+    }
+    
+    FileSystem::initInstance();
 }
 
 Application::~Application()
@@ -74,7 +78,9 @@ Application::~Application()
         glfwDestroyWindow(pWindow_);
     }
     
-	glfwTerminate();
+    FileSystem::finiInstance();
+    
+    glfwTerminate();
     if(gApp == this)
     {
         gApp = nullptr;

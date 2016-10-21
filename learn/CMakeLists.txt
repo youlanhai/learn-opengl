@@ -7,6 +7,7 @@ elseif (APPLE)
 	set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -framework Cocoa -framework CoreVideo -framework IOKit -framework OpenGL -framework CoreFoundation")
 endif ()
 
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 listsubdir(SUB_DIRS ${CMAKE_CURRENT_LIST_DIR})
 
 foreach(subdir ${SUB_DIRS})

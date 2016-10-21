@@ -99,28 +99,48 @@ namespace mjson
     {
         allocator_->release();
     }
+
+    bool Parser::parseFromFile(const char *fileName)
+    {
+        FILE *fp = fopen(fileName, "r");
+        if(fp == NULL)
+        {
+            return RC_OPEN_FILE_ERROR;
+        }
+        fseek(fp, 0, SEEK_END);
+        long length = ftell(fp);
+        fseek(fp, 0, SEEK_SET);
+        
+        char *buffer = (char*)allocator_->malloc(length);
+        fread(buffer, 1, length, fp);
+        
+        fclose(fp);
+        fp = NULL;
+
+        bool ret = parseFromData(buffer, length);
+        allocator_->free(buffer);
+        return ret;
+    }
     
-    int Parser::parse(const char *str, size_t length)
+    bool Parser::parseFromData(const char *str, size_t length)
     {
         root_.setNull();
         errorCode_ = RC_OK;
         errorOffset_ = 0;
         
         Reader reader(str, str + length);
-        
-        int ret = RC_OK;
         do
         {
             char firstChar = skipWhiteSpace(reader);
             if(firstChar != '{' && firstChar != '[')
             {
-                ret = RC_INVALID_JSON;
+                errorCode_ = RC_INVALID_JSON;
                 break;
             }
             
             reader.unget();
-            ret = parseValue(root_, reader);
-            if(ret != RC_OK)
+            errorCode_ = parseValue(root_, reader);
+            if(errorCode_ != RC_OK)
             {
                 break;
             }
@@ -128,16 +148,14 @@ namespace mjson
             char endChar = skipWhiteSpace(reader);
             if(endChar != 0)
             {
-                ret = RC_INVALID_JSON;
+                errorCode_ = RC_INVALID_JSON;
             }
         }while(0);
         
-        if(ret != RC_OK)
+        if(errorCode_ != RC_OK)
         {
-            errorCode_ = ret;
             errorOffset_ = reader.current() - str;
-
-#if 0
+#ifdef DEBUG
             int line = 1;
             int col = 1;
             for(const char *p = str; p != reader.current(); ++p)
@@ -152,13 +170,13 @@ namespace mjson
                     ++col;
                 }
             }
-            std::cout << "parse error: " << ret
-            << " line: " << line
-            << " col: " << col
-            << std::endl;
+            std::cerr << "parse error: " << ret
+                << " line: " << line
+                << " col: " << col
+                << std::endl;
 #endif
         }
-        return ret;
+        return errorCode_ == RC_OK;
     }
     
     int Parser::parseValue(Node &node, Reader &reader)

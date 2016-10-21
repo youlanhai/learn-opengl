@@ -7,8 +7,8 @@
 class Application
 {
 public:
-	Application();
-	~Application();
+    Application();
+    ~Application();
     
     virtual bool createWindow(int width, int height, const std::string &title);
     
@@ -46,7 +46,7 @@ protected:
     
     virtual void onDestroy();
     
-	GLFWwindow*	 pWindow_;
+    GLFWwindow*  pWindow_;
 };
 
 extern Application *gApp;

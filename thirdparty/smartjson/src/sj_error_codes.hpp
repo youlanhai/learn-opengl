@@ -7,6 +7,7 @@ namespace mjson
     {
         RC_OK,
         RC_END_OF_FILE,
+        RC_OPEN_FILE_ERROR,
         RC_INVALID_JSON,
         RC_INVALID_DICT,
         RC_INVALID_KEY,

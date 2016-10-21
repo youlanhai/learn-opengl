@@ -30,7 +30,30 @@ namespace mjson
         allocator_->release();
     }
 
-    bool BinaryParser::parse(const char *str, size_t length)
+    bool BinaryParser::parseFromFile(const char *fileName)
+    {
+        FILE *fp = fopen(fileName, "r");
+        if(fp == NULL)
+        {
+            errorCode_ = RC_OPEN_FILE_ERROR;
+            return false;
+        }
+        fseek(fp, 0, SEEK_END);
+        long length = ftell(fp);
+        fseek(fp, 0, SEEK_SET);
+        
+        char *buffer = (char*)allocator_->malloc(length);
+        fread(buffer, 1, length, fp);
+        
+        fclose(fp);
+        fp = NULL;
+
+        bool ret = parseFromData(buffer, length);
+        allocator_->free(buffer);
+        return ret;
+    }
+
+    bool BinaryParser::parseFromData(const char *str, size_t length)
     {
         root_.setNull();
         

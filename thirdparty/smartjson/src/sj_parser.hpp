@@ -17,7 +17,9 @@ namespace mjson
         explicit Parser(IAllocator *allocator = 0);
         ~Parser();
         
-        int parse(const char *str, size_t length);
+        // return one of `ResultCode`.
+        bool parseFromFile(const char *fileName);
+        bool parseFromData(const char *str, size_t length);
         
         Node getRoot() const{ return root_; }
         int getErrorCode() const { return errorCode_; }
