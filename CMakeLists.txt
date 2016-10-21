@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(LearnOpenGL)
 
+include(common.cmake)
+
 include_directories(dependency/include)
 link_directories(dependency/lib)
 

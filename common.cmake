@@ -1,0 +1,11 @@
+
+macro(listsubdir result curdir)
+	file(GLOB children RELATIVE ${curdir} ${curdir}/*)
+	set(dirs "")
+	foreach(child ${children})
+		if(IS_DIRECTORY ${curdir}/${child} AND EXISTS ${curdir}/${child}/CMakeLists.txt)
+			list(APPEND dirs ${child})
+		endif()
+	endforeach()
+	set(${result} ${dirs})
+endmacro()
