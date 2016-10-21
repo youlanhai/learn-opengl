@@ -21,6 +21,14 @@ static void keyCallback(GLFWwindow *window, int key, int scancode, int action, i
     }
 }
 
+static void frameBufferSizeChangeCallback(GLFWwindow *window, int width, int height)
+{
+    if(window == gApp->getWindow())
+    {
+        gApp->onSizeChange(width, height);
+    }
+}
+
 
 Application::Application()
 : pWindow_(nullptr)
@@ -38,8 +46,10 @@ Application::~Application()
 {
     if(pWindow_ != nullptr)
     {
+        onDestroy();
         glfwDestroyWindow(pWindow_);
     }
+    
 	glfwTerminate();
     if(gApp == this)
     {
@@ -60,6 +70,7 @@ bool Application::createWindow(int width, int height, const std::string &title)
     makeCurrent();
     
     glfwSetKeyCallback(pWindow_, keyCallback);
+    glfwSetFramebufferSizeCallback(pWindow_, frameBufferSizeChangeCallback);
     
     onCreate();
     return true;
@@ -74,13 +85,13 @@ void Application::mainLoop()
 {
     while(!glfwWindowShouldClose(pWindow_))
     {
-        draw();
+        onDraw();
         glfwSwapBuffers(pWindow_);
         glfwPollEvents();
     }
 }
 
-void Application::draw()
+void Application::onDraw()
 {
     glClear(GL_COLOR_BUFFER_BIT);
 }
@@ -93,6 +104,11 @@ void Application::onCreate()
     glClearColor(0, 0, 1, 0); 
 }
 
+void Application::onDestroy()
+{
+    
+}
+
 void Application::onKey(int key, int scancode, int action, int modes)
 {
     if(key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE)
@@ -102,4 +118,9 @@ void Application::onKey(int key, int scancode, int action, int modes)
 void Application::onError(int error, const char *description)
 {
     fprintf(stderr, "Error(%d): %s\n", error, description);
+}
+
+void Application::onSizeChange(int width, int height)
+{
+    glViewport(0, 0, width, height);
 }

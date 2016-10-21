@@ -22,7 +22,6 @@ public:
     
 public:
     // 内部方法，不要手动调用
-   
     
     /** 键盘事件回调。*/
     virtual void onKey(int key, int scancode, int action, int modes);
@@ -30,12 +29,16 @@ public:
     /** OpenGL错误回调。*/
     virtual void onError(int error, const char *description);
     
+    virtual void onSizeChange(int width, int height);
+    
 protected:
     
     /** 重载此函数，实现自己的渲染方法。*/
-    virtual void draw();
+    virtual void onDraw();
     
     virtual void onCreate();
+    
+    virtual void onDestroy();
     
 	GLFWwindow*	 pWindow_;
 };
