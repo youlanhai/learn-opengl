@@ -4,6 +4,7 @@
 #include <cassert>
 
 #include "FileSystem.h"
+#include "LogTool.h"
 
 Application *gApp = nullptr;
 
@@ -98,6 +99,9 @@ bool Application::createWindow(int width, int height, const std::string &title)
     }
     
     makeCurrent();
+
+	gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+	LOG_INFO("GL Version: %d.%d", GLVersion.major, GLVersion.minor);
     
     glfwSetKeyCallback(pWindow_, keyCallback);
     glfwSetMouseButtonCallback(pWindow_, mouseButtonCallback);
@@ -105,8 +109,7 @@ bool Application::createWindow(int width, int height, const std::string &title)
     glfwSetCursorPosCallback(pWindow_, mouseMoveCallback);
     glfwSetFramebufferSizeCallback(pWindow_, frameBufferSizeChangeCallback);
     
-    onCreate();
-    return true;
+    return onCreate();
 }
 
 void Application::makeCurrent()
@@ -129,12 +132,13 @@ void Application::onDraw()
     glClear(GL_COLOR_BUFFER_BIT);
 }
 
-void Application::onCreate()
+bool Application::onCreate()
 {
     // 开启垂直同步
     glfwSwapInterval(1);
     // 屏幕清成蓝色
     glClearColor(0, 0, 1, 0); 
+	return true;
 }
 
 void Application::onDestroy()

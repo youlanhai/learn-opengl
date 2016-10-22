@@ -1,5 +1,5 @@
 
-set(COMMON_LINK_LIBRARIES glfw3 common)
+set(COMMON_LINK_LIBRARIES glfw3 glad common)
 
 if (WIN32)
 	set(COMMON_LINK_LIBRARIES ${COMMON_LINK_LIBRARIES} winmm imm32 version opengl32 shlwapi Ws2_32)

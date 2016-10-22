@@ -42,7 +42,7 @@ protected:
     /** 重载此函数，实现自己的渲染方法。*/
     virtual void onDraw();
     
-    virtual void onCreate();
+    virtual bool onCreate();
     
     virtual void onDestroy();
     

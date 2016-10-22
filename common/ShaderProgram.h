@@ -21,6 +21,9 @@ public:
     int getUniformLocation(const char *name);
     int getAttribLocation(const char *name);
 
+	void setMatrix(int location, const float *data);
+	void setMatrixTranspose(int location, const float *data);
+
 private:
     uint32_t        handle_;
     std::string     fileName_;

@@ -67,6 +67,9 @@ bool ShaderProgram::loadFromData(const std::string &data)
     glAttachShader(handle_, vs.getHandle());
     glAttachShader(handle_, fs.getHandle());
     glLinkProgram(handle_);
+
+	glDetachShader(handle_, vs.getHandle());
+	glDetachShader(handle_, fs.getHandle());
     
     GLint status;
     glGetProgramiv(handle_, GL_LINK_STATUS, &status);
@@ -86,7 +89,7 @@ std::string ShaderProgram::getLinkError() const
     
     std::string ret;
     glGetProgramInfoLog(handle_, length, nullptr, const_cast<char*>(ret.data()));
-    
+   
     return ret;
 }
 
@@ -103,4 +106,14 @@ int ShaderProgram::getUniformLocation(const char *name)
 int ShaderProgram::getAttribLocation(const char *name)
 {
     return glGetAttribLocation(handle_, name);
+}
+
+void ShaderProgram::setMatrix(int location, const float *data)
+{
+	glProgramUniformMatrix4fv(handle_, location, 1, false, data);
+}
+
+void ShaderProgram::setMatrixTranspose(int location, const float * data)
+{
+	glProgramUniformMatrix4fv(handle_, location, 1, true, data);
 }

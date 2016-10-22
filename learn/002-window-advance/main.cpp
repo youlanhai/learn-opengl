@@ -4,11 +4,12 @@ class MyApplication : public Application
 {
 public:
     
-    virtual void onCreate()
+    virtual bool onCreate() override
     {
         Application::onCreate();
         
         glClearColor(0.3f, 0.3f, 0.3f, 0);
+		return true;
     }
     
     virtual void onDraw()

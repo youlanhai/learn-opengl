@@ -9,6 +9,12 @@
 #include <mach-o/dyld.h>
 #elif defined(WIN32)
 #include <Windows.h>
+
+bool testFileAttribute(const char *path, DWORD flag)
+{
+	DWORD ret = GetFileAttributes(path);
+	return (ret != INVALID_FILE_ATTRIBUTES) && ((ret & flag) != 0);
+}
 #endif
 
 void formatSlash(std::string &path)
@@ -191,6 +197,22 @@ bool listDir(const std::string &path, std::vector<std::string> &files)
     }
     closedir(dp);
     return true;
+#elif defined(WIN32)
+	filePath += "\\*";
+	WIN32_FIND_DATA findData;
+	ZeroMemory(&findData, sizeof(findData));
+	HANDLE h = FindFirstFile(filePath.c_str(), &findData);
+	if (h == INVALID_HANDLE_VALUE)
+	{
+		return false;
+	}
+
+	do
+	{
+		files.push_back(findData.cFileName);
+	} while (FindNextFileA(h, &findData) != 0);
+	FindClose(h);
+	return true;
 #else
     return false;
 #endif
@@ -205,6 +227,8 @@ bool isFile(const std::string &path)
     {
         ret = (S_ISREG(statbuf.st_mode));
     }
+#elif defined(WIN32)
+	ret = testFileAttribute(path.c_str(), FILE_ATTRIBUTE_NORMAL);
 #endif
     return ret;
 }
@@ -218,6 +242,8 @@ bool isDir(const std::string &path)
     {
         ret = (S_ISDIR(statbuf.st_mode));
     }
+#elif defined(WIN32)
+	ret = testFileAttribute(path.c_str(), FILE_ATTRIBUTE_DIRECTORY);
 #endif
     return ret;
 }
@@ -227,6 +253,8 @@ bool isExist(const std::string &path)
     bool ret = false;
 #ifdef __APPLE__
     ret = (access(path.c_str(), F_OK) == 0);
+#elif defined(WIN32)
+	ret = testFileAttribute(path.c_str(), FILE_ATTRIBUTE_ARCHIVE);
 #endif
     return ret;
 }
