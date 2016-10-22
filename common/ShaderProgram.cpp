@@ -2,6 +2,7 @@
 #include "Shader.h"
 #include "FileSystem.h"
 #include "LogTool.h"
+#include "glconfig.h"
 
 #include <smartjson/sj_parser.hpp>
 #include <iostream>

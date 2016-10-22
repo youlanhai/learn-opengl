@@ -1,8 +1,9 @@
 ﻿#include "Shader.h"
 #include "FileSystem.h"
 #include "LogTool.h"
+#include "glconfig.h"
 
-Shader::Shader(GLuint type)
+Shader::Shader(uint32_t type)
 : handle_(0)
 , type_(type)
 {

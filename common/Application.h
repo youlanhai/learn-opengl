@@ -1,7 +1,7 @@
 ﻿#ifndef COMMON_APPLICATION_H
 #define COMMON_APPLICATION_H
 
-#include <GLFW/glfw3.h>
+#include "glconfig.h"
 #include <string>
 
 class Application

@@ -2,7 +2,6 @@
 #define SHADER_PROGRAM_H
 
 #include "Reference.h"
-#include <GLFW/glfw3.h>
 #include <string>
 
 class ShaderProgram : public ReferenceCount
@@ -14,7 +13,7 @@ public:
     bool loadFromFile(const std::string &fileName);
     bool loadFromData(const std::string &data);
 
-    GLuint getHandle() const { return handle_; }
+    uint32_t getHandle() const { return handle_; }
     std::string getLinkError() const;
     
     void use();
@@ -23,7 +22,7 @@ public:
     int getAttribLocation(const char *name);
 
 private:
-    GLuint          handle_;
+    uint32_t        handle_;
     std::string     fileName_;
 };
 
