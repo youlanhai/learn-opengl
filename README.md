@@ -11,4 +11,14 @@ learning opengl
 4. 编译。选择要观看的target，然后点击运行。
 
 ## windows
-还没测试
+### 额外环境配置
++ Visual Studio 2013或更高版本
++ 需要安装Python 2.7，并将python.exe加入PATH环境变量
++ 具备OpenGL 2.0或更高版本的驱动
+
+### 构建步骤
+1. 从Visual Studio菜单中打开“开发者命令行”，执行`thirdparty/build.py`，用于构建依赖库
+2. 创建文件夹`build`，用命令行进入`build`文件夹，执行`cmake -G"Visual Studio xxx" ..`。“xxx”为安装的Visual Studio版本
+3. 打开build目录下的`LearnOpenGL.sln`
+4. 编译。选择要执行的工程，在其右键菜单中选择“设为启动项”，然后可以执行了。
+

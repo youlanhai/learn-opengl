@@ -19,8 +19,6 @@ public:
     MyApplication()
     : vb_(0)
     {
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 	}
     
     virtual bool onCreate() override
@@ -69,6 +67,7 @@ public:
         glBindBuffer(GL_ARRAY_BUFFER, vb_);
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
+		// 设置顶点属性。必须先绑定顶点buffer。
 		glEnableVertexAttribArray(posLocation);
 		glVertexAttribPointer(posLocation, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
 
