@@ -105,11 +105,19 @@ namespace mjson
         FILE *fp = fopen(fileName, "r");
         if(fp == NULL)
         {
-            return RC_OPEN_FILE_ERROR;
+            errorCode_ = RC_OPEN_FILE_ERROR;
+            return false;
         }
+
         fseek(fp, 0, SEEK_END);
         long length = ftell(fp);
         fseek(fp, 0, SEEK_SET);
+
+        if(length == 0)
+        {
+            errorCode_ = RC_FILE_EMPTY;
+            return false;
+        }
         
         char *buffer = (char*)allocator_->malloc(length);
         fread(buffer, 1, length, fp);
@@ -170,7 +178,7 @@ namespace mjson
                     ++col;
                 }
             }
-            std::cerr << "parse error: " << ret
+            std::cerr << "parse error: " << errorCode_
                 << " line: " << line
                 << " col: " << col
                 << std::endl;

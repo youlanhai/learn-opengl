@@ -7,6 +7,8 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <mach-o/dyld.h>
+#elif defined(WIN32)
+#include <Windows.h>
 #endif
 
 void formatSlash(std::string &path)
@@ -319,7 +321,7 @@ std::string getExePath()
             s_exePath = getFilePath(buffer);
         }
 #elif defined(WIN32)
-        GetModuleFileNameA(buffer, length);
+        GetModuleFileNameA(0, buffer, length);
         s_exePath = getFilePath(buffer);
 #endif
     }

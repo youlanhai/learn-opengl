@@ -1,4 +1,4 @@
-#ifndef REFERENCE_COUNT_H
+﻿#ifndef REFERENCE_COUNT_H
 #define REFERENCE_COUNT_H
 
 /** 引用计数基类。可以安全的用于智能指针。*/

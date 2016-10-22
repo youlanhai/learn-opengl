@@ -1,4 +1,4 @@
-#ifndef COMMON_APPLICATION_H
+﻿#ifndef COMMON_APPLICATION_H
 #define COMMON_APPLICATION_H
 
 #include <GLFW/glfw3.h>

@@ -1,4 +1,4 @@
-#ifndef COMMON_SHADER_HP
+﻿#ifndef COMMON_SHADER_HP
 #define COMMON_SHADER_HP
 
 #include <GLFW/glfw3.h>

@@ -2,10 +2,14 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 import shutil
 from argparse import ArgumentParser
 
 MODULE_PATH = os.path.dirname(os.path.abspath(__file__))
+
+MAKE = "nmake" if sys.platform == "win32" else "make"
+GENERATOR = "NMake Makefiles" if sys.platform == "win32" else "Unix Makefiles"
 
 def safe_mkdir(path):
 	if not os.path.exists(path):
@@ -47,10 +51,10 @@ def main():
 
 			os.chdir(temp_path)
 
-			cmd = '''cmake -DCMAKE_INSTALL_PREFIX="%s" "%s"''' % (install_path, source_path)
+			cmd = '''cmake -G"%s" -DCMAKE_INSTALL_PREFIX="%s" "%s"''' % (GENERATOR, install_path, source_path)
 			call_cmd(cmd, quiet)
-			call_cmd("make", quiet)
-			call_cmd("make install", quiet)
+			call_cmd("%s" % (MAKE, ), quiet)
+			call_cmd("%s install" % (MAKE, ), quiet)
 
 	os.chdir(cwd)
 	return
