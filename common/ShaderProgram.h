@@ -1,8 +1,9 @@
 #ifndef SHADER_PROGRAM_H
 #define SHADER_PROGRAM_H
 
-#include "Reference.h"
-#include <string>
+#include "VertexDeclaration.h"
+
+class ShaderUniform;
 
 class ShaderProgram : public ReferenceCount
 {
@@ -25,8 +26,13 @@ public:
 	void setMatrixTranspose(int location, const float *data);
 
 private:
+	bool parseAttributes();
+	bool parseUniforms();
+
     uint32_t        handle_;
     std::string     fileName_;
+	int             attributes_[VertexUsageMax];
+	ShaderUniform*	uniformRoot_;
 };
 
 #endif //SHADER_PROGRAM_H

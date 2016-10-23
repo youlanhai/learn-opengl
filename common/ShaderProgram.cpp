@@ -3,18 +3,22 @@
 #include "FileSystem.h"
 #include "LogTool.h"
 #include "glconfig.h"
+#include "ShaderUniform.h"
 
 #include <smartjson/sj_parser.hpp>
 #include <iostream>
 
 ShaderProgram::ShaderProgram()
 : handle_(0)
+, uniformRoot_(new ShaderUniform("root"))
 {
-
+	memset(attributes_, 0, sizeof(attributes_));
 }
 
 ShaderProgram::~ShaderProgram()
 {
+	delete uniformRoot_;
+
     if(glIsProgram(handle_))
     {
         glDeleteProgram(handle_);
@@ -78,6 +82,15 @@ bool ShaderProgram::loadFromData(const std::string &data)
         LOG_ERROR("Failed to link shader program: %s", getLinkError().c_str());
         return false;
     }
+
+	if (!parseAttributes())
+	{
+		return false;
+	}
+	if (!parseUniforms())
+	{
+		return false;
+	}
     
     return true;
 }
@@ -91,6 +104,99 @@ std::string ShaderProgram::getLinkError() const
     glGetProgramInfoLog(handle_, length, nullptr, const_cast<char*>(ret.data()));
    
     return ret;
+}
+
+bool ShaderProgram::parseAttributes()
+{
+	GLint numAttributes;
+	GL_ASSERT(glGetProgramiv(handle_, GL_ACTIVE_ATTRIBUTES, &numAttributes));
+	if (numAttributes <= 0)
+	{
+		return false;
+	}
+
+	int maxLength;
+	GL_ASSERT(glGetProgramiv(handle_, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &maxLength));
+	if (maxLength <= 0)
+	{
+		return false;
+	}
+
+	std::string attribName;
+	GLint   attribSize;
+	GLenum  attribType;
+	GLint   attribLocation;
+	GLint   length;
+	for (GLint i = 0; i < numAttributes; ++i)
+	{
+		attribName.resize(maxLength);
+		glGetActiveAttrib(handle_, i, maxLength, &length, &attribSize, &attribType, &attribName[0]);
+		if (length < attribName.size())
+		{
+			attribName.erase(length);
+		}
+
+		attribLocation = glGetAttribLocation(handle_, attribName.c_str());
+
+		VertexUsage usage = vertexAttr2Usage(attribName);
+		if (usage == VertexUsage::NONE)
+		{
+			LOG_ERROR("can't get usage for attribute '%s' in '%s'.",
+				attribName.c_str(), fileName_.c_str());
+			return false;
+		}
+
+		attributes_[int(usage)] = attribLocation;
+	}
+	return true;
+}
+
+bool ShaderProgram::parseUniforms()
+{
+	GLint nUniforms;
+	glGetProgramiv(handle_, GL_ACTIVE_UNIFORMS, &nUniforms);
+
+	if (nUniforms == 0)
+	{
+		return false;
+	}
+
+	GLint nMaxNameLen;
+	glGetProgramiv(handle_, GL_ACTIVE_UNIFORM_MAX_LENGTH, &nMaxNameLen);
+
+	std::string uniformName(nMaxNameLen + 1, '\0');
+	unsigned int samplerIndex = 0;
+	for (int i = 0; i < nUniforms; ++i)
+	{
+		uniformName.resize(nMaxNameLen);
+		GLsizei len;
+		GLint num;
+		GLenum type;
+		glGetActiveUniform(handle_, i, nMaxNameLen, &len, &num, &type, &uniformName[0]);
+		uniformName.erase(len);
+
+		GLint location = glGetUniformLocation(handle_, uniformName.c_str());
+
+		size_t iBracket = uniformName.find('[');
+		if (iBracket != std::string::npos)
+		{
+			uniformName.erase(iBracket);
+		}
+
+		ShaderUniform* uniform = uniformRoot_->getChildren(uniformName, true);
+		uniform->pEffect_ = this;
+		uniform->location_ = location;
+		uniform->type_ = type;
+		if (type == GL_SAMPLER_2D || type == GL_SAMPLER_CUBE)
+		{
+			uniform->index_ = samplerIndex++;
+		}
+		else
+		{
+			uniform->index_ = 0;
+		}
+	}
+	return true;
 }
 
 void ShaderProgram::use()

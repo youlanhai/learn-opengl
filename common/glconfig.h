@@ -4,4 +4,6 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#define GL_ASSERT(EXP) EXP
+
 #endif //GL_CONFIG_H
