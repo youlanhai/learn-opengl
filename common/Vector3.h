@@ -39,7 +39,7 @@ public:
 	Vector3 operator / (const Vector3 &v) const { return Vector3(x / v.x, y / v.y, z / v.z); }
 
 	Vector3 operator * (float v) const { return Vector3(x * v, y * v, z * v); }
-	Vector3 operator / (float v) const { *this * (1.0f / v); }
+	Vector3 operator / (float v) const { return *this * (1.0f / v); }
 
 	const Vector3& operator += (const Vector3 &v) { x += v.x; y += v.y; z += v.z; return *this; }
 	const Vector3& operator -= (const Vector3 &v) { x -= v.x; y -= v.y; z -= v.z; return *this; }

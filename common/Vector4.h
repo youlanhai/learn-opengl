@@ -36,7 +36,7 @@ public:
 	Vector4 operator / (const Vector4 &v) const { return Vector4(x / v.x, y / v.y, z / v.z, w / v.w); }
 
 	Vector4 operator * (float v) const { return Vector4(x * v, y * v, z * v, w * v); }
-	Vector4 operator / (float v) const { *this * (1.0f / v); }
+	Vector4 operator / (float v) const { return *this * (1.0f / v); }
 
 	const Vector4& operator += (const Vector4 &v) { x += v.x; y += v.y; z += v.z; w += v.w; return *this; }
 	const Vector4& operator -= (const Vector4 &v) { x -= v.x; y -= v.y; z -= v.z; w -= v.w; return *this; }

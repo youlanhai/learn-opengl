@@ -328,12 +328,11 @@ const Matrix& Matrix::operator -= (const Matrix &v)
 
 const Matrix& Matrix::operator *= (float v)
 {
-    Matrix m;
     for(int i = 0; i < 16; ++i)
     {
         _m[i] *= v;
     }
-    return m;
+    return *this;
 }
 
 const Matrix& Matrix::operator /= (float v)
