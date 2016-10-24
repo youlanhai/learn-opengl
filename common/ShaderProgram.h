@@ -17,13 +17,17 @@ public:
     uint32_t getHandle() const { return handle_; }
     std::string getLinkError() const;
     
-    void use();
+    void bind();
+    void unbind();
     
     int getUniformLocation(const char *name);
     int getAttribLocation(const char *name);
+    int getAttribLocation(VertexUsage usage){ return attributes_[(int)usage]; }
 
 	void setMatrix(int location, const float *data);
 	void setMatrixTranspose(int location, const float *data);
+    
+    ShaderUniform* findUniform(const std::string &name);
 
 private:
 	bool parseAttributes();
@@ -34,5 +38,7 @@ private:
 	int             attributes_[VertexUsageMax];
 	ShaderUniform*	uniformRoot_;
 };
+
+typedef SmartPointer<ShaderProgram> ShaderProgramPtr;
 
 #endif //SHADER_PROGRAM_H

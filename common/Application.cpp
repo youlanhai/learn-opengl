@@ -5,6 +5,8 @@
 
 #include "FileSystem.h"
 #include "LogTool.h"
+#include "VertexDeclaration.h"
+#include "TextureMgr.h"
 
 Application *gApp = nullptr;
 
@@ -69,18 +71,22 @@ Application::Application()
     }
     
     FileSystem::initInstance();
+    VertexDeclMgr::initInstance();
+    TextureMgr::initInstance();
 }
 
 Application::~Application()
 {
+    TextureMgr::finiInstance();
+    VertexDeclMgr::finiInstance();
+    FileSystem::finiInstance();
+    
     if(pWindow_ != nullptr)
     {
         onDestroy();
         glfwDestroyWindow(pWindow_);
     }
-    
-    FileSystem::finiInstance();
-    
+   
     glfwTerminate();
     if(gApp == this)
     {
@@ -106,12 +112,22 @@ bool Application::createWindow(int width, int height, const std::string &title)
         return false;
     }
 	LOG_INFO("GL Version: %d.%d", GLVersion.major, GLVersion.minor);
+    if(GLVersion.major < 2)
+    {
+        LOG_ERROR("Unsupported OpenGL version.");
+        return false;
+    }
     
     glfwSetKeyCallback(pWindow_, keyCallback);
     glfwSetMouseButtonCallback(pWindow_, mouseButtonCallback);
     glfwSetScrollCallback(pWindow_, mouseScrollCallback);
     glfwSetCursorPosCallback(pWindow_, mouseMoveCallback);
     glfwSetFramebufferSizeCallback(pWindow_, frameBufferSizeChangeCallback);
+    
+    // 开启垂直同步
+    glfwSwapInterval(1);
+    // 屏幕清成蓝色
+    glClearColor(0, 0, 1, 0);
     
     return onCreate();
 }
@@ -138,10 +154,6 @@ void Application::onDraw()
 
 bool Application::onCreate()
 {
-    // 开启垂直同步
-    glfwSwapInterval(1);
-    // 屏幕清成蓝色
-    glClearColor(0, 0, 1, 0); 
 	return true;
 }
 

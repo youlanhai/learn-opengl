@@ -122,8 +122,6 @@ int VertexElement::size() const
 //////////////////////////////////////////////////////////////////
 ///
 //////////////////////////////////////////////////////////////////
-/*static*/ VertexDeclaration * VertexDeclaration::s_pActiveDecl = nullptr;
-
 VertexDeclaration::VertexDeclaration(const std::string & name)
     : name_(name)
     , vertexSize_(0)
@@ -133,8 +131,6 @@ VertexDeclaration::VertexDeclaration(const std::string & name)
 
 VertexDeclaration::~VertexDeclaration()
 {
-    if(this == s_pActiveDecl)
-		s_pActiveDecl = nullptr;
 }
 
 bool VertexDeclaration::load(const mjson::Node &section)
@@ -204,17 +200,6 @@ size_t VertexDeclaration::getVertexSize() const
     return vertexSize_;
 }
 
-void VertexDeclaration::bind()
-{
-    s_pActiveDecl = this;
-}
-
-void VertexDeclaration::unbind()
-{
-    assert(s_pActiveDecl == this && "VertexDeclaration::unbind - invalid operation!");
-    s_pActiveDecl = nullptr;
-}
-
 void VertexDeclaration::merge(VertexDeclaration * p)
 {
     assert(p);
@@ -232,7 +217,7 @@ IMPLEMENT_SINGLETON(VertexDeclMgr);
 
 VertexDeclMgr::VertexDeclMgr()
 {
-
+    init();
 }
 
 VertexDeclMgr::~VertexDeclMgr()

@@ -19,4 +19,6 @@ do{ \
 } while (0)
 #endif
 
+inline bool isVAOSupported() { return glIsVertexArray != nullptr; }
+
 #endif //GL_CONFIG_H

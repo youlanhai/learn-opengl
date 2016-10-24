@@ -199,9 +199,14 @@ bool ShaderProgram::parseUniforms()
 	return true;
 }
 
-void ShaderProgram::use()
+void ShaderProgram::bind()
 {
     GL_ASSERT(glUseProgram(handle_));
+}
+
+void ShaderProgram::unbind()
+{
+    GL_ASSERT(glUseProgram(0));
 }
 
 int ShaderProgram::getUniformLocation(const char *name)
@@ -223,4 +228,9 @@ void ShaderProgram::setMatrix(int location, const float *data)
 void ShaderProgram::setMatrixTranspose(int location, const float * data)
 {
 	glUniformMatrix4fv(location, 1, true, data);
+}
+
+ShaderUniform* ShaderProgram::findUniform(const std::string &name)
+{
+    return uniformRoot_->getChild(name);
 }

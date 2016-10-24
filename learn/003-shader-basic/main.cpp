@@ -89,7 +89,7 @@ public:
     {
         Application::onDraw();
 
-        shader_->use();
+        shader_->bind();
         glBindBuffer(GL_ARRAY_BUFFER, vb_);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     }

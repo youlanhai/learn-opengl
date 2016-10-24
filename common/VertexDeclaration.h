@@ -81,19 +81,12 @@ public:
 
     const std::string & getName() const { return name_; }
 
-    void bind();
-    void unbind();
-
     void merge(VertexDeclaration * p);
-
-    static VertexDeclaration * getActiveDecl() { return s_pActiveDecl; }
 
 private:
     std::string name_;
     size_t vertexSize_;
     std::vector<VertexElement> elements_;
-
-    static VertexDeclaration * s_pActiveDecl;
 };
 
 typedef SmartPointer<VertexDeclaration> VertexDeclarationPtr;
@@ -107,7 +100,6 @@ public:
     VertexDeclMgr();
     ~VertexDeclMgr();
 
-    void init();
 	bool loadFromFile(const std::string &fileName);
 
     void add(VertexDeclarationPtr decl);
@@ -118,6 +110,8 @@ public:
     VertexDeclarationPtr get(const std::string & name);
 
 private:
+    void init();
+    
     std::unordered_map<std::string, VertexDeclarationPtr> decls_;
 };
 

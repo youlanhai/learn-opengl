@@ -17,11 +17,18 @@ public:
 
 	virtual bool init(ShaderProgram *shader, VertexBuffer *vb, VertexDeclaration *decl);
 
+    void bind();
+    void unbind();
+    
 private:
+    void bindAttributes();
+    
     uint32_t    handle_;
-	SmartPointer<ShaderProgram>		shaderProgram_;
-	SmartPointer<VertexBuffer>		vertexBuffer_;
-	SmartPointer<VertexDeclaration> vertexDecl_;
+    SmartPointer<ShaderProgram> shader_;
+    SmartPointer<VertexBuffer>  vb_;
+    SmartPointer<VertexDeclaration> decl_;
 };
+
+typedef SmartPointer<VertexAttribute> VertexAttributePtr;
 
 #endif //VERTEX_ATTRIBUTE_H
