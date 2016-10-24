@@ -21,6 +21,8 @@ class MyApplication : public Application
         FileSystem::instance()->addSearchPath(joinPath(resPath, "common"));
         FileSystem::instance()->dumpSearchPath();
         
+        Texture::s_defaultQuality = TextureQuality::Nearest;
+        
         const char *ShaderFile = "shader/xyzuv.shader";
         const char *TextureFile = "alpha.png";
         

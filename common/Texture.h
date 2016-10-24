@@ -62,6 +62,7 @@ protected:
     TextureTarget       target_;
     TextureQuality      quality_;
     
+public:
     static TextureQuality s_defaultQuality;
 };
 
