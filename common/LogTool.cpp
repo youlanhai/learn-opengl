@@ -58,4 +58,9 @@ void EditorLog(int moduleLvl, int logLvl, const char * tag, const char *format, 
         fputs("\n", stdout);
         fflush(stdout);
     }
+    
+    if(logLvl >= LOG_PRIORITY_FATAL)
+    {
+        abort();
+    }
 }

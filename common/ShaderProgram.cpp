@@ -201,7 +201,7 @@ bool ShaderProgram::parseUniforms()
 
 void ShaderProgram::use()
 {
-    glUseProgram(handle_);
+    GL_ASSERT(glUseProgram(handle_));
 }
 
 int ShaderProgram::getUniformLocation(const char *name)
@@ -216,10 +216,11 @@ int ShaderProgram::getAttribLocation(const char *name)
 
 void ShaderProgram::setMatrix(int location, const float *data)
 {
-	glProgramUniformMatrix4fv(handle_, location, 1, false, data);
+    //4.1及以上版本才支持 glProgramUniformMatrix4fv
+	glUniformMatrix4fv(location, 1, false, data);
 }
 
 void ShaderProgram::setMatrixTranspose(int location, const float * data)
 {
-	glProgramUniformMatrix4fv(handle_, location, 1, true, data);
+	glUniformMatrix4fv(location, 1, true, data);
 }

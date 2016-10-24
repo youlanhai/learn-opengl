@@ -100,7 +100,11 @@ bool Application::createWindow(int width, int height, const std::string &title)
     
     makeCurrent();
 
-	gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+	if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    {
+        LOG_ERROR("Failed initialize OpenGL.");
+        return false;
+    }
 	LOG_INFO("GL Version: %d.%d", GLVersion.major, GLVersion.minor);
     
     glfwSetKeyCallback(pWindow_, keyCallback);
