@@ -1,8 +1,11 @@
 #ifndef SHADER_PROGRAM_H
 #define SHADER_PROGRAM_H
 
-#include "VertexDeclaration.h"
+#include "Reference.h"
+#include "SmartPointer.h"
+#include "VertexUsage.h"
 
+class VertexDeclaration;
 class ShaderUniform;
 
 class ShaderProgram : public ReferenceCount

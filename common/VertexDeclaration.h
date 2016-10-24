@@ -4,41 +4,16 @@
 #include "SmartPointer.h"
 #include "Singleton.h"
 #include "Reference.h"
+#include "VertexUsage.h"
+
 #include <unordered_map>
 #include <vector>
-#include <smartjson/sj_node.hpp>
 
-enum class VertexUsage
+// predefine
+namespace mjson
 {
-    NONE,
-    POSITION,
-    NORMAL,
-    COLOR,
-    TANGENT,
-    BINORMAL,
-    BLENDWEIGHTS,
-    BLENDINDICES,
-    PSIZE,
-    TESSFACTOR,
-    POSITIONT,
-    FOG,
-    DEPTH,
-    SAMPLE,
-    TEXCOORD0,
-    TEXCOORD1,
-    TEXCOORD2,
-    TEXCOORD3,
-    TEXCOORD4,
-    TEXCOORD5,
-    TEXCOORD6,
-    TEXCOORD7,
-
-    MAX_NUM
-};
-
-const int VertexUsageMax = int(VertexUsage::MAX_NUM);
-
-VertexUsage vertexAttr2Usage(const std::string & attr);
+    class Node;
+}
 
 ////////////////////////////////////////////////////////////////////
 /// VertexElement

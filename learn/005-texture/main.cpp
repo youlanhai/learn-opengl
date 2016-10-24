@@ -5,6 +5,7 @@
 #include "Vertex.h"
 #include "VertexBuffer.h"
 #include "VertexAttribute.h"
+#include "VertexDeclaration.h"
 #include "FileSystem.h"
 #include "DemoTool.h"
 #include "PathTool.h"

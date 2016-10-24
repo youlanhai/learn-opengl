@@ -2,6 +2,7 @@
 #include "Vertex.h"
 #include "VertexBuffer.h"
 #include "VertexAttribute.h"
+#include "VertexDeclaration.h"
 #include "ShaderProgram.h"
 #include "ShaderUniform.h"
 #include "LogTool.h"

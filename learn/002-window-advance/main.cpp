@@ -12,7 +12,7 @@ public:
 		return true;
     }
     
-    virtual void onDraw()
+    virtual void onDraw() override
     {
         Application::onDraw();
     }

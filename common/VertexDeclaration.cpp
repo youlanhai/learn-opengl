@@ -60,10 +60,6 @@ TypeMap[NAME] = VertexElement(VertexUsage::NONE, COM, TYPE, TP_SIZE, NML)
 
         return true;
     }
-
-    bool _token = registerUsage();
-
-
 }
 
 VertexUsage vertexAttr2Usage(const std::string & attr)
@@ -217,6 +213,7 @@ IMPLEMENT_SINGLETON(VertexDeclMgr);
 
 VertexDeclMgr::VertexDeclMgr()
 {
+    registerUsage();
     init();
 }
 
