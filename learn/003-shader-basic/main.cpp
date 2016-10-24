@@ -29,7 +29,7 @@ public:
         LOG_INFO("resource path: %s", resPath.c_str());
         
         FileSystem::instance()->addSearchPath(resPath);
-        FileSystem::instance()->addSearchPath(joinPath(resPath, "003"));
+        FileSystem::instance()->addSearchPath(joinPath(resPath, "common"));
         FileSystem::instance()->dumpSearchPath();
         
         shader_ = new ShaderProgram();
@@ -51,7 +51,7 @@ public:
 		};
 		if (matrixLocation >= 0)
 		{
-			shader_->use();
+			shader_->bind();
 			shader_->setMatrix(matrixLocation, matrix);
 		}
         

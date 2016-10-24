@@ -68,7 +68,7 @@ public:
 
     void bindValue(const Matrix& value);
 
-    void bindValue(const Matrix* values, int count, bool transposed);
+    void bindValue(const Matrix* values, int count, bool needTranspos);
 
     void bindValue(const Vector2& value);
 

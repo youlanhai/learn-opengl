@@ -8,6 +8,11 @@
 
 
 int g_texture_counter = 0;
+#ifdef __APPLE__
+TextureQuality Texture::s_defaultQuality = TextureQuality::TwoLinear;
+#else
+TextureQuality Texture::s_defaultQuality = TextureQuality::ThreeLinear;
+#endif
 
 Texture::Texture()
     : format_(TextureFormat::Unknown)
@@ -48,7 +53,7 @@ void Texture::destroy()
 bool Texture::load(const std::string & filename)
 {
     std::string buffer;
-    if (FileSystem::instance()->readFile(buffer, filename, true))
+    if (!FileSystem::instance()->readFile(buffer, filename, true))
     {
         LOG_ERROR("Failed to open texture file '%s'", filename.c_str());
         return false;
@@ -142,9 +147,15 @@ bool Texture::create(uint32_t levels, uint32_t width, uint32_t height, TextureFo
     
     if (pPixelData != nullptr)
     {
+        int oldAlignment;
+        glGetIntegerv(GL_PACK_ALIGNMENT, &oldAlignment);
+        glPixelStorei(GL_PACK_ALIGNMENT, 1);
+        
         GL_ASSERT(glBindTexture(GL_TEXTURE_2D, handle_));
         GL_ASSERT(glTexImage2D(GL_TEXTURE_2D, levels, internalFormat, width_, height_,
             0, internalFormat, type, pPixelData));
+        
+        glPixelStorei(GL_PACK_ALIGNMENT, oldAlignment);
     }
     return true;
 }
@@ -191,7 +202,10 @@ void Texture::generateMipmaps()
     assert(target_ == TextureTarget::Tex2D && "this format does't supported rightnow!");
 
     mipmapped_ = true;
-    GL_ASSERT(glGenerateMipmap(GL_TEXTURE_2D));
+    if(glGenerateMipmap != nullptr)
+    {
+        GL_ASSERT(glGenerateMipmap(GL_TEXTURE_2D));
+    }
 }
 
 void Texture::updateParameter()
@@ -209,7 +223,7 @@ void Texture::updateParameter()
 
     TextureQuality quality = quality_;
     if (quality == TextureQuality::Default)
-        quality = TextureQuality::ThreeLinear;
+        quality = s_defaultQuality;
 
     if ((width_ & (width_ - 1)) != 0 ||
         (height_ & (height_ - 1)) != 0)

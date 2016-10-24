@@ -61,6 +61,8 @@ protected:
     TextureWrap         vwrap_;
     TextureTarget       target_;
     TextureQuality      quality_;
+    
+    static TextureQuality s_defaultQuality;
 };
 
 #endif //H__TEXTURE_H

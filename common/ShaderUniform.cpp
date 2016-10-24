@@ -83,16 +83,14 @@ void ShaderUniform::bindValue(const int* values, int count)
 
 void ShaderUniform::bindValue(const Matrix& value)
 {
-    Matrix mat;
-    mat.transpose(value);
-    GL_ASSERT(glUniformMatrix4fv(location_, 1, GL_FALSE, (const float*) (&mat)));
+    GL_ASSERT(glUniformMatrix4fv(location_, 1, GL_FALSE, (const float*) (&value)));
 }
 
-void ShaderUniform::bindValue(const Matrix* values, int count, bool transposed)
+void ShaderUniform::bindValue(const Matrix* values, int count, bool needTranspos)
 {
     assert(values && count > 0);
 
-    if(transposed)
+    if(!needTranspos)
     {
         glUniformMatrix4fv(location_, count, GL_FALSE, (GLfloat*) values);
     }

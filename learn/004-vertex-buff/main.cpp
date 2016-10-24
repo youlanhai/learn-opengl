@@ -24,7 +24,7 @@ public:
     {
         std::string resPath = findResPath();
         FileSystem::instance()->addSearchPath(resPath);
-        FileSystem::instance()->addSearchPath(joinPath(resPath, "003"));
+        FileSystem::instance()->addSearchPath(joinPath(resPath, "common"));
         FileSystem::instance()->dumpSearchPath();
         
         VertexXYZColor vertices[4];
@@ -50,7 +50,7 @@ public:
         }
         
         shader_ = new ShaderProgram();
-        if(!shader_->loadFromFile("003/test.shader"))
+        if(!shader_->loadFromFile("test.shader"))
         {
             LOG_ERROR("Failed to load shader");
             return false;
