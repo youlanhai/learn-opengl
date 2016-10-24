@@ -127,7 +127,7 @@ bool Application::createWindow(int width, int height, const std::string &title)
     // 开启垂直同步
     glfwSwapInterval(1);
     // 屏幕清成蓝色
-    glClearColor(0, 0, 1, 0);
+    glClearColor(0.15f, 0.24f, 0.24f, 0.0f);
     
     return onCreate();
 }
