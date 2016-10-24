@@ -16,6 +16,7 @@ public:
     std::string getFullPath(const std::string &fileName) const;
 
     bool readFile(std::string &output, const std::string &fileName, bool isBinary = false);
+    bool saveFile(const char* data, size_t size, const std::string &fileName, bool isBinary = false);
 
     void addSearchPath(const std::string &path);
 
@@ -24,9 +25,15 @@ public:
     const Paths& getSearchPaths() const { return searchPaths_; }
 
     void dumpSearchPath();
+    
+    void setWritablePath(const std::string &path){ writablePath_ = path; }
+    const std::string& getWritablePath() const { return writablePath_; }
+    
+    std::string resolveWritablePath(const std::string &path) const;
 
 private:
     Paths   searchPaths_;
+    std::string writablePath_;
 };
 
 #endif //COMMON_FILE_SYSTEM_H

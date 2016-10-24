@@ -3,25 +3,22 @@
 
 #include "Reference.h"
 #include "SmartPointer.h"
-
+#include "RenderState.h"
+#include <string>
 
 typedef SmartPointer<class Texture> TexturePtr;
 
 class Texture : public ReferenceCount
 {
 public:
-    typedef uint32_t TextureWrap;
-    
     Texture();
     virtual ~Texture();
 
     virtual bool load(const std::string & filename);
-    virtual bool save(const std::string & filename);
+    virtual bool save(const std::string & filename) const;
 
-    void loadingImmediately();
-
-    bool create(uint32 levels, uint32 width, uint32 height, TextureFormat format, const void* pPixelData, size_t size);
-    bool create(GLuint handle, uint32 width, uint32 height, TextureFormat format);
+    bool create(uint32_t levels, uint32_t width, uint32_t height, TextureFormat format, const void* pPixelData, size_t size);
+    bool create(GLuint handle, uint32_t width, uint32_t height, TextureFormat format);
 
     void setUWrap(TextureWrap wrap);
     TextureWrap getUWrap() const{ return uwrap_; }
@@ -34,8 +31,8 @@ public:
 
     const std::string & getResource() const {  return resource_; }
     TextureFormat getFormat() const { return format_; }
-    uint32 getWidth() const { return width_; }
-    uint32 getHeight() const { return height_; }
+    uint32_t getWidth() const { return width_; }
+    uint32_t getHeight() const { return height_; }
     bool   isMipmapped() const { return mipmapped_ != 0; }
     GLuint getHandle() const { return handle_; }
 
@@ -48,35 +45,22 @@ public:
 
 protected:
     
-    virtual void doLoading();
     void destroy();
 
     virtual void updateParameter();
-
-protected:
     virtual void generateMipmaps();
-    void onDeviceClose();
 
     std::string         resource_;
     TextureFormat       format_;
     GLuint              handle_;
-    uint32              width_;
-    uint32              height_;
-    int32               mipmapped_;
-    int32               parameterDirty_;
+    uint32_t            width_;
+    uint32_t            height_;
+    bool                mipmapped_;
+    bool                parameterDirty_;
     TextureWrap         uwrap_;
     TextureWrap         vwrap_;
     TextureTarget       target_;
     TextureQuality      quality_;
-
-    
-    struct TextureLoadingInfo
-    {
-        uint32  levels;
-        char*   pPixelData;
-        size_t  size;
-    };
-    struct TextureLoadingInfo * pLoadingInfo_;
 };
 
 #endif //H__TEXTURE_H

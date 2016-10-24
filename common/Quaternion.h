@@ -1,6 +1,8 @@
 #ifndef QUTERNION_H
 #define QUTERNION_H
 
+#include <cstddef>
+
 class Vector4;
 
 class Quaternion

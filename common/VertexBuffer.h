@@ -1,28 +1,10 @@
 ﻿#ifndef VERTEX_BUFFER_H
 #define VERTEX_BUFFER_H
 
-#include "glconfig.h"
+#include "RenderState.h"
 #include "Reference.h"
 #include "SmartPointer.h"
 
-enum class BufferType
-{
-    Vertex = GL_ARRAY_BUFFER,
-    Index = GL_ELEMENT_ARRAY_BUFFER,
-};
-
-enum class BufferUsage
-{
-    Static = GL_STATIC_DRAW,
-    Dynamic = GL_DYNAMIC_DRAW,
-};
-
-enum class IndexType
-{
-    Index8 = GL_UNSIGNED_BYTE,
-    Index16 = GL_UNSIGNED_SHORT,
-    Index32 = GL_UNSIGNED_INT
-};
 
 size_t indexType2Size(IndexType type);
 IndexType size2IndexType(size_t n);
@@ -80,7 +62,7 @@ public:
     ~VertexBuffer();
 
     virtual bool bind() override;
-    virtual void unbind();
+    virtual void unbind() override;
 };
 
 
@@ -118,7 +100,7 @@ public:
     IndexType getIndexType() const;
 
     virtual bool bind() override;
-    virtual void unbind();
+    virtual void unbind() override;
 };
 
 template<typename TIndex>

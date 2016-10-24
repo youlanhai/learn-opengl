@@ -1,12 +1,13 @@
 ﻿#include "ShaderUniform.h"
-#include "ShaderProram.h"
+#include "ShaderProgram.h"
 #include "Color.h"
 #include "Vector2.h"
 #include "Vector3.h"
 #include "Vector4.h"
 #include "Matrix.h"
-
+#include "Texture.h"
 #include "LogTool.h"
+#include "glconfig.h"
 
 
 ShaderUniform::ShaderUniform(const std::string & name)
@@ -24,21 +25,6 @@ ShaderUniform::~ShaderUniform()
     {
         delete it.second;
     }
-}
-
-Effect* ShaderUniform::getEffect() const
-{
-    return pEffect_;
-}
-
-const std::string& ShaderUniform::getName() const
-{
-    return name_;
-}
-
-const GLenum ShaderUniform::getType() const
-{
-    return type_;
 }
 
 ShaderUniform *ShaderUniform::getChild(const std::string & name, bool createIfMiss)
@@ -60,7 +46,7 @@ ShaderUniform *ShaderUniform::getChild(const std::string & name, bool createIfMi
 
 ShaderUniform *ShaderUniform::getChildren(const std::string & name, bool createIfMiss)
 {
-    ASSERT_2(!name.empty(), "ShaderUniform::getChild");
+    assert(!name.empty() && "ShaderUniform::getChild");
 
     size_t pos = name.find('.');
     if(pos == name.npos)
@@ -80,7 +66,7 @@ void ShaderUniform::bindValue(float value)
     GL_ASSERT( glUniform1f(location_, value) );
 }
 
-void ShaderUniform::bindValue(const float* values, uint32 count)
+void ShaderUniform::bindValue(const float* values, int count)
 {
     GL_ASSERT( glUniform1fv(location_, count, values) );
 }
@@ -90,7 +76,7 @@ void ShaderUniform::bindValue(int value)
     GL_ASSERT( glUniform1i(location_, value) );
 }
 
-void ShaderUniform::bindValue(const int* values, uint32 count)
+void ShaderUniform::bindValue(const int* values, int count)
 {
     GL_ASSERT( glUniform1iv(location_, count, values) );
 }
@@ -102,9 +88,9 @@ void ShaderUniform::bindValue(const Matrix& value)
     GL_ASSERT(glUniformMatrix4fv(location_, 1, GL_FALSE, (const float*) (&mat)));
 }
 
-void ShaderUniform::bindValue(const Matrix* values, uint32 count, bool transposed)
+void ShaderUniform::bindValue(const Matrix* values, int count, bool transposed)
 {
-    ASSERT_1(values && count > 0);
+    assert(values && count > 0);
 
     if(transposed)
     {
@@ -113,7 +99,7 @@ void ShaderUniform::bindValue(const Matrix* values, uint32 count, bool transpose
     else
     {
         Matrix * pBuffer = new Matrix[count];
-        for (uint32 i = 0; i < count; ++i)
+        for (int i = 0; i < count; ++i)
             pBuffer[i].transpose(values[i]);
 
         glUniformMatrix4fv(location_, count, GL_FALSE, (GLfloat*) pBuffer);
@@ -127,7 +113,7 @@ void ShaderUniform::bindValue(const Vector2& value)
     GL_ASSERT( glUniform2f(location_, value.x, value.y) );
 }
 
-void ShaderUniform::bindValue(const Vector2* values, uint32 count)
+void ShaderUniform::bindValue(const Vector2* values, int count)
 {
     GL_ASSERT( glUniform2fv(location_, count, (GLfloat*)values) );
 }
@@ -137,7 +123,7 @@ void ShaderUniform::bindValue(const Vector3& value)
     GL_ASSERT( glUniform3f(location_, value.x, value.y, value.z) );
 }
 
-void ShaderUniform::bindValue(const Vector3* values, uint32 count)
+void ShaderUniform::bindValue(const Vector3* values, int count)
 {
     GL_ASSERT( glUniform3fv(location_, count, (GLfloat*)values) );
 }
@@ -147,7 +133,7 @@ void ShaderUniform::bindValue(const Vector4& value)
     GL_ASSERT( glUniform4f(location_, value.x, value.y, value.z, value.w) );
 }
 
-void ShaderUniform::bindValue(const Vector4* values, uint32 count)
+void ShaderUniform::bindValue(const Vector4* values, int count)
 {
     GL_ASSERT( glUniform4fv(location_, count, (GLfloat*)values) );
 }
@@ -157,9 +143,9 @@ void ShaderUniform::bindValue(const Color & color)
     GL_ASSERT( glUniform4f(location_, color.r, color.g, color.b, color.a) );
 }
 
-void ShaderUniform::bindValue(TexturePtr texture)
+void ShaderUniform::bindValue(Texture *texture)
 {
-    ASSERT_1(type_ == GL_SAMPLER_2D);
+    assert(type_ == GL_SAMPLER_2D);
 
     texture_ = texture;
 

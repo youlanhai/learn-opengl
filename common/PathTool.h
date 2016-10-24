@@ -16,6 +16,7 @@
 void formatSlash(std::string &path);
 void formatPath(std::string &path);
 void formatPathNoEndSlash(std::string &path);
+void formatPathWithEndSlash(std::string &path);
 
 void appendPathSlash(std::string &path);
 void trimPathSlash(std::string &path);
@@ -37,6 +38,7 @@ bool listDir(const std::string &path, std::vector<std::string> &files);
 bool isFile(const std::string &path);
 bool isDir(const std::string &path);
 bool isExist(const std::string &path);
+bool isAbsolutePath(const std::string &path);
 
 std::string getExePath();
 std::string getAppResPath();

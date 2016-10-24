@@ -2,6 +2,8 @@
 #define SHADER_UNIFORM_H
 
 #include "Reference.h"
+#include "SmartPointer.h"
+#include <string>
 #include <map>
 
 
@@ -49,42 +51,40 @@ class ShaderUniform
 
 public:
 
-    const std::string& getName() const;
-
-    const uint32_t getType() const;
-
-    ShaderProgram* getEffect() const;
+    const std::string& getName() const{ return name_; }
+    const uint32_t getType() const{ return type_; }
+    ShaderProgram* getProgram() const{ return pEffect_; }
 
     ShaderUniform *getChild(const std::string & name, bool createIfMiss = false);
     ShaderUniform *getChildren(const std::string & name, bool createIfMiss = false);
 
     void bindValue(float value);
 
-    void bindValue(const float* values, uint32 count = 1);
+    void bindValue(const float* values, int count = 1);
 
     void bindValue(int value);
 
-    void bindValue(const int* values, uint32 count = 1);
+    void bindValue(const int* values, int count = 1);
 
     void bindValue(const Matrix& value);
 
-    void bindValue(const Matrix* values, uint32 count, bool transposed);
+    void bindValue(const Matrix* values, int count, bool transposed);
 
     void bindValue(const Vector2& value);
 
-    void bindValue(const Vector2* values, uint32 count = 1);
+    void bindValue(const Vector2* values, int count = 1);
 
     void bindValue(const Vector3& value);
 
-    void bindValue(const Vector3* values, uint32 count = 1);
+    void bindValue(const Vector3* values, int count = 1);
 
     void bindValue(const Vector4& value);
 
-    void bindValue(const Vector4* values, uint32 count = 1);
+    void bindValue(const Vector4* values, int count = 1);
 
     void bindValue(const Color & color);
 
-    void bindValue(const TexturePtr texture);
+    void bindValue(Texture* texture);
 
 private:
 

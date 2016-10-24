@@ -1,5 +1,6 @@
 ﻿#include "VertexBuffer.h"
 #include "LogTool.h"
+#include <cstring>
 
 int g_vb_counter = 0;
 int g_ib_counter = 0;

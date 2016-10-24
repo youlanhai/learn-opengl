@@ -25,13 +25,19 @@ void formatSlash(std::string &path)
 void formatPath(std::string &path)
 {
     formatSlash(path);
-    appendPathSlash(path);
+    trimPathSlash(path);
 }
 
 void formatPathNoEndSlash(std::string &path)
 {
     formatSlash(path);
     trimPathSlash(path);
+}
+
+void formatPathWithEndSlash(std::string &path)
+{
+    formatSlash(path);
+    appendPathSlash(path); 
 }
 
 void appendPathSlash(std::string &path)
@@ -259,6 +265,14 @@ bool isExist(const std::string &path)
     return ret;
 }
 
+bool isAbsolutePath(const std::string &path)
+{
+#ifdef WIN32
+    return path.size() > 1 && path[1] == ':';
+#else
+    return path.size() > 0 && path[0] == '/';
+#endif
+}
 
 void normalizePath(std::string &path)
 {

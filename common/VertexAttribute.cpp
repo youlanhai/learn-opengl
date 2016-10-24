@@ -2,6 +2,7 @@
 #include "glconfig.h"
 #include "VertexBuffer.h"
 #include "VertexDeclaration.h"
+#include "ShaderProgram.h"
 
 VertexAttribute::VertexAttribute()
 	: handle_(0)

@@ -1,5 +1,7 @@
 ﻿#include "Texture.h"
 #include "LogTool.h"
+#include "PathTool.h"
+#include "FileSystem.h"
 
 #include "stb/stb_image.h"
 #include "stb/stb_image_write.h"
@@ -12,13 +14,12 @@ Texture::Texture()
     , handle_(0)
     , width_(0)
     , height_(0)
-    , mipmapped_(0)
-    , parameterDirty_(1)
+    , mipmapped_(false)
+    , parameterDirty_(true)
     , uwrap_(TextureWrap::Clamp)
     , vwrap_(TextureWrap::Clamp)
     , target_(TextureTarget::Tex2D)
     , quality_(TextureQuality::Default)
-    , pLoadingInfo_(nullptr)
 {
     ++g_texture_counter;
 }
@@ -32,7 +33,7 @@ Texture::~Texture()
 
 void Texture::destroy()
 {
-    if (handle_ != 0)
+    if (glIsTexture(handle_))
     {
         tryUnbind();
 
@@ -40,42 +41,26 @@ void Texture::destroy()
         handle_ = 0;
     }
 
-    if(pLoadingInfo_ != nullptr)
-    {
-        delete [] pLoadingInfo_->pPixelData;
-        delete pLoadingInfo_;
-        pLoadingInfo_ = nullptr;
-    }
-
-    mipmapped_ = 0;
-    parameterDirty_ = 1;
+    mipmapped_ = false;
+    parameterDirty_ = true;
 }
 
 bool Texture::load(const std::string & filename)
 {
-    resource_ = filename;
-
     std::string buffer;
-    do
+    if (FileSystem::instance()->readFile(buffer, filename, true))
     {
-        if (readFile(buffer, filename, true))
-            break;
-    
-        if(stringEndWith(filename, ".bmp") || stringEndWith(filename, ".tga"))
-        {
-            if(readFile(buffer, removeFileExt(filename) + ".tga", true))
-                break;
-        }
-
-        ORA_LOG_ERROR("Failed to open texture file '%s'", filename.c_str());
+        LOG_ERROR("Failed to open texture file '%s'", filename.c_str());
         return false;
-    }while(0);
+    }
+    
+    resource_ = filename;
 
     int w, h, comp;
     stbi_uc * pixelData = stbi_load_from_memory((stbi_uc*) &buffer[0], buffer.size(), &w, &h, &comp, 0);
     if (!pixelData)
     {
-        ORA_LOG_ERROR("Failed to load texture '%s'", filename.c_str());
+        LOG_ERROR("Failed to load texture '%s'", filename.c_str());
         return false;
     }
 
@@ -111,44 +96,7 @@ bool Texture::load(const std::string & filename)
     return ret;
 }
 
-void Texture::loadingImmediately()
-{
-    if(pLoadingInfo_ != nullptr)
-    {
-        doLoading();
-    }
-}
-
-void Texture::doLoading()
-{
-    ASSERT_1(pLoadingInfo_ != nullptr);
-
-    GLenum internalFormat = GLenum(format_);
-    GLenum type = GL_UNSIGNED_BYTE;
-
-    GL_ASSERT(glGenTextures(1, &handle_));
-
-    if (pLoadingInfo_->pPixelData)
-    {
-        GL_ASSERT(glBindTexture(GL_TEXTURE_2D, handle_));
-        GL_ASSERT(glTexImage2D(GL_TEXTURE_2D,
-            pLoadingInfo_->levels,
-            internalFormat,
-            width_,
-            height_,
-            0, 
-            (GLenum) format_,
-            type,
-            pLoadingInfo_->pPixelData));
-
-        delete [] pLoadingInfo_->pPixelData;
-    }
-
-    delete pLoadingInfo_;
-    pLoadingInfo_ = nullptr;
-}
-
-bool Texture::save(const std::string & filename)
+bool Texture::save(const std::string & filename) const
 {
     int saveChannels = 4;
     GLenum saveFormat = GL_RGBA;
@@ -162,45 +110,46 @@ bool Texture::save(const std::string & filename)
     glBindTexture(GL_TEXTURE_2D, handle_);
     glReadPixels(0, 0, width_, height_, saveFormat, GL_UNSIGNED_BYTE, pData);// split x and y sizes into bytes
     if (GLenum error = glGetError())
-        ORA_LOG_ERROR("OpenGLTexture::read pixels failed! %x", error);
+    {
+        LOG_ERROR("OpenGLTexture::read pixels failed! %x", error);
+    }
     glPixelStorei(GL_PACK_ALIGNMENT, oldAligment);
 
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    int ret = 0;
-    std::string fullpath = FileSystemMgr::instance()->getWritablePath() + filename;
-    ret = stbi_write_tga(fullpath.c_str(), width_, height_, saveChannels, pData);
+    std::string fullpath = FileSystem::instance()->resolveWritablePath(filename);
+    int ret = stbi_write_tga(fullpath.c_str(), width_, height_, saveChannels, pData);
     
-    delete pData;
+    delete []pData;
     return ret != 0;
 }
 
-bool Texture::create(uint32 levels, uint32 width, uint32 height, TextureFormat format, const void* pPixelData, size_t size)
+bool Texture::create(uint32_t levels, uint32_t width, uint32_t height, TextureFormat format, const void* pPixelData, size_t size)
 {
-    ASSERT_1(width != 0 && height != 0);
-    ASSERT_1(format != TextureFormat::Unknown);
+    assert(width != 0 && height != 0);
+    assert(format != TextureFormat::Unknown);
 
     destroy();
 
     width_ = width;
     height_ = height;
     format_ = format;
-
-    TextureLoadingInfo * pInfo = new TextureLoadingInfo();
-    pInfo->levels = levels;
-    pInfo->size = size;
-    pInfo->pPixelData = nullptr;
-    if(pPixelData != nullptr)
+    
+    GLenum internalFormat = GLenum(format_);
+    GLenum type = GL_UNSIGNED_BYTE;
+    
+    GL_ASSERT(glGenTextures(1, &handle_));
+    
+    if (pPixelData != nullptr)
     {
-        pInfo->pPixelData = new char[size];
-        memcpy(pInfo->pPixelData, pPixelData, size);
+        GL_ASSERT(glBindTexture(GL_TEXTURE_2D, handle_));
+        GL_ASSERT(glTexImage2D(GL_TEXTURE_2D, levels, internalFormat, width_, height_,
+            0, internalFormat, type, pPixelData));
     }
-
-    pLoadingInfo_ = pInfo;
     return true;
 }
 
-bool Texture::create(GLuint handle, uint32 width, uint32 height, TextureFormat format)
+bool Texture::create(GLuint handle, uint32_t width, uint32_t height, TextureFormat format)
 {
     destroy();
 
@@ -216,7 +165,7 @@ void Texture::setUWrap(TextureWrap wrap)
     if (wrap == uwrap_) return;
 
     uwrap_ = wrap;
-    parameterDirty_ = 1;
+    parameterDirty_ = true;
 }
 
 void Texture::setVWrap(TextureWrap wrap)
@@ -224,7 +173,7 @@ void Texture::setVWrap(TextureWrap wrap)
     if (wrap == vwrap_) return;
 
     vwrap_ = wrap;
-    parameterDirty_ = 1;
+    parameterDirty_ = true;
 }
 
 void Texture::setQuality(TextureQuality quality)
@@ -232,37 +181,35 @@ void Texture::setQuality(TextureQuality quality)
     if (quality == quality_) return;
 
     quality_ = quality;
-    parameterDirty_ = 1;
+    parameterDirty_ = true;
 }
 
 void Texture::generateMipmaps()
 {
     if (handle_ == 0 || mipmapped_) return;
 
-    ASSERT_2(target_ == TextureTarget::Tex2D, "this format does't supported rightnow!");
+    assert(target_ == TextureTarget::Tex2D && "this format does't supported rightnow!");
 
-    mipmapped_ = 1;
+    mipmapped_ = true;
     GL_ASSERT(glGenerateMipmap(GL_TEXTURE_2D));
 }
 
 void Texture::updateParameter()
 {
     if (!parameterDirty_ || !handle_) return;
-    parameterDirty_ = 1;
+    parameterDirty_ = false;
 
     GLenum target = GLenum(target_);
 
-#ifndef _RELEASE
-
+#ifdef DEBUG 
     GLint handle = 0;
     glGetIntegerv(GL_TEXTURE_BINDING_2D, &handle);
-    ASSERT_1(handle == handle_);
-
+    assert(handle == handle_);
 #endif
 
     TextureQuality quality = quality_;
     if (quality == TextureQuality::Default)
-        quality = RenderConfig::instance()->getTextureQuality();
+        quality = TextureQuality::ThreeLinear;
 
     if ((width_ & (width_ - 1)) != 0 ||
         (height_ & (height_ - 1)) != 0)
@@ -309,21 +256,9 @@ void Texture::updateParameter()
     glTexParameteri(target, GL_TEXTURE_WRAP_T, GLenum(vwrap_));
 }
 
-void Texture::onDeviceClose()
-{
-    destroy();
-}
-
-
 bool Texture::bind()
 {
-    if(pLoadingInfo_ != nullptr)
-    {
-        doLoading();
-    }
-
     glBindTexture(GL_TEXTURE_2D, handle_);
-
     if(handle_ == 0)
     {
         return false;
@@ -351,24 +286,3 @@ bool Texture::tryUnbind()
     return false;
 }
 
-////////////////////////////////////////////////////////////////////
-TextureStage::TextureStage()
-    : uWrap_(TextureWrap::Clamp)
-    , vWrap_(TextureWrap::Clamp)
-{
-
-}
-
-TextureStage::~TextureStage()
-{
-
-}
-
-void TextureStage::applyParam()
-{
-    if(texture_)
-    {
-        texture_->setUWrap(uWrap_);
-        texture_->setVWrap(vWrap_);
-    }
-}
