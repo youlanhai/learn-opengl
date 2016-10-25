@@ -41,30 +41,29 @@ bool VertexAttribute::init(ShaderProgram *shader, VertexBuffer * vb, VertexDecla
         }
         
         glBindVertexArray(handle_);
-    }
-
-    bindAttributes();
-    
-    if(isVAOSupported())
-    {
+        vb_->bind();
+        
+        bindAttributes();
+        
         glBindVertexArray(0);
+        vb->unbind();
     }
-    vb->unbind();
     return true; 
 }
 
 void VertexAttribute::bindAttributes()
 {
-    vb_->bind();
-    
     ptrdiff_t offset = 0;
     for(size_t i = 0; i < decl_->getNumElement(); ++i)
     {
         const VertexElement &e = decl_->getElement(i);
         
         int location = shader_->getAttribLocation(e.usage);
-        glEnableVertexAttribArray(location);
-        glVertexAttribPointer(location, e.nComponent, e.type, e.normalized, decl_->getVertexSize(), (GLvoid*)offset);
+        if(location >= 0)
+        {
+            glEnableVertexAttribArray(location);
+            glVertexAttribPointer(location, e.nComponent, e.type, e.normalized, decl_->getVertexSize(), (GLvoid*)offset);
+        }
         offset += e.size();
     }
 }
@@ -78,6 +77,7 @@ void VertexAttribute::bind()
     }
     else
     {
+        vb_->bind();
         bindAttributes();
     }
 }

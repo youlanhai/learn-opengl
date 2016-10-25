@@ -12,7 +12,10 @@ ShaderProgram::ShaderProgram()
 : handle_(0)
 , uniformRoot_(new ShaderUniform("root"))
 {
-	memset(attributes_, 0, sizeof(attributes_));
+    for(int i = 0; i < VertexUsageMax; ++i)
+    {
+        attributes_[i] = -1;
+    }
 }
 
 ShaderProgram::~ShaderProgram()

@@ -40,28 +40,24 @@ class MyApplication : public Application
             return false;
         }
         
-        VertexXYZUV vertices[4] = {
-            {{-0.5f, -0.5f, 0.0f}, {0.0f, 1.0f}}, //left bottom
-            {{-0.5f,  0.5f, 0.0f}, {0.0f, 0.0f}}, //left top 
-            {{0.5f,  -0.5f, 0.0f}, {1.0f, 1.0f}}, //right bottom
-            {{0.5f,   0.5f, 0.0f}, {1.0f, 0.0f}}, //right top 
-        };
+        typedef VertexXYZNUV VertexType;
         
-        VertexBufferPtr vb = new VertexBufferEx<VertexXYZUV>(BufferUsage::Static, 4, vertices);
+        std::vector<VertexType> vertices;
+        std::vector<uint16_t> indices;
+        createSimpleGround(vertices, indices, Vector2(1, 1), 0.3, 0.1, 0.4);
+        
+        VertexBufferPtr vb = new VertexBufferEx<VertexType>(BufferUsage::Static, vertices.size(), vertices.data());
+        ib_ = new IndexBufferEx<uint16_t>(BufferUsage::Static, indices.size(), indices.data());
         
         va_ = new VertexAttribute();
-        if(!va_->init(shader_.get(), vb.get(), VertexDeclMgr::instance()->get(VertexXYZUV::getType()).get()))
+        if(!va_->init(shader_.get(), vb.get(), VertexDeclMgr::instance()->get(VertexType::getType()).get()))
         {
             LOG_ERROR("Failed create vertex attribute.");
             return false;
         }
         
         shader_->bind();
-        ShaderUniform *mvp = shader_->findUniform("u_matWorldViewProj");
-        if(mvp != nullptr)
-        {
-            mvp->bindValue(Matrix::Identity);
-        }
+        
         ShaderUniform *tex = shader_->findUniform("u_texture0");
         if(tex != nullptr)
         {
@@ -75,8 +71,19 @@ class MyApplication : public Application
         Application::onDraw();
         
         shader_->bind();
+        
+        ShaderUniform *mvp = shader_->findUniform("u_matWorldViewProj");
+        if(mvp != nullptr)
+        {
+            Matrix mat;
+            mat.setRotateX(glfwGetTime());
+            mvp->bindValue(mat);
+        }
+        
         va_->bind();
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        ib_->bind();
+        glDrawElements(GL_TRIANGLES, ib_->count(), GLenum(ib_->getIndexType()), 0);
+        ib_->unbind();
         va_->unbind();
         shader_->unbind();
     }
@@ -84,12 +91,13 @@ class MyApplication : public Application
     ShaderProgramPtr shader_;
     TexturePtr texture_;
     VertexAttributePtr va_;
+    IndexBufferPtr  ib_;
 };
 
 int main()
 {
     MyApplication app;
-    if(app.createWindow(640, 480, "005-texture"))
+    if(app.createWindow(640, 480, "006-mesh"))
     {
         app.mainLoop();
     }
