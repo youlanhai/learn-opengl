@@ -12,15 +12,31 @@ VertexAttribute::VertexAttribute()
 
 VertexAttribute::~VertexAttribute()
 {
+    destroy();
+}
+
+void VertexAttribute::destroy()
+{
     if(isVAOSupported() && glIsVertexArray(handle_))
     {
         glDeleteVertexArrays(1, &handle_);
+        handle_ = 0;
     }
 }
 
 bool VertexAttribute::init(ShaderProgram *shader, VertexBuffer * vb, VertexDeclaration * decl)
 {
-    assert(shader && vb && decl);
+    if(nullptr == shader || nullptr == vb || nullptr == decl)
+    {
+        return false;
+    }
+    
+    if(shader == shader_ && vb == vb_ && decl == decl_)
+    {
+        return true;
+    }
+    
+    destroy();
     
     shader_ = shader;
     vb_ = vb;

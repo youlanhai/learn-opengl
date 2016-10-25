@@ -166,6 +166,8 @@ void BufferBase::onDeviceClose()
 /// VertexBuffer
 //////////////////////////////////////////////////////////////////////
 
+VertexBuffer* VertexBuffer::s_vertexBuffer = nullptr;
+
 VertexBuffer::VertexBuffer(BufferUsage usage, size_t stride, size_t nVertex, const void *data)
     : BufferBase(BufferType::Vertex, usage, stride)
 {
@@ -178,8 +180,8 @@ VertexBuffer::~VertexBuffer()
 {
     --g_vb_counter;
     
-    //if (renderDevValid())
-    //    renderDev()->unsetVertexBuffer(this);
+    if(s_vertexBuffer == this)
+        s_vertexBuffer = nullptr;
 }
 
 bool VertexBuffer::bind()
@@ -189,19 +191,23 @@ bool VertexBuffer::bind()
         return false;
     }
 
-    //renderDev()->setVertexBuffer(this);
+    s_vertexBuffer = this;
     return true;
 }
 
 void VertexBuffer::unbind()
 {
     BufferBase::unbind();
-    //renderDev()->unsetVertexBuffer(this);
+    
+    if(s_vertexBuffer == this)
+        s_vertexBuffer = nullptr;
 }
 
 //////////////////////////////////////////////////////////////////////
 /// IndexBuffer
 //////////////////////////////////////////////////////////////////////
+
+IndexBuffer* IndexBuffer::s_indexBuffer = nullptr;
 
 IndexBuffer::IndexBuffer(BufferUsage usage, size_t stride, size_t nCount, const void *data)
     : BufferBase(BufferType::Index, usage, stride)
@@ -215,8 +221,8 @@ IndexBuffer::~IndexBuffer()
 {
     --g_ib_counter;
     
-   /* if (renderDevValid())
-        renderDev()->unsetIndexBuffer(this);*/
+    if(s_indexBuffer == this)
+        s_indexBuffer = nullptr;
 }
 
 IndexType IndexBuffer::getIndexType() const
@@ -230,12 +236,14 @@ bool IndexBuffer::bind()
     {
         return false;
     }
-    //renderDev()->setIndexBuffer(this);
+    s_indexBuffer = this;
     return true;
 }
 
 void IndexBuffer::unbind()
 {
     BufferBase::unbind();
-    //renderDev()->unsetIndexBuffer(this);
+    
+    if(s_indexBuffer == this)
+        s_indexBuffer = nullptr;
 }

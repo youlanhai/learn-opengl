@@ -2,6 +2,8 @@
 #include "PathTool.h"
 
 #include "Vertex.h"
+#include "Mesh.h"
+
 #include <cmath>
 
 std::string findResPath()
@@ -23,9 +25,30 @@ void computeNormal(Vector3 &normal, const Vector3 &a, const Vector3 &b, const Ve
     normal.normalize();
 }
 
-void createSimpleGround(std::vector<VertexXYZNUV> &vertices,
-                        std::vector<uint16_t> &indices,
-                        const Vector2 &size, float height, float gridSize, float waveSize)
+SmartPointer<Mesh> createSimpleGround(const Vector2 &size, float height,  float gridSize, float waveSize)
+{
+    typedef VertexXYZNUV VertexType;
+    std::vector<VertexType> vertices;
+    std::vector<uint16_t> indices;
+    
+    createSimpleGround(vertices, indices, size, height, gridSize, waveSize);
+    
+    VertexBufferPtr vb = new VertexBufferEx<VertexType>(BufferUsage::Static, vertices.size(), vertices.data());
+    IndexBufferPtr ib = new IndexBufferEx<uint16_t>(BufferUsage::Static, indices.size(), indices.data());
+    
+    MeshPtr mesh = new Mesh();
+    mesh->setVertexBuffer(vb);
+    mesh->setIndexBuffer(ib);
+    mesh->setVertexDecl(VertexDeclMgr::instance()->get(VertexType::getType()));
+    
+    SubMeshPtr subMesh = new SubMesh();
+    subMesh->setPrimitive(PrimitiveType::TriangleList, 0, indices.size(), 0, true);
+    mesh->addSubMesh(subMesh);
+    return mesh;
+}
+
+void createSimpleGround(std::vector<VertexXYZNUV> &vertices, std::vector<uint16_t> &indices,
+                        const Vector2 &size, float height,  float gridSize, float waveSize)
 {
     int cols = int(size.x / gridSize) + 1;
     int rows = int(size.y / gridSize) + 1;
@@ -35,14 +58,16 @@ void createSimpleGround(std::vector<VertexXYZNUV> &vertices,
     
     float pi = 3.141592654f;
     
+    typedef VertexXYZNUV VertexType;
     vertices.clear();
+    indices.clear();
     
     // compute position and uv
     for(int r = 0; r < rows; ++r)
     {
         for(int c = 0; c < cols; ++c)
         {
-            VertexXYZNUV v;
+            VertexType v;
             v.position.x = c * gridSize - halfX;
             v.position.z = r * gridSize - halfZ;
             
@@ -58,7 +83,6 @@ void createSimpleGround(std::vector<VertexXYZNUV> &vertices,
     }
     
     // create indices
-    indices.clear();
     for(int r = 0; r < rows - 1; ++r)
     {
         for(int c = 0; c < cols - 1; ++c)
@@ -133,4 +157,5 @@ void createSimpleGround(std::vector<VertexXYZNUV> &vertices,
             vertices[r * cols + c].normal = normal;
         }
     }
+   
 }

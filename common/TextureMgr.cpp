@@ -28,6 +28,8 @@ TexturePtr TextureMgr::get(const std::string &fileName, bool load)
             textures_[fileName] = tex;
             return tex;
         }
+        
+        LOG_ERROR("Failed to load texture: %s", fileName.c_str());
     }
     return nullptr;
 }

@@ -22,6 +22,7 @@ public:
     
 private:
     void bindAttributes();
+    void destroy();
     
     uint32_t    handle_;
     SmartPointer<ShaderProgram> shader_;

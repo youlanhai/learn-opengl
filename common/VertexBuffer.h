@@ -63,6 +63,8 @@ public:
 
     virtual bool bind() override;
     virtual void unbind() override;
+    
+    static VertexBuffer* s_vertexBuffer;
 };
 
 
@@ -101,6 +103,8 @@ public:
 
     virtual bool bind() override;
     virtual void unbind() override;
+    
+    static IndexBuffer* s_indexBuffer;
 };
 
 template<typename TIndex>
