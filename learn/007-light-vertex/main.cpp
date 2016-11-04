@@ -1,7 +1,8 @@
 #include "Application.h"
 #include "ShaderProgram.h"
+#include "ShaderProgramMgr.h"
 #include "ShaderUniform.h"
-#include "Texture.h"
+#include "TextureMgr.h"
 #include "Vertex.h"
 #include "VertexBuffer.h"
 #include "VertexAttribute.h"
@@ -11,87 +12,67 @@
 #include "PathTool.h"
 #include "LogTool.h"
 #include "Matrix.h"
+#include "Mesh.h"
 
 class MyApplication : public Application
 {
-    bool onCreate() override
-    {
-        std::string resPath = findResPath();
-        FileSystem::instance()->addSearchPath(resPath);
-        FileSystem::instance()->addSearchPath(joinPath(resPath, "common"));
-        FileSystem::instance()->dumpSearchPath();
-        
-        Texture::s_defaultQuality = TextureQuality::Nearest;
-        
-        const char *ShaderFile = "shader/xyzuv.shader";
-        const char *TextureFile = "alpha.png";
-        
-        shader_ = new ShaderProgram();
-        if(!shader_->loadFromFile(ShaderFile))
-        {
-            LOG_ERROR("Failed to load shader: %s", ShaderFile);
-            return false;
-        }
-        
-        texture_ = new Texture();
-        if(!texture_->load(TextureFile))
-        {
-            LOG_ERROR("Failed to load texture %s", TextureFile);
-            return false;
-        }
-        
-        typedef VertexXYZNUV VertexType;
-        
-        std::vector<VertexType> vertices;
-        std::vector<uint16_t> indices;
-        createSimpleGround(vertices, indices, Vector2(1, 1), 0.3, 0.1, 0.4);
-        
-        VertexBufferPtr vb = new VertexBufferEx<VertexType>(BufferUsage::Static, vertices.size(), vertices.data());
-        ib_ = new IndexBufferEx<uint16_t>(BufferUsage::Static, indices.size(), indices.data());
-        
-        va_ = new VertexAttribute();
-        if(!va_->init(shader_.get(), vb.get(), VertexDeclMgr::instance()->get(VertexType::getType()).get()))
-        {
-            LOG_ERROR("Failed create vertex attribute.");
-            return false;
-        }
-        
-        shader_->bind();
-        
-        ShaderUniform *tex = shader_->findUniform("u_texture0");
-        if(tex != nullptr)
-        {
-            tex->bindValue(texture_.get());
-        }
-        return true;
-    }
-    
-    void onDraw() override
-    {
-        Application::onDraw();
-        
-        shader_->bind();
-        
-        ShaderUniform *mvp = shader_->findUniform("u_matWorldViewProj");
-        if(mvp != nullptr)
-        {
-            Matrix mat;
-            mat.setRotateX(glfwGetTime());
-            mvp->bindValue(mat);
-        }
-        
-        va_->bind();
-        ib_->bind();
-        glDrawElements(GL_TRIANGLES, ib_->count(), GLenum(ib_->getIndexType()), 0);
-        ib_->unbind();
-        va_->unbind();
-        shader_->unbind();
-    }
-    
-    ShaderProgramPtr shader_;
-    TexturePtr texture_;
-    VertexAttributePtr va_;
-    IndexBufferPtr  ib_;
+	bool onCreate() override
+	{
+		std::string resPath = findResPath();
+		FileSystem::instance()->addSearchPath(resPath);
+		FileSystem::instance()->addSearchPath(joinPath(resPath, "common"));
+		FileSystem::instance()->dumpSearchPath();
+
+		Texture::s_defaultQuality = TextureQuality::Nearest;
+
+		const char *ShaderFile = "shader/light_vertex.shader";
+		const char *TextureFile = "alpha.png";
+
+		shader_ = ShaderProgramMgr::instance()->get(ShaderFile);
+		TexturePtr texture = TextureMgr::instance()->get(TextureFile);
+		if (!shader_ || !texture)
+		{
+			return false;
+		}
+
+		shader_->bind();
+		ShaderUniform *un = shader_->findUniform("u_texture0");
+		un->bindValue(texture.get());
+
+		Vector3 lightDir(1, 1, 1);
+		lightDir.normalize();
+
+		un = shader_->findUniform("lightDir");
+		un->bindValue(lightDir);
+		un = shader_->findUniform("lightColor");
+		un->bindValue(Vector3(1.0f, 1.0f, 1.0f));
+		un = shader_->findUniform("ambientColor");
+		un->bindValue(Vector3(0.2f, 0.2f, 0.2f));
+
+		mesh_ = createSimpleGround(Vector2(1.0f, 1.0f), 0.2f, 0.1f, 0.4f);
+		mesh_->addMaterial(shader_);
+		return true;
+	}
+
+	void onDraw() override
+	{
+		Application::onDraw();
+
+		shader_->bind();
+		ShaderUniform *mvp = shader_->findUniform("MVP");
+		if (mvp != nullptr)
+		{
+			Matrix mat;
+			mat.setRotateX((float)glfwGetTime());
+			mvp->bindValue(mat);
+		}
+
+		mesh_->draw();
+		shader_->unbind();
+	}
+
+	ShaderProgramPtr shader_;
+	MeshPtr     mesh_;
 };
 
 int main()

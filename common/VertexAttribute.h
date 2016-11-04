@@ -3,7 +3,7 @@
 
 #include "Reference.h"
 #include "SmartPointer.h"
-#include <string>
+#include <cstdint>
 
 class VertexBuffer;
 class VertexDeclaration;
