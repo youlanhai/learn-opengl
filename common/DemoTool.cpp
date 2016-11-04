@@ -6,6 +6,16 @@
 
 #include <cmath>
 
+#ifdef min
+#undef min
+#endif
+
+#ifdef max
+#undef max
+#endif
+
+#include <algorithm>
+
 std::string findResPath()
 {
     std::string rootPath = getExePath();

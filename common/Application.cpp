@@ -7,6 +7,7 @@
 #include "LogTool.h"
 #include "VertexDeclaration.h"
 #include "TextureMgr.h"
+#include "ShaderProgramMgr.h"
 
 Application *gApp = nullptr;
 
@@ -73,10 +74,12 @@ Application::Application()
     FileSystem::initInstance();
     VertexDeclMgr::initInstance();
     TextureMgr::initInstance();
+	ShaderProgramMgr::initInstance();
 }
 
 Application::~Application()
 {
+	ShaderProgramMgr::finiInstance();
     TextureMgr::finiInstance();
     VertexDeclMgr::finiInstance();
     FileSystem::finiInstance();

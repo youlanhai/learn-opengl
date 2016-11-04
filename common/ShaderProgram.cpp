@@ -4,6 +4,7 @@
 #include "LogTool.h"
 #include "glconfig.h"
 #include "ShaderUniform.h"
+#include "PathTool.h"
 
 #include <smartjson/sj_parser.hpp>
 #include <iostream>
@@ -49,17 +50,20 @@ bool ShaderProgram::loadFromData(const std::string &data)
         LOG_ERROR("Failed parse json: %s : error %d", fileName_.c_str(), parser.getErrorCode());
         return false;
     }
-    
     mjson::Node root = parser.getRoot();
+
+	std::string rootPath = getFilePath(fileName_);
     
     Shader vs(GL_VERTEX_SHADER);
-    if(!vs.loadFromFile(root["vertexShader"].asStdString()))
+	std::string path = joinPath(rootPath, root["vertexShader"].asStdString());
+    if(!vs.loadFromFile(path))
     {
         return false;
     }
     
     Shader fs(GL_FRAGMENT_SHADER);
-    if(!fs.loadFromFile(root["fragmentShader"].asStdString()))
+	path = joinPath(rootPath, root["fragmentShader"].asStdString());
+    if(!fs.loadFromFile(path))
     {
         return false;
     }

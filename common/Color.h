@@ -1,7 +1,7 @@
 #ifndef COLOR_H
 #define COLOR_H
 
-#include <cstdlib>
+#include <cstdint>
 
 class Color
 {

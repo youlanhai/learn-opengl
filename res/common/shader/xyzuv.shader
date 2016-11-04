@@ -1,4 +1,4 @@
 {
-	"vertexShader" : "shader/xyzuv.vsh",
-	"fragmentShader" : "shader/xyzuv.fsh"
+	"vertexShader" : "xyzuv.vsh",
+	"fragmentShader" : "xyzuv.fsh"
 }
