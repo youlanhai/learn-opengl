@@ -105,9 +105,9 @@ void Mesh::draw()
         return;
     }
     
-    if(indexBuffer_)
-        indexBuffer_->bind();
     vertexAttribute_->bind();
+	if (indexBuffer_)
+		indexBuffer_->bind();
 
     for(SubMeshPtr ptr : subMeshs_)
     {

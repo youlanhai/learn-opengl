@@ -17,6 +17,11 @@ public:
 
 	virtual bool init(ShaderProgram *shader, VertexBuffer *vb, VertexDeclaration *decl);
 
+	/**
+	*	激活顶点属性组。
+	*	注意，顶点属性组只存贮顶点属性信息，顶点buffer和索引buffer需要在属性组激活后，再手动激活。
+	*	此函数已经自动激活了顶点buffer，索引buffer需要外部调用者手动激活。
+	*/
     void bind();
     void unbind();
     

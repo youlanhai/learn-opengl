@@ -41,7 +41,7 @@ class MyApplication : public Application
             tex->bindValue(texture.get());
         }
         
-        mesh_ = createSimpleGround(Vector2(1, 1), 0.3, 0.1, 0.4);
+        mesh_ = createSimpleGround(Vector2(1.0f, 1.0f), 0.3f, 0.1f, 0.4f);
         mesh_->addMaterial(shader_);
         return true;
     }
@@ -55,7 +55,7 @@ class MyApplication : public Application
         if(mvp != nullptr)
         {
             Matrix mat;
-            mat.setRotateX(glfwGetTime());
+            mat.setRotateX((float)glfwGetTime());
             mvp->bindValue(mat);
         }
         
