@@ -25,7 +25,7 @@ class MyApplication : public Application
 
 		Texture::s_defaultQuality = TextureQuality::Nearest;
 
-		const char *ShaderFile = "shader/light_vertex.shader";
+		const char *ShaderFile = "shader/light_pixel.shader";
 		const char *TextureFile = "alpha.png";
 
 		shader_ = ShaderProgramMgr::instance()->get(ShaderFile);
@@ -49,8 +49,12 @@ class MyApplication : public Application
 		un = shader_->findUniform("ambientColor");
 		un->bindValue(Vector3(0.2f, 0.2f, 0.2f));
 
-		mesh_ = createSimpleGround(Vector2(1.0f, 1.0f), 0.2f, 0.1f, 0.4f);
+
+		mesh_ = createSimpleGround(Vector2(1.0f, 1.0f), 0.2f, 0.01f, 0.5f);
 		mesh_->addMaterial(shader_);
+
+		LOG_DEBUG("num vertices: %d", (int)mesh_->getVertexBuffer()->count());
+		LOG_DEBUG("num indices: %d", (int)mesh_->getIndexBuffer()->count());
 		return true;
 	}
 
@@ -59,11 +63,13 @@ class MyApplication : public Application
 		Application::onDraw();
 
 		shader_->bind();
+
 		ShaderUniform *mvp = shader_->findUniform("MVP");
 		if (mvp != nullptr)
 		{
 			Matrix mat;
-			mat.setRotateX((float)glfwGetTime());
+			mat.setIdentity();
+			mat.setRotateX(glfwGetTime() * 0.5f);
 			mvp->bindValue(mat);
 		}
 

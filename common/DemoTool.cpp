@@ -4,6 +4,7 @@
 #include "Vertex.h"
 #include "Mesh.h"
 
+#include <unordered_map>
 #include <cmath>
 
 #ifdef min
@@ -33,6 +34,47 @@ void computeNormal(Vector3 &normal, const Vector3 &a, const Vector3 &b, const Ve
     Vector3 e2 = c - a;
     normal.crossProduct(e1, e2);
     normal.normalize();
+}
+
+void computeNormals(std::vector<VertexXYZNUV> &vertices, std::vector<uint16_t> &indices)
+{
+	std::unordered_map<int, std::vector<int>> vertexFaces;
+
+	// compute face normal
+	std::vector<Vector3> normals;
+	normals.resize(indices.size() / 3);
+	for (size_t i = 0; i < indices.size(); i += 3)
+	{
+		int iFace = i / 3;
+		computeNormal(normals[iFace],
+			vertices[indices[i + 0]].position,
+			vertices[indices[i + 1]].position,
+			vertices[indices[i + 2]].position);
+
+		vertexFaces[indices[i + 0]].push_back(iFace);
+		vertexFaces[indices[i + 1]].push_back(iFace);
+		vertexFaces[indices[i + 2]].push_back(iFace);
+	}
+
+	// slerp normal
+	for (size_t i = 0; i < vertices.size(); ++i)
+	{
+		auto &vertex = vertices[i];
+		auto &faces = vertexFaces[i];
+		if (faces.empty())
+		{
+			vertex.normal = Vector3::YAxis;
+		}
+		else
+		{
+			vertex.normal.zero();
+			for (int iFace : faces)
+			{
+				vertex.normal += normals[iFace];
+			}
+			vertex.normal /= (float)faces.size();
+		}
+	}
 }
 
 SmartPointer<Mesh> createSimpleGround(const Vector2 &size, float height,  float gridSize, float waveSize)
@@ -81,8 +123,8 @@ void createSimpleGround(std::vector<VertexXYZNUV> &vertices, std::vector<uint16_
             v.position.x = c * gridSize - halfX;
             v.position.z = r * gridSize - halfZ;
             
-            float hx = sin(v.position.x / waveSize * pi * 2);
-            float hz = sin(v.position.z / waveSize * pi * 2);
+            float hx = sin(c * gridSize / waveSize * pi * 2);
+            float hz = sin(r * gridSize / waveSize * pi * 2);
             
             v.position.y = std::min(hx, hz) * height;
             v.uv.x = (c * gridSize) / (halfX * 2.0f);
@@ -109,63 +151,5 @@ void createSimpleGround(std::vector<VertexXYZNUV> &vertices, std::vector<uint16_
         }
     }
     
-    // compute face normal
-    std::vector<Vector3> normals;
-    uint16_t *p = indices.data();
-    for(int r = 0; r < rows - 1; ++r)
-    {
-        for(int c = 0; c < cols - 1; ++c)
-        {
-            Vector3 normal;
-            computeNormal(normal,
-                          vertices[*(p + 0)].position,
-                          vertices[*(p + 1)].position,
-                          vertices[*(p + 2)].position);
-            normals.push_back(normal);
-            
-            computeNormal(normal,
-                          vertices[*(p + 3)].position,
-                          vertices[*(p + 4)].position,
-                          vertices[*(p + 5)].position);
-            normals.push_back(normal);
-            p += 6;
-        }
-    }
-    
-    // slerp normal
-    for(int r = 0; r < rows; ++r)
-    {
-        for(int c = 0; c < cols; ++c)
-        {
-            int face = (r * (cols - 1) + c) * 2;
-            int faceUp = face - (cols - 1) * 2;
-            
-            // clockwise
-            int faces[6] = {
-                face,
-                face - 1,
-                face - 2,
-                faceUp - 1,
-                faceUp,
-                faceUp + 1,
-            };
-            
-            int n = 0;
-            Vector3 normal;
-            for(int i = 0; i < 6; ++i)
-            {
-                int f = faces[i];
-                if(f >= 0 && f < normals.size())
-                {
-                    normal += normals[f];
-                    ++n;
-                }
-            }
-            normal /= n;
-            normal.normalize();
-            
-            vertices[r * cols + c].normal = normal;
-        }
-    }
-   
+	computeNormals(vertices, indices);
 }
