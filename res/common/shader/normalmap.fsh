@@ -1,6 +1,5 @@
 varying vec2 v_texcoord;
 varying mat3 v_TBN;
-varying vec3 v_tangent;
 
 uniform sampler2D u_texture0;
 uniform sampler2D u_texture1;

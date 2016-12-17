@@ -8,7 +8,6 @@ uniform mat4 matWorld;
 
 varying vec2 v_texcoord;
 varying mat3 v_TBN;
-varying vec3 v_tangent;
 
 void main()
 {
@@ -20,5 +19,4 @@ void main()
 	vec3 B = normalize(cross(T, N));
 
 	v_TBN = mat3(T, B, N);
-	v_tangent = T;
 }
