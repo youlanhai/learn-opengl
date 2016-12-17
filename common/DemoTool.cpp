@@ -112,8 +112,11 @@ void createSimpleGround(std::vector<VertexXYZNUV> &vertices, std::vector<uint16_
     int cols = int(size.x / gridSize) + 1;
     int rows = int(size.y / gridSize) + 1;
     
-    float halfX = (cols - 1) * gridSize * 0.5f;
-    float halfZ = (rows - 1) * gridSize * 0.5f;
+	float XLength = (cols - 1) * gridSize;
+	float ZLength = (rows - 1) * gridSize;
+
+	float halfX = XLength * 0.5f;
+	float halfZ = ZLength * 0.5f;
     
     float pi = 3.141592654f;
     
@@ -128,14 +131,14 @@ void createSimpleGround(std::vector<VertexXYZNUV> &vertices, std::vector<uint16_
         {
             VertexType v;
             v.position.x = c * gridSize - halfX;
-            v.position.z = r * gridSize - halfZ;
+            v.position.z = halfZ - r * gridSize;
             
             float hx = sin(c * gridSize / waveSize * pi * 2);
             float hz = sin(r * gridSize / waveSize * pi * 2);
             
             v.position.y = std::min(hx, hz) * height;
-            v.uv.x = (c * gridSize) / (halfX * 2.0f);
-            v.uv.y = (r * gridSize) / (halfZ * 2.0f);
+            v.uv.x = (c * gridSize) / XLength;
+            v.uv.y = (r * gridSize) / ZLength;
             
             vertices.push_back(v);
         }
@@ -185,7 +188,7 @@ void createPlane(std::vector<VertexXYZNUV> &vertices, std::vector<uint16_t> &ind
 			VertexType v;
 			v.position.x = c * gridSize - halfX;
 			v.position.y = 0.0f;
-			v.position.z = r * gridSize - halfZ;
+			v.position.z = halfZ - r * gridSize;
 
 			v.normal = Vector3::YAxis;
 
