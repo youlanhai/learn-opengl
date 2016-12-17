@@ -108,6 +108,7 @@ std::string ShaderProgram::getLinkError() const
     glGetProgramiv(handle_, GL_INFO_LOG_LENGTH, &length);
     
     std::string ret;
+	ret.resize(length);
     glGetProgramInfoLog(handle_, length, nullptr, const_cast<char*>(ret.data()));
    
     return ret;

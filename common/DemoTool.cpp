@@ -1,4 +1,4 @@
-#include "DemoTool.h"
+ï»¿#include "DemoTool.h"
 #include "PathTool.h"
 
 #include "Vertex.h"
@@ -46,7 +46,7 @@ MeshPtr createMesh(const std::vector<VertexType> &vertices, const std::vector<ui
 	return mesh;
 }
 
-// abc°´ÄæÊ±ÕëÅÅÁÐ
+// abcæŒ‰é€†æ—¶é’ˆæŽ’åˆ—
 void computeNormal(Vector3 &normal, const Vector3 &a, const Vector3 &b, const Vector3 &c)
 {
     Vector3 e1 = c - a;
@@ -55,7 +55,25 @@ void computeNormal(Vector3 &normal, const Vector3 &a, const Vector3 &b, const Ve
     normal.normalize();
 }
 
-void computeNormals(std::vector<VertexXYZNUV> &vertices, std::vector<uint16_t> &indices)
+// abcæŒ‰é€†æ—¶é’ˆæŽ’åˆ—
+void computeTangent(Vector3 &tangent, const MeshVertex &a, const MeshVertex &b, const MeshVertex &c)
+{
+	Vector3 e1 = c.position - a.position;
+	Vector3 e2 = b.position - a.position;
+
+	Vector2 u1 = c.uv - a.uv;
+	Vector2 u2 = b.uv - a.uv;
+
+	float f = 1.0f / (u1.x * u2.y - u1.y * u2.x);
+
+	tangent.x = f * (u2.y * e1.x - u1.y * e2.x);
+	tangent.y = f * (u2.y * e1.y - u1.y * e2.y);
+	tangent.z = f * (u2.y * e1.z - u1.y * e2.z);
+
+	tangent.normalize();
+}
+
+void computeNormals(std::vector<MeshVertex> &vertices, std::vector<uint16_t> &indices)
 {
 	std::unordered_map<int, std::vector<int>> vertexFaces;
 
@@ -86,7 +104,7 @@ void computeNormals(std::vector<VertexXYZNUV> &vertices, std::vector<uint16_t> &
 		}
 		else
 		{
-			vertex.normal.zero();
+			vertex.normal.setZero();
 			for (int iFace : faces)
 			{
 				vertex.normal += normals[iFace];
@@ -98,7 +116,7 @@ void computeNormals(std::vector<VertexXYZNUV> &vertices, std::vector<uint16_t> &
 
 MeshPtr createSimpleGround(const Vector2 &size, float height,  float gridSize, float waveSize)
 {
-    typedef VertexXYZNUV VertexType;
+    typedef MeshVertex VertexType;
     std::vector<VertexType> vertices;
     std::vector<uint16_t> indices;
     
@@ -106,7 +124,7 @@ MeshPtr createSimpleGround(const Vector2 &size, float height,  float gridSize, f
     return createMesh<VertexType, uint16_t>(vertices, indices);
 }
 
-void createSimpleGround(std::vector<VertexXYZNUV> &vertices, std::vector<uint16_t> &indices,
+void createSimpleGround(std::vector<MeshVertex> &vertices, std::vector<uint16_t> &indices,
                         const Vector2 &size, float height,  float gridSize, float waveSize)
 {
     int cols = int(size.x / gridSize) + 1;
@@ -120,7 +138,7 @@ void createSimpleGround(std::vector<VertexXYZNUV> &vertices, std::vector<uint16_
     
     float pi = 3.141592654f;
     
-    typedef VertexXYZNUV VertexType;
+    typedef MeshVertex VertexType;
     vertices.clear();
     indices.clear();
     
@@ -164,7 +182,7 @@ void createSimpleGround(std::vector<VertexXYZNUV> &vertices, std::vector<uint16_
 	computeNormals(vertices, indices);
 }
 
-void createPlane(std::vector<VertexXYZNUV> &vertices, std::vector<uint16_t> &indices,
+void createPlane(std::vector<MeshVertex> &vertices, std::vector<uint16_t> &indices,
 	const Vector2 &size, float gridSize)
 {
 	int cols = int(size.x / gridSize) + 1;
@@ -176,7 +194,7 @@ void createPlane(std::vector<VertexXYZNUV> &vertices, std::vector<uint16_t> &ind
 	float halfX = XLength * 0.5f;
 	float halfZ = ZLength * 0.5f;
 
-	typedef VertexXYZNUV VertexType;
+	typedef MeshVertex VertexType;
 	vertices.clear();
 	indices.clear();
 
@@ -191,6 +209,7 @@ void createPlane(std::vector<VertexXYZNUV> &vertices, std::vector<uint16_t> &ind
 			v.position.z = halfZ - r * gridSize;
 
 			v.normal = Vector3::YAxis;
+			v.tangent = Vector3::XAxis;
 
 			v.uv.x = (c * gridSize) / XLength;
 			v.uv.y = (r * gridSize) / ZLength;
@@ -218,7 +237,7 @@ void createPlane(std::vector<VertexXYZNUV> &vertices, std::vector<uint16_t> &ind
 
 MeshPtr createPlane(const Vector2 &size, float gridSize)
 {
-	typedef VertexXYZNUV VertexType;
+	typedef MeshVertex VertexType;
 	std::vector<VertexType> vertices;
 	std::vector<uint16_t> indices;
 
@@ -226,7 +245,7 @@ MeshPtr createPlane(const Vector2 &size, float gridSize)
 	return createMesh<VertexType, uint16_t>(vertices, indices);
 }
 
-void createCube(std::vector<VertexXYZNUV> &vertices, std::vector<uint16_t> &indices,
+void createCube(std::vector<MeshVertex> &vertices, std::vector<uint16_t> &indices,
 	const Vector3 &size)
 {
 	float X = size.x * 0.5f;
@@ -234,6 +253,7 @@ void createCube(std::vector<VertexXYZNUV> &vertices, std::vector<uint16_t> &indi
 	float Z = size.z * 0.5f;
 
 	float buffer[] = {
+		//position normal uv tangent
 		// front
 		-X, Y, -Z,	0, 0, -1, 0, 0,
 		-X, -Y, -Z,	0, 0, -1, 0, 1,
@@ -266,17 +286,32 @@ void createCube(std::vector<VertexXYZNUV> &vertices, std::vector<uint16_t> &indi
 		X, -Y, Z,	0, -1, 0, 1, 1,
 	};
 
+	// copy vertices data
 	vertices.resize(6 * 4);
 	for (int n = 0; n < 6 * 4; ++n)
 	{
-		VertexXYZNUV &v = vertices[n];
+		MeshVertex &v = vertices[n];
 
 		int i = n * 8;
 		v.position.set(buffer[i], buffer[i + 1], buffer[i + 2]);
 		v.normal.set(buffer[i + 3], buffer[i + 4], buffer[i + 5]);
 		v.uv.set(buffer[i + 6], buffer[i + 7]);
+		v.tangent.setZero();
 	}
 
+	// compute tangent
+	for (int i = 0; i < 6 * 4; i += 4)
+	{
+		Vector3 tangent;
+		computeTangent(tangent, vertices[i], vertices[i + 1], vertices[i + 2]);
+
+		for (int j = 0; j < 4; ++j)
+		{
+			vertices[i + j].tangent = tangent;
+		}
+	}
+
+	// generate indices
 	indices.clear();
 	indices.reserve(6 * 6);
 	for (int n = 0; n < 6; ++n)
@@ -295,7 +330,7 @@ void createCube(std::vector<VertexXYZNUV> &vertices, std::vector<uint16_t> &indi
 
 MeshPtr createCube(const Vector3 &size)
 {
-	typedef VertexXYZNUV VertexType;
+	typedef MeshVertex VertexType;
 	std::vector<VertexType> vertices;
 	std::vector<uint16_t> indices;
 

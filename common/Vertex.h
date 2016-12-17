@@ -56,4 +56,14 @@ struct VertexXYZNUV
     DEF_VERTEX_TYPE(oxyznuv)
 };
 
+struct MeshVertex
+{
+	Vector3 position;
+	Vector3 normal;
+	Vector2 uv;
+	Vector3 tangent;
+
+    DEF_VERTEX_TYPE(oxyznuvt)
+};
+
 #endif //VERTEX_H

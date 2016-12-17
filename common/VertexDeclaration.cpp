@@ -257,6 +257,13 @@ void VertexDeclMgr::init()
     decl->addElement(VertexUsage::COLOR, 4);
     decl->addElement(VertexUsage::TEXCOORD0, 2);
     add(decl);
+
+	decl = new VertexDeclaration(MeshVertex::getType());
+	decl->addElement(VertexUsage::POSITION, 3);
+	decl->addElement(VertexUsage::NORMAL, 3);
+	decl->addElement(VertexUsage::TEXCOORD0, 2);
+	decl->addElement(VertexUsage::TANGENT, 3);
+	add(decl);
 }
 
 bool VertexDeclMgr::loadFromFile(const std::string & fileName)

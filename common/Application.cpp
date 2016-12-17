@@ -140,6 +140,13 @@ void Application::makeCurrent()
     glfwMakeContextCurrent(pWindow_);
 }
 
+Vector2 Application::getWindowSize()
+{
+	int width, height;
+	glfwGetWindowSize(pWindow_, &width, &height);
+	return Vector2(width, height);
+}
+
 void Application::mainLoop()
 {
     while(!glfwWindowShouldClose(pWindow_))

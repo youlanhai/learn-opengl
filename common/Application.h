@@ -2,6 +2,7 @@
 #define COMMON_APPLICATION_H
 
 #include "glconfig.h"
+#include "Vector2.h"
 #include <string>
 
 class Application
@@ -19,6 +20,7 @@ public:
     void makeCurrent();
     
     GLFWwindow* getWindow(){ return pWindow_; }
+	Vector2 getWindowSize();
     
 public:
     // 内部方法，不要手动调用

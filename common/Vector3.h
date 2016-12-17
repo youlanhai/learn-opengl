@@ -23,7 +23,7 @@ public:
 	float lengthSq() const { return x * x + y * y + z *z; }
 	float length() const { return sqrtf(lengthSq()); }
 
-	void zero() { *this = Zero; }
+	void setZero() { *this = Zero; }
 	void set(float _x, float _y, float _z){ x = _x; y = _y; z = _z; }
 
 	void normalize();
