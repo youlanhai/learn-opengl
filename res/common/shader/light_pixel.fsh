@@ -10,7 +10,7 @@ uniform vec3 lightColor;
 
 vec3 light()
 {
-	float diffuse = lightDir * normalize(v_normal);
+	float diffuse = dot(lightDir, normalize(v_normal));
 	return ambientColor + lightColor * max(0.0, diffuse);
 }
 

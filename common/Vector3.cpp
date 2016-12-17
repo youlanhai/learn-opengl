@@ -18,19 +18,27 @@ Vector3::Vector3(const Vector4 &v)
 
 void Vector3::normalize()
 {
-	float l = length();
+	double l = std::sqrt(double(x) * x + y * y + z * z);
 	if(l != 0.0f)
 	{
-		*this *= 1.0f / l;
+		float d = float(1.0 / l);
+
+		x *= d;
+		y *= d;
+		z *= d;
 	}
+}
+
+Vector3 Vector3::crossProduct(const Vector3 &right)
+{
+	Vector3 ret;
+	ret.crossProduct(*this, right);
+	return ret;
 }
 
 void Vector3::crossProduct(const Vector3 &left, const Vector3 &right)
 {
-	float _x = left.y * right.z - left.z * right.y;
-	float _y = left.z * right.z - left.x * right.z;
-	float _z = left.x * right.y - left.y * right.z;
-	x = _x;
-	y = _y;
-	z = _z;
+	x = left.y * right.z - left.z * right.y;
+	y = left.z * right.x - left.x * right.z;
+	z = left.x * right.y - left.y * right.x;
 }

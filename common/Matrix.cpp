@@ -340,36 +340,39 @@ const Matrix& Matrix::operator /= (float v)
     return *this *= (1.0f / v);
 }
 
-void Matrix::lookAt(const Vector3& position, const Vector3& direction, const Vector3& up)
+void Matrix::lookAt(const Vector3& position, const Vector3& target, const Vector3& up)
 {
     Vector3 Up;
-    Vector3 Direction(direction);
     Vector3 Right;
 
-    Direction.normalize();
-    Right.crossProduct(up, Direction);
+    Vector3 Forward = target - position;
+	Forward.normalize();
+
+    Right.crossProduct(up, Forward);
     Right.normalize();
-    Up.crossProduct(Direction, Right);
+
+    Up.crossProduct(Forward, Right);
+	Up.normalize();
 
     m[0][0] = Right.x;
     m[1][0] = Right.y;
     m[2][0] = Right.z;
-    m[3][0] = 0.f;
+    m[3][0] = -position.dotProduct(Right);
 
     m[0][1] = Up.x;
     m[1][1] = Up.y;
     m[2][1] = Up.z;
-    m[3][1] = 0.f;
-
-    m[0][2] = Direction.x;
-    m[1][2] = Direction.y;
-    m[2][2] = Direction.z;
-    m[3][2] = 0.f;
-
-    m[3][0] = -position.dotProduct(Right);
     m[3][1] = -position.dotProduct(Up);
-    m[3][2] = -position.dotProduct(Direction);
-    m[3][3] = 1.f;
+
+    m[0][2] = Forward.x;
+    m[1][2] = Forward.y;
+    m[2][2] = Forward.z;
+    m[3][2] = -position.dotProduct(Forward);
+
+	m[0][3] = 0.0f;
+    m[1][3] = 0.0f;
+    m[2][3] = 0.0f;
+    m[3][3] = 1.0f;
 }
 
 void Matrix::decompose(Quaternion & rotation, Vector3 & scale, Vector3 & translate) const

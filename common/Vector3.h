@@ -30,7 +30,7 @@ public:
 
 	float dotProduct(const Vector3 &right) const { return x * right.x + y * right.y + z * right.z; }
 
-	void crossProduct(const Vector3 &right);
+	Vector3 crossProduct(const Vector3 &right);
 	void crossProduct(const Vector3 &left, const Vector3 &right);
 
 	Vector3 operator + (const Vector3 &v) const { return Vector3(x + v.x, y + v.y, z + v.z); }
@@ -56,10 +56,5 @@ public:
 	static Vector3 YAxis;
 	static Vector3 ZAxis;
 };
-
-inline void Vector3::crossProduct(const Vector3 &right)
-{
-	crossProduct(*this, right);
-}
 
 #endif // VECTOR3_H

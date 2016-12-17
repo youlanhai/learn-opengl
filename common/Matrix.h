@@ -81,7 +81,7 @@ public:
     const Matrix& operator *= (float v);
     const Matrix& operator /= (float v);
 
-	void lookAt(const Vector3& position, const Vector3& direction, const Vector3& up);
+	void lookAt(const Vector3& position, const Vector3& target, const Vector3& up);
 
     void orthogonalProjection( float w, float h, float zn, float zf );
     void perspectiveProjection( float fov, float aspectRatio,

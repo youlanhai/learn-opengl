@@ -43,11 +43,18 @@ class MyApplication : public Application
 
 		curShader_ = shaderVertex_;
 
-		mesh_ = createSimpleGround(Vector2(1.0f, 1.0f), 0.2f, 0.05f, 0.5f);
+		//mesh_ = createSimpleGround(Vector2(1.0f, 1.0f), 0.2f, 0.1f, 0.5f);
+		//mesh_ = createPlane(Vector2(1.0f, 1.0f), 0.2f);
+		mesh_ = createCube(Vector3(1.0f, 1.0f, 1.0f));
 		mesh_->addMaterial(curShader_);
 
 		LOG_DEBUG("num vertices: %d", (int)mesh_->getVertexBuffer()->count());
 		LOG_DEBUG("num indices: %d", (int)mesh_->getIndexBuffer()->count());
+
+		glEnable(GL_DEPTH_TEST);
+		//glDisable(GL_CULL_FACE);
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
 		return true;
 	}
 
@@ -83,21 +90,23 @@ class MyApplication : public Application
 		ShaderUniform *un = shader->findUniform("u_texture0");
 		un->bindValue(groundTexture_.get());
 
-		Vector3 lightDir(1, 1, 1);
+		Vector3 lightDir(0, 1, 0);
 		lightDir.normalize();
 
 		un = shader->findUniform("lightDir");
 		un->bindValue(lightDir);
 
 		un = shader->findUniform("lightColor");
-		un->bindValue(Vector3(1.5f, 1.5f, 1.5f));
+		un->bindValue(Vector3(1.0f));
 
 		un = shader->findUniform("ambientColor");
-		un->bindValue(Vector3(0.2f, 0.2f, 0.2f));
+		un->bindValue(Vector3(0.2f));
 	}
 
 	void onKey(int key, int scancode, int action, int mods) override
 	{
+		Application::onKey(key, scancode, action, mods);
+
 		if (key == GLFW_KEY_SPACE && action == GLFW_RELEASE)
 		{
 			if (curShader_ == shaderVertex_)
@@ -120,21 +129,35 @@ class MyApplication : public Application
 	void setupWorldMatrix()
 	{
 		curShader_->bind();
-		ShaderUniform *mvp = curShader_->findUniform("MVP");
-		if (mvp != nullptr)
-		{
-			Matrix mat;
-			mat.setIdentity();
-			//mat.setRotateX(glfwGetTime() * 0.5f);
-			mat.setRotateX(3.14f / 3);
-			mvp->bindValue(mat);
-		}
+
+		Matrix matWorld;
+		matWorld.setIdentity();
+		//matWorld.setRotateX(3.14f / 3);
+		matWorld.setRotateX(glfwGetTime() * 0.5f);
+
+		ShaderUniform *un;
+
+		un = curShader_->findUniform("matWorld");
+		un->bindValue(matWorld);
+
+		Matrix matView;
+		matView.lookAt(Vector3(1, 1, -2), Vector3::Zero, Vector3::YAxis);
+
+		Matrix matProj;
+		matProj.setIdentity();
+		matProj.perspectiveProjectionGL(90, 800.0f / 600.0f, 1, 1000.0f);
+		//matProj.orthogonalProjectionGL(10, 10, 0.0f, 1000.0f);
+
+		un = curShader_->findUniform("matMVP");
+		un->bindValue(matWorld * matView * matProj);
+
 		curShader_->unbind();
 	}
 
 	void onDraw() override
 	{
-		Application::onDraw();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 		setupWorldMatrix();
 
 		mesh_->draw();

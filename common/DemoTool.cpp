@@ -28,10 +28,29 @@ std::string findResPath()
     return resPath;
 }
 
+template<typename VertexType, typename IndexType>
+MeshPtr createMesh(const std::vector<VertexType> &vertices, const std::vector<uint16_t> &indices)
+{
+	VertexBufferPtr vb = new VertexBufferEx<VertexType>(BufferUsage::Static, vertices.size(), vertices.data());
+	IndexBufferPtr ib = new IndexBufferEx<IndexType>(BufferUsage::Static, indices.size(), indices.data());
+
+	MeshPtr mesh = new Mesh();
+	mesh->setVertexBuffer(vb);
+	mesh->setIndexBuffer(ib);
+	mesh->setVertexDecl(VertexDeclMgr::instance()->get(VertexType::getType()));
+
+	SubMeshPtr subMesh = new SubMesh();
+	subMesh->setPrimitive(PrimitiveType::TriangleList, 0, indices.size(), 0, true);
+	mesh->addSubMesh(subMesh);
+
+	return mesh;
+}
+
+// abc∞¥ƒÊ ±’Î≈≈¡–
 void computeNormal(Vector3 &normal, const Vector3 &a, const Vector3 &b, const Vector3 &c)
 {
-    Vector3 e1 = b - a;
-    Vector3 e2 = c - a;
+    Vector3 e1 = c - a;
+    Vector3 e2 = b - a;
     normal.crossProduct(e1, e2);
     normal.normalize();
 }
@@ -77,26 +96,14 @@ void computeNormals(std::vector<VertexXYZNUV> &vertices, std::vector<uint16_t> &
 	}
 }
 
-SmartPointer<Mesh> createSimpleGround(const Vector2 &size, float height,  float gridSize, float waveSize)
+MeshPtr createSimpleGround(const Vector2 &size, float height,  float gridSize, float waveSize)
 {
     typedef VertexXYZNUV VertexType;
     std::vector<VertexType> vertices;
     std::vector<uint16_t> indices;
     
     createSimpleGround(vertices, indices, size, height, gridSize, waveSize);
-    
-    VertexBufferPtr vb = new VertexBufferEx<VertexType>(BufferUsage::Static, vertices.size(), vertices.data());
-    IndexBufferPtr ib = new IndexBufferEx<uint16_t>(BufferUsage::Static, indices.size(), indices.data());
-    
-    MeshPtr mesh = new Mesh();
-    mesh->setVertexBuffer(vb);
-    mesh->setIndexBuffer(ib);
-    mesh->setVertexDecl(VertexDeclMgr::instance()->get(VertexType::getType()));
-    
-    SubMeshPtr subMesh = new SubMesh();
-    subMesh->setPrimitive(PrimitiveType::TriangleList, 0, indices.size(), 0, true);
-    mesh->addSubMesh(subMesh);
-    return mesh;
+    return createMesh<VertexType, uint16_t>(vertices, indices);
 }
 
 void createSimpleGround(std::vector<VertexXYZNUV> &vertices, std::vector<uint16_t> &indices,
@@ -152,4 +159,143 @@ void createSimpleGround(std::vector<VertexXYZNUV> &vertices, std::vector<uint16_
     }
     
 	computeNormals(vertices, indices);
+}
+
+void createPlane(std::vector<VertexXYZNUV> &vertices, std::vector<uint16_t> &indices,
+	const Vector2 &size, float gridSize)
+{
+	int cols = int(size.x / gridSize) + 1;
+	int rows = int(size.y / gridSize) + 1;
+
+	float XLength = (cols - 1) * gridSize;
+	float ZLength = (rows - 1) * gridSize;
+
+	float halfX = XLength * 0.5f;
+	float halfZ = ZLength * 0.5f;
+
+	typedef VertexXYZNUV VertexType;
+	vertices.clear();
+	indices.clear();
+
+	// compute position and uv
+	for (int r = 0; r < rows; ++r)
+	{
+		for (int c = 0; c < cols; ++c)
+		{
+			VertexType v;
+			v.position.x = c * gridSize - halfX;
+			v.position.y = 0.0f;
+			v.position.z = r * gridSize - halfZ;
+
+			v.normal = Vector3::YAxis;
+
+			v.uv.x = (c * gridSize) / XLength;
+			v.uv.y = (r * gridSize) / ZLength;
+
+			vertices.push_back(v);
+		}
+	}
+
+	// create indices
+	for (int r = 0; r < rows - 1; ++r)
+	{
+		for (int c = 0; c < cols - 1; ++c)
+		{
+			int i = r * cols + c;
+			indices.push_back(i); //left top
+			indices.push_back(i + cols); // left bottom
+			indices.push_back(i + 1); // right top
+
+			indices.push_back(i + 1); // right top
+			indices.push_back(i + cols); // left bottom
+			indices.push_back(i + cols + 1); // left bottom
+		}
+	}
+}
+
+MeshPtr createPlane(const Vector2 &size, float gridSize)
+{
+	typedef VertexXYZNUV VertexType;
+	std::vector<VertexType> vertices;
+	std::vector<uint16_t> indices;
+
+	createPlane(vertices, indices, size, gridSize);
+	return createMesh<VertexType, uint16_t>(vertices, indices);
+}
+
+void createCube(std::vector<VertexXYZNUV> &vertices, std::vector<uint16_t> &indices,
+	const Vector3 &size)
+{
+	float X = size.x * 0.5f;
+	float Y = size.y * 0.5f;
+	float Z = size.z * 0.5f;
+
+	float buffer[] = {
+		// front
+		-X, Y, -Z,	0, 0, -1, 0, 0,
+		-X, -Y, -Z,	0, 0, -1, 0, 1,
+		X, Y, -Z,	0, 0, -1, 1, 0,
+		X, -Y, -Z,	0, 0, -1, 1, 1,
+		// back
+		X, Y, Z,	0, 0, 1, 0, 0,
+		X, -Y, Z,	0, 0, 1, 0, 1,
+		-X, Y, Z,	0, 0, 1, 1, 0,
+		-X, -Y, Z,	0, 0, 1, 1, 1,
+		// left
+		-X, Y, Z,	-1, 0, 0, 0, 0,
+		-X, -Y, Z,	-1, 0, 0, 0, 1,
+		-X, Y, -Z,	-1, 0, 0, 1, 0,
+		-X, -Y, -Z,	-1, 0, 0, 1, 1,
+		// right
+		X, Y, -Z,	1, 0, 0, 0, 0,
+		X, -Y, -Z,	1, 0, 0, 0, 1,
+		X, Y, Z,	1, 0, 0, 1, 0,
+		X, -Y, Z,	1, 0, 0, 1, 1,
+		// top 
+		-X, Y, Z,	0, 1, 0, 0, 0,
+		-X, Y, -Z,	0, 1, 0, 0, 1,
+		X, Y, Z,	0, 1, 0, 1, 0,
+		X, Y, -Z,	0, 1, 0, 1, 1,
+		// bottom
+		-X, -Y, -Z,	0, -1, 0, 0, 0,
+		-X, -Y, Z,	0, -1, 0, 0, 1,
+		X, -Y, -Z,	0, -1, 0, 1, 0,
+		X, -Y, Z,	0, -1, 0, 1, 1,
+	};
+
+	vertices.resize(6 * 4);
+	for (int n = 0; n < 6 * 4; ++n)
+	{
+		VertexXYZNUV &v = vertices[n];
+
+		int i = n * 8;
+		v.position.set(buffer[i], buffer[i + 1], buffer[i + 2]);
+		v.normal.set(buffer[i + 3], buffer[i + 4], buffer[i + 5]);
+		v.uv.set(buffer[i + 6], buffer[i + 7]);
+	}
+
+	indices.clear();
+	indices.reserve(6 * 6);
+	for (int n = 0; n < 6; ++n)
+	{
+		int i = n * 4;
+
+		indices.push_back(i + 0);
+		indices.push_back(i + 1);
+		indices.push_back(i + 2);
+
+		indices.push_back(i + 2);
+		indices.push_back(i + 1);
+		indices.push_back(i + 3);
+	}
+}
+
+MeshPtr createCube(const Vector3 &size)
+{
+	typedef VertexXYZNUV VertexType;
+	std::vector<VertexType> vertices;
+	std::vector<uint16_t> indices;
+
+	createCube(vertices, indices, size);
+	return createMesh<VertexType, uint16_t>(vertices, indices);
 }
