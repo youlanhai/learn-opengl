@@ -33,7 +33,8 @@ public:
 		{
 			return false;
 		}
-		normalMap->setQuality(TextureQuality::Nearest);
+		texture->setQuality(TextureQuality::TwoLinear);
+		normalMap->setQuality(TextureQuality::ThreeLinear);
 
 		const char *ShaderFile = "shader/normalmap_specular.shader";
 		shader_ = ShaderProgramMgr::instance()->get(ShaderFile);
@@ -51,7 +52,7 @@ public:
 		bindShaderUniform(shader_.get(), "lightDir", lightDir);
 		bindShaderUniform(shader_.get(), "lightColor", Vector3(1.1f));
 		bindShaderUniform(shader_.get(), "ambientColor", Vector3(0.1f));
-		bindShaderUniform(shader_.get(), "shininess", 16.0f);
+		bindShaderUniform(shader_.get(), "shininess", 64.0f);
 		bindShaderUniform(shader_.get(), "specularStrength", 4.0f);
 		shader_->unbind();
 
