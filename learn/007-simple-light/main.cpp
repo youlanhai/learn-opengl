@@ -43,7 +43,9 @@ class MyApplication : public Application
 		mesh_ = createSimpleGround(Vector2(5.0f, 5.0f), 0.6f, 0.2f, 1.6f);
 		//mesh_ = createPlane(Vector2(1.0f, 1.0f), 0.2f);
 		//mesh_ = createCube(Vector3(1.0f, 1.0f, 1.0f));
-		mesh_->addMaterial(curShader_);
+		MaterialPtr material = new Material();
+		material->setShader(curShader_);
+		mesh_->addMaterial(material);
 
 		LOG_DEBUG("num vertices: %d", (int)mesh_->getVertexBuffer()->count());
 		LOG_DEBUG("num indices: %d", (int)mesh_->getIndexBuffer()->count());
@@ -126,9 +128,7 @@ class MyApplication : public Application
 				LOG_INFO("switch to vertex light.");
 			}
 
-			Mesh::Materials materials;
-			materials.push_back(curShader_);
-			mesh_->setMaterials(materials);
+			mesh_->getMaterial(0)->setShader(curShader_);
 		}
 		else if (key == GLFW_KEY_L && action == GLFW_RELEASE)
 		{

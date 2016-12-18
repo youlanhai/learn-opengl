@@ -132,6 +132,9 @@ enum class TextureFormat
     RGB             = GL_RGB,
     RGBA            = GL_RGBA,
     ALPHA           = GL_ALPHA,
+	Depth			= GL_DEPTH_COMPONENT,
+	DepthStencil	= GL_DEPTH_STENCIL,
+
 #if defined(USE_PVRTC)
     PVRTC4BPP_A     = GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG,
     PVRTC4BPP       = GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG,

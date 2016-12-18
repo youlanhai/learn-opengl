@@ -94,7 +94,7 @@ bool Texture::load(const std::string & filename)
     bool ret = false;
     if (format != TextureFormat::Unknown)
     {
-        ret = create(0, w, h, format, pixelData, w * h * comp);
+        ret = create(0, w, h, format, pixelData, GL_UNSIGNED_BYTE);
     }
 
     stbi_image_free(pixelData);
@@ -129,7 +129,7 @@ bool Texture::save(const std::string & filename) const
     return ret != 0;
 }
 
-bool Texture::create(uint32_t levels, uint32_t width, uint32_t height, TextureFormat format, const void* pPixelData, size_t size)
+bool Texture::create(uint32_t levels, uint32_t width, uint32_t height, TextureFormat format, const void* pPixelData, uint32_t pxieType)
 {
     assert(width != 0 && height != 0);
     assert(format != TextureFormat::Unknown);
@@ -141,22 +141,18 @@ bool Texture::create(uint32_t levels, uint32_t width, uint32_t height, TextureFo
     format_ = format;
     
     GLenum internalFormat = GLenum(format_);
-    GLenum type = GL_UNSIGNED_BYTE;
     
-    GL_ASSERT(glGenTextures(1, &handle_));
-    
-    if (pPixelData != nullptr)
-    {
-        int oldAlignment;
-        glGetIntegerv(GL_PACK_ALIGNMENT, &oldAlignment);
-        glPixelStorei(GL_PACK_ALIGNMENT, 1);
-        
-        GL_ASSERT(glBindTexture(GL_TEXTURE_2D, handle_));
-        GL_ASSERT(glTexImage2D(GL_TEXTURE_2D, levels, internalFormat, width_, height_,
-            0, internalFormat, type, pPixelData));
-        
-        glPixelStorei(GL_PACK_ALIGNMENT, oldAlignment);
-    }
+	GL_ASSERT(glGenTextures(1, &handle_));
+	GL_ASSERT(glBindTexture(GL_TEXTURE_2D, handle_));
+
+	int oldAlignment;
+	glGetIntegerv(GL_PACK_ALIGNMENT, &oldAlignment);
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+
+	GL_ASSERT(glTexImage2D(GL_TEXTURE_2D, levels, internalFormat, width_, height_,
+		0, internalFormat, pxieType, pPixelData));
+
+	glPixelStorei(GL_PACK_ALIGNMENT, oldAlignment);
     return true;
 }
 

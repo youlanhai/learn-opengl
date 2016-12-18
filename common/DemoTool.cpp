@@ -225,8 +225,8 @@ MeshPtr createSimpleGround(const Vector2 &size, float height, float gridSize, fl
 void createPlane(std::vector<MeshVertex> &vertices, std::vector<uint16_t> &indices,
 	const Vector2 &size, float gridSize)
 {
-	int cols = int(size.x / gridSize) + 1;
-	int rows = int(size.y / gridSize) + 1;
+	int cols = (int)ceil(size.x / gridSize) + 1;
+	int rows = (int)ceil(size.y / gridSize) + 1;
 
 	float XLength = (cols - 1) * gridSize;
 	float ZLength = (rows - 1) * gridSize;

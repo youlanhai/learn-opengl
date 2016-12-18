@@ -17,7 +17,7 @@ public:
     virtual bool load(const std::string & filename);
     virtual bool save(const std::string & filename) const;
 
-    bool create(uint32_t levels, uint32_t width, uint32_t height, TextureFormat format, const void* pPixelData, size_t size);
+    bool create(uint32_t levels, uint32_t width, uint32_t height, TextureFormat format, const void* pPixelData, uint32_t pxieType);
     bool create(GLuint handle, uint32_t width, uint32_t height, TextureFormat format);
 
     void setUWrap(TextureWrap wrap);

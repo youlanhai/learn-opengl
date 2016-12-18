@@ -4,14 +4,12 @@
 #include "VertexBuffer.h"
 #include "VertexDeclaration.h"
 #include "VertexAttribute.h"
-#include "ShaderProgram.h"
+#include "Material.h"
 
 #include <vector>
 
 class Mesh;
-
 typedef SmartPointer<Mesh> MeshPtr;
-typedef SmartPointer<ShaderProgram> MaterialPtr;
 
 class SubMesh : public ReferenceCount
 {

@@ -99,8 +99,15 @@ void Mesh::draw()
     {
         return;
     }
+
+	MaterialPtr firstMaterial = getMaterial(0);
+	if (!firstMaterial)
+	{
+		return;
+	}
     
-    if(!vertexAttribute_->init(getMaterial(0).get(), vertexBuffer_.get(), vertexDecl_.get()))
+	// TODO 简化这里
+    if(!vertexAttribute_->init(firstMaterial->getShader().get(), vertexBuffer_.get(), vertexDecl_.get()))
     {
         return;
     }
@@ -112,11 +119,11 @@ void Mesh::draw()
     for(SubMeshPtr ptr : subMeshs_)
     {
         MaterialPtr mtl = getMaterial(ptr->getMaterialID());
-        if(mtl)
+        if(mtl && mtl->begin())
         {
-            mtl->bind();
             ptr->draw();
-            mtl->unbind();
+
+			mtl->end();
         }
     }
 

@@ -38,7 +38,9 @@ class MyApplication : public Application
         }
         
         mesh_ = createSimpleGround(Vector2(1.0f, 1.0f), 0.3f, 0.1f, 0.4f);
-        mesh_->addMaterial(shader_);
+		MaterialPtr material = new Material();
+		material->setShader(shader_);
+        mesh_->addMaterial(material);
         return true;
     }
     

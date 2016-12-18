@@ -60,7 +60,9 @@ public:
 		if (un) un->bindValue(Vector3(0.3f));
 
 		mesh_ = createCube(Vector3(1.0f, 1.0f, 1.0f));
-		mesh_->addMaterial(shader_);
+		MaterialPtr material = new Material();
+		material->setShader(shader_);
+		mesh_->addMaterial(material);
 
 		camera_.lookAt(Vector3(0, 1, -2), Vector3::Zero, Vector3::YAxis);
 		setupViewProjMatrix();

@@ -68,7 +68,9 @@ public:
 		//mesh_ = createSimpleGround(Vector2(2.0f, 2.0f), 0.4f, 0.1f, 4.0f);
 		//mesh_ = createPlane(Vector2(1.0f, 1.0f), 0.2f);
 		mesh_ = createCube(Vector3(1.0f, 1.0f, 1.0f));
-		mesh_->addMaterial(shader_);
+		MaterialPtr material = new Material();
+		material->setShader(shader_);
+		mesh_->addMaterial(material);
 
 		setupViewProjMatrix();
 
