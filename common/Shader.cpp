@@ -47,7 +47,7 @@ bool Shader::loadFromData(const std::string &data)
     glGetShaderiv(handle_, GL_COMPILE_STATUS, &params);
     if(params != GL_TRUE)
     {
-        LOG_ERROR("Failed to compile shader: %s", getCompileError().c_str());
+        LOG_ERROR("Failed to compile shader %s:\n %s", fileName_.c_str(), getCompileError().c_str());
         return false;
     }
     return true;
