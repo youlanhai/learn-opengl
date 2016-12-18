@@ -50,8 +50,8 @@ public:
 		bindShaderUniform(shader_.get(), "u_texture0", texture.get());
 		bindShaderUniform(shader_.get(), "u_texture1", normalMap.get());
 		bindShaderUniform(shader_.get(), "lightDir", lightDir);
-		bindShaderUniform(shader_.get(), "lightColor", Vector3(1.1f));
-		bindShaderUniform(shader_.get(), "ambientColor", Vector3(0.1f));
+		bindShaderUniform(shader_.get(), "lightColor", Vector3(1.5f));
+		bindShaderUniform(shader_.get(), "ambientColor", Vector3(0.5f));
 		bindShaderUniform(shader_.get(), "shininess", 64.0f);
 		bindShaderUniform(shader_.get(), "specularStrength", 4.0f);
 		shader_->unbind();
