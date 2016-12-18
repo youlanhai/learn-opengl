@@ -114,6 +114,45 @@ void computeNormals(std::vector<MeshVertex> &vertices, std::vector<uint16_t> &in
 	}
 }
 
+
+void computeTangents(std::vector<MeshVertex> &vertices, std::vector<uint16_t> &indices)
+{
+	std::unordered_map<int, std::vector<int>> vertexFaces;
+
+	// compute face normal
+	std::vector<Vector3> tangents;
+	tangents.resize(indices.size() / 3);
+	for (size_t i = 0; i < indices.size(); i += 3)
+	{
+		int iFace = i / 3;
+		computeTangent(tangents[iFace],	vertices[indices[i + 0]], vertices[indices[i + 1]],	vertices[indices[i + 2]]);
+
+		vertexFaces[indices[i + 0]].push_back(iFace);
+		vertexFaces[indices[i + 1]].push_back(iFace);
+		vertexFaces[indices[i + 2]].push_back(iFace);
+	}
+
+	// slerp normal
+	for (size_t i = 0; i < vertices.size(); ++i)
+	{
+		auto &vertex = vertices[i];
+		auto &faces = vertexFaces[i];
+		if (faces.empty())
+		{
+			vertex.tangent = Vector3::XAxis;
+		}
+		else
+		{
+			vertex.tangent.setZero();
+			for (int iFace : faces)
+			{
+				vertex.tangent += tangents[iFace];
+			}
+			vertex.tangent /= (float)faces.size();
+		}
+	}
+}
+
 MeshPtr createSimpleGround(const Vector2 &size, float height,  float gridSize, float waveSize)
 {
     typedef MeshVertex VertexType;
@@ -180,6 +219,7 @@ void createSimpleGround(std::vector<MeshVertex> &vertices, std::vector<uint16_t>
     }
     
 	computeNormals(vertices, indices);
+	computeTangents(vertices, indices);
 }
 
 void createPlane(std::vector<MeshVertex> &vertices, std::vector<uint16_t> &indices,

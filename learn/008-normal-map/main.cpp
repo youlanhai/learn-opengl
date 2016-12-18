@@ -35,7 +35,7 @@ public:
 			return false;
 		}
 		//texture->setQuality(TextureQuality::Nearest);
-		texNormalMap->setQuality(TextureQuality::Linear);
+		texNormalMap->setQuality(TextureQuality::Nearest);
 
 		const char *ShaderFile = "shader/normalmap.shader";
 		shader_ = ShaderProgramMgr::instance()->get(ShaderFile);
@@ -65,6 +65,8 @@ public:
 		un = shader_->findUniform("ambientColor");
 		if (un) un->bindValue(Vector3(0.1f));
 
+		//mesh_ = createSimpleGround(Vector2(2.0f, 2.0f), 0.4f, 0.1f, 4.0f);
+		//mesh_ = createPlane(Vector2(1.0f, 1.0f), 0.2f);
 		mesh_ = createCube(Vector3(1.0f, 1.0f, 1.0f));
 		mesh_->addMaterial(shader_);
 
