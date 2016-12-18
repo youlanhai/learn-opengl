@@ -1,6 +1,7 @@
 ﻿#ifndef MATRIX_H
 #define MATRIX_H
 
+#include "MathDef.h"
 #include "Vector3.h"
 #include "Vector4.h"
 
@@ -24,7 +25,7 @@ public:
 
     // 处于效率考虑。Matrix不进行默认构造，需要手动调用setIdentity设置成标准矩阵。
     Matrix(){}
-    explicit Matrix(float *data){ memcpy(_m, data, sizeof(float) * 16); }
+	explicit Matrix(float *data);
     Matrix(float v11, float v12, float v13, float v14,
             float v21, float v22, float v23, float v24,
             float v31, float v32, float v33, float v34,

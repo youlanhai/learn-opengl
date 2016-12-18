@@ -20,7 +20,17 @@ public:
     void makeCurrent();
     
     GLFWwindow* getWindow(){ return pWindow_; }
+
+	float getDeltaTime() const { return deltaTime_; }
+
 	Vector2 getWindowSize();
+	Vector2 getCursorPos();
+
+	int getMouseState(int key) { return glfwGetMouseButton(pWindow_, key); }
+	bool isMousePress(int key) { return getMouseState(key) == GLFW_PRESS; }
+
+	int getKeyState(int key) { return glfwGetKey(pWindow_, key); }
+	bool isKeyPress(int key) { return getKeyState(key) == GLFW_PRESS; }
     
 public:
     // 内部方法，不要手动调用
@@ -40,6 +50,8 @@ public:
     virtual void onSizeChange(int width, int height);
     
 protected:
+
+	virtual void onTick();
     
     /** 重载此函数，实现自己的渲染方法。*/
     virtual void onDraw();
@@ -49,6 +61,7 @@ protected:
     virtual void onDestroy();
     
     GLFWwindow*  pWindow_;
+	float		deltaTime_;
 };
 
 extern Application *gApp;

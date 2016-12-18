@@ -29,7 +29,7 @@ void Vector3::normalize()
 	}
 }
 
-Vector3 Vector3::crossProduct(const Vector3 &right)
+Vector3 Vector3::crossProduct(const Vector3 &right) const
 {
 	Vector3 ret;
 	ret.crossProduct(*this, right);

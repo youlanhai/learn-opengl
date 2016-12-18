@@ -21,6 +21,11 @@
     0, 0, 0, 0
 );
 
+Matrix::Matrix(float *data)
+{
+	memcpy(_m, data, sizeof(float) * 16);
+}
+
 Matrix::Matrix(float v11, float v12, float v13, float v14,
         float v21, float v22, float v23, float v24,
         float v31, float v32, float v33, float v34,

@@ -39,7 +39,7 @@ static void mouseMoveCallback(GLFWwindow *window, double x, double y)
 {
     if(window == gApp->getWindow())
     {
-        gApp->onMouseScroll(x, y);
+        gApp->onMouseMove(x, y);
     }
 }
 
@@ -62,6 +62,7 @@ static void frameBufferSizeChangeCallback(GLFWwindow *window, int width, int hei
 
 Application::Application()
 : pWindow_(nullptr)
+, deltaTime_(0.0f)
 {
     gApp = this;
     
@@ -144,17 +145,36 @@ Vector2 Application::getWindowSize()
 {
 	int width, height;
 	glfwGetWindowSize(pWindow_, &width, &height);
-	return Vector2(width, height);
+	return Vector2(float(width), float(height));
+}
+
+Vector2 Application::getCursorPos()
+{
+	double x, y;
+	glfwGetCursorPos(pWindow_, &x, &y);
+	return Vector2(float(x), float(y));
 }
 
 void Application::mainLoop()
 {
+	double lastTime = glfwGetTime();
     while(!glfwWindowShouldClose(pWindow_))
     {
+		double curTime = glfwGetTime();
+		deltaTime_ = float(curTime - lastTime);
+		lastTime = curTime;
+
+		onTick();
         onDraw();
+
         glfwSwapBuffers(pWindow_);
         glfwPollEvents();
     }
+}
+
+void Application::onTick()
+{
+
 }
 
 void Application::onDraw()
