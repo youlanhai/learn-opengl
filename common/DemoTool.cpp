@@ -153,16 +153,6 @@ void computeTangents(std::vector<MeshVertex> &vertices, std::vector<uint16_t> &i
 	}
 }
 
-MeshPtr createSimpleGround(const Vector2 &size, float height,  float gridSize, float waveSize)
-{
-    typedef MeshVertex VertexType;
-    std::vector<VertexType> vertices;
-    std::vector<uint16_t> indices;
-    
-    createSimpleGround(vertices, indices, size, height, gridSize, waveSize);
-    return createMesh<VertexType, uint16_t>(vertices, indices);
-}
-
 void createSimpleGround(std::vector<MeshVertex> &vertices, std::vector<uint16_t> &indices,
                         const Vector2 &size, float height,  float gridSize, float waveSize)
 {
@@ -220,6 +210,16 @@ void createSimpleGround(std::vector<MeshVertex> &vertices, std::vector<uint16_t>
     
 	computeNormals(vertices, indices);
 	computeTangents(vertices, indices);
+}
+
+MeshPtr createSimpleGround(const Vector2 &size, float height, float gridSize, float waveSize)
+{
+	typedef MeshVertex VertexType;
+	std::vector<VertexType> vertices;
+	std::vector<uint16_t> indices;
+
+	createSimpleGround(vertices, indices, size, height, gridSize, waveSize);
+	return createMesh<VertexType, uint16_t>(vertices, indices);
 }
 
 void createPlane(std::vector<MeshVertex> &vertices, std::vector<uint16_t> &indices,

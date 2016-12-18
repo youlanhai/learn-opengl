@@ -141,18 +141,18 @@ void ShaderUniform::bindValue(const Color & color)
     GL_ASSERT( glUniform4f(location_, color.r, color.g, color.b, color.a) );
 }
 
-void ShaderUniform::bindValue(Texture *texture)
+void ShaderUniform::bindValue(const Texture *texture)
 {
     assert(type_ == GL_SAMPLER_2D);
 
-    texture_ = texture;
+    texture_ = const_cast<Texture*>(texture);
 
     //binds the texture
     GL_ASSERT(glActiveTexture(GL_TEXTURE0 + index_));
 
-    if (texture)
+    if (texture_)
     {
-        texture->bind();
+		texture_->bind();
     }
     else
     {

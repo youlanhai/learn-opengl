@@ -42,31 +42,18 @@ public:
 			return false;
 		}
 
-		shader_->bind();
-		ShaderUniform *un;
-
-		un = shader_->findUniform("u_texture0");
-		if (un) un->bindValue(texture.get());
-		un = shader_->findUniform("u_texture1");
-		if (un) un->bindValue(normalMap.get());
-
 		Vector3 lightDir(1, 1, 0);
 		lightDir.normalize();
 
-		un = shader_->findUniform("lightDir");
-		if (un) un->bindValue(lightDir);
-
-		un = shader_->findUniform("lightColor");
-		if (un) un->bindValue(Vector3(1.1f));
-
-		un = shader_->findUniform("ambientColor");
-		if (un) un->bindValue(Vector3(0.1f));
-
-		un = shader_->findUniform("shininess");
-		if (un) un->bindValue(16.0f);
-
-		un = shader_->findUniform("specularStrength");
-		if (un) un->bindValue(2.0f);
+		shader_->bind();
+		bindShaderUniform(shader_.get(), "u_texture0", texture.get());
+		bindShaderUniform(shader_.get(), "u_texture1", normalMap.get());
+		bindShaderUniform(shader_.get(), "lightDir", lightDir);
+		bindShaderUniform(shader_.get(), "lightColor", Vector3(1.1f));
+		bindShaderUniform(shader_.get(), "ambientColor", Vector3(0.1f));
+		bindShaderUniform(shader_.get(), "shininess", 16.0f);
+		bindShaderUniform(shader_.get(), "specularStrength", 2.0f);
+		shader_->unbind();
 
 		mesh_ = createCube(Vector3(1.0f, 1.0f, 1.0f));
 		mesh_->addMaterial(shader_);
@@ -87,16 +74,9 @@ public:
 		Matrix matWorld;
 		matWorld.setRotateY(glfwGetTime() * 0.5f);
 
-		ShaderUniform *un;
-
-		un = shader_->findUniform("matWorld");
-		if (un) un->bindValue(matWorld);
-
-		un = shader_->findUniform("matMVP");
-		if (un) un->bindValue(matWorld * camera_.getViewProjMatrix());
-
-		un = shader_->findUniform("cameraPos");
-		if (un) un->bindValue(camera_.getPosition());
+		bindShaderUniform(shader_.get(), "matWorld", matWorld);
+		bindShaderUniform(shader_.get(), "matMVP", matWorld * camera_.getViewProjMatrix());
+		bindShaderUniform(shader_.get(), "cameraPos", camera_.getPosition());
 
 		shader_->unbind();
 	}
