@@ -21,7 +21,7 @@ class MyApplication : public Application
 		FileSystem::instance()->addSearchPath(joinPath(resPath, "common"));
 		FileSystem::instance()->dumpSearchPath();
 
-		const char *TextureFile = "alpha.png";
+		const char *TextureFile = "rock.png";
 		groundTexture_ = TextureMgr::instance()->get(TextureFile);
 		if (!groundTexture_)
 		{
@@ -57,7 +57,6 @@ class MyApplication : public Application
 
 		matViewProj = matView * matProj;
 
-		glEnable(GL_DEPTH_TEST);
 		//glDisable(GL_CULL_FACE);
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
@@ -165,7 +164,7 @@ class MyApplication : public Application
 
 	void onDraw() override
 	{
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		Application::onDraw();
 
 		setupWorldMatrix();
 

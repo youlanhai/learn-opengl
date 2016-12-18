@@ -21,7 +21,7 @@ class MyApplication : public Application
         Texture::s_defaultQuality = TextureQuality::Nearest;
         
         const char *ShaderFile = "shader/xyzuv.shader";
-        const char *TextureFile = "alpha.png";
+        const char *TextureFile = "rock.png";
         
         shader_ = ShaderProgramMgr::instance()->get(ShaderFile);
         TexturePtr texture = TextureMgr::instance()->get(TextureFile);

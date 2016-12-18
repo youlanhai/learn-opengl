@@ -133,6 +133,7 @@ bool Application::createWindow(int width, int height, const std::string &title)
     // 屏幕清成蓝色
     glClearColor(0.15f, 0.24f, 0.24f, 0.0f);
     
+	glEnable(GL_DEPTH_TEST);
     return onCreate();
 }
 
@@ -179,7 +180,7 @@ void Application::onTick()
 
 void Application::onDraw()
 {
-    glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 bool Application::onCreate()

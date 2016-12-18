@@ -62,7 +62,6 @@ public:
 		camera_.lookAt(Vector3(0, 1, -2), Vector3::Zero, Vector3::YAxis);
 		setupViewProjMatrix();
 
-		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 		return true;
@@ -89,7 +88,7 @@ public:
 
 	void onDraw() override
 	{
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		Application::onDraw();
 
 		setupDynamicUniform();
 

@@ -32,6 +32,7 @@ public:
 		{
 			return false;
 		}
+		texture->setQuality(TextureQuality::ThreeLinear);
 
 		const char *ShaderFile = "shader/light_pixel.shader";
 		shader_ = ShaderProgramMgr::instance()->get(ShaderFile);
@@ -56,7 +57,7 @@ public:
 		if (un) un->bindValue(Vector3(1.0f));
 
 		un = shader_->findUniform("ambientColor");
-		if (un) un->bindValue(Vector3(0.1f));
+		if (un) un->bindValue(Vector3(0.3f));
 
 		mesh_ = createCube(Vector3(1.0f, 1.0f, 1.0f));
 		mesh_->addMaterial(shader_);
@@ -64,7 +65,6 @@ public:
 		camera_.lookAt(Vector3(0, 1, -2), Vector3::Zero, Vector3::YAxis);
 		setupViewProjMatrix();
 
-		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 		return true;
@@ -95,7 +95,7 @@ public:
 
 	void onDraw() override
 	{
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		Application::onDraw();
 
 		setupWorldMatrix();
 
