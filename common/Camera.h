@@ -30,6 +30,7 @@ public:
 	void lookAt(const Vector3& position, const Vector3 &target, const Vector3 &up);
 
 	void setPerspective(float fov, float aspect, float znear, float zfar);
+	void setOrtho(float w, float h, float zn, float zf);
 
 	const Matrix& getProjMatrix() const { return matProj_; }
 	const Matrix& getViewMatrix() const;

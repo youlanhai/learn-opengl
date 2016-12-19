@@ -17,6 +17,7 @@ public:
 	Vector3(const Vector2 &v, float _z);
 	explicit Vector3(const Vector4 &v);
 
+	Vector3 operator - () const { return Vector3(-x, -y, -z);  }
 	float& operator [] (size_t i){ return reinterpret_cast<float*>(this)[i]; }
 	float  operator [] (size_t i) const { return reinterpret_cast<const float*>(this)[i]; }
 

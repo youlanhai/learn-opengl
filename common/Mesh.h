@@ -70,6 +70,7 @@ public:
     const Materials& getMaterials() const { return materials_; }
     Materials& getMaterials() { return materials_; }
     void setMaterials(const Materials & materials);
+	void setMaterial(size_t index, MaterialPtr mtl);
     int addMaterial(MaterialPtr mtl);
 
     const std::string& getResource() const { return resource_; }

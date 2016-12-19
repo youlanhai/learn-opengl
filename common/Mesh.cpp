@@ -185,6 +185,14 @@ void Mesh::setMaterials(const Mesh::Materials & materials)
     materials_ = materials;
 }
 
+void Mesh::setMaterial(size_t index, MaterialPtr mtl)
+{
+	if (index < materials_.size())
+	{
+		materials_[index] = mtl;
+	}
+}
+
 int Mesh::addMaterial(MaterialPtr mtl)
 {
     int index = int(materials_.size());

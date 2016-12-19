@@ -101,6 +101,12 @@ void Camera::setPerspective(float fov, float aspect, float znear, float zfar)
 	dirtyFlag_ |= DIRTY_PROJ;
 }
 
+void Camera::setOrtho(float w, float h, float zn, float zf)
+{
+	dirtyFlag_ |= DIRTY_PROJ;
+	matProj_.orthogonalProjectionGL(w, h, zn, zf);
+}
+
 const Matrix & Camera::getViewMatrix() const
 {
 	if (dirtyFlag_ & DIRTY_VIEW)
