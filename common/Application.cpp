@@ -8,6 +8,7 @@
 #include "VertexDeclaration.h"
 #include "TextureMgr.h"
 #include "ShaderProgramMgr.h"
+#include "Renderer.h"
 
 Application *gApp = nullptr;
 
@@ -76,6 +77,7 @@ Application::Application()
     VertexDeclMgr::initInstance();
     TextureMgr::initInstance();
 	ShaderProgramMgr::initInstance();
+	Renderer::initInstance();
 }
 
 Application::~Application()
@@ -84,6 +86,7 @@ Application::~Application()
     TextureMgr::finiInstance();
     VertexDeclMgr::finiInstance();
     FileSystem::finiInstance();
+	Renderer::finiInstance();
     
     if(pWindow_ != nullptr)
     {

@@ -205,6 +205,12 @@ bool ShaderProgram::parseUniforms()
 		{
 			uniform->index_ = 0;
 		}
+
+		ShaderAutoUniform *autoUniform = ShaderAutoUniform::get(uniformName);
+		if(autoUniform != nullptr)
+		{
+			autoUnfiorms_.push_back(std::make_pair(autoUniform, uniform));
+		}
 	}
 	return true;
 }
@@ -243,4 +249,12 @@ void ShaderProgram::setMatrixTranspose(int location, const float * data)
 ShaderUniform* ShaderProgram::findUniform(const std::string &name)
 {
     return uniformRoot_->getChild(name);
+}
+
+void ShaderProgram::applyAutoUniforms()
+{
+	for(auto &pair : autoUnfiorms_)
+	{
+		pair.first->apply(pair.second);
+	}
 }

@@ -4,7 +4,7 @@
 #include "Reference.h"
 #include "SmartPointer.h"
 #include <string>
-#include <map>
+#include <unordered_map>
 
 
 class ShaderProgram;
@@ -23,6 +23,7 @@ namespace AutoUniform
     const std::string Proj = "u_matProj";
     const std::string ViewProj = "u_matViewProj";
     const std::string WorldViewProj = "u_matWorldViewProj";
+    const std::string WorldView = "u_matWorldView";
     const std::string AmbientColor = "u_ambient";
     const std::string OmitLight = "u_omitLight";
     const std::string DirLight = "u_dirLight";
@@ -36,10 +37,6 @@ namespace AutoUniform
     const std::string Texture5 = "u_texture5";
     const std::string Texture6 = "u_texture6";
     const std::string Texture7 = "u_texture7";
-    const std::string Material = "u_material";
-    const std::string ActionAlpha = "u_actionAlpha";
-    const std::string ColdDownAlpha = "u_coldDownAlpha";
-    const std::string ProgressReference = "u_progressReference";
 }
 
 /**
@@ -98,9 +95,12 @@ private:
     ShaderProgram*      pEffect_;
     //如果是纹理，这里需要持有它的一个引用技术，防止纹理提前析构而引起崩溃
     SmartPointer<Texture>  texture_;
-    std::map<std::string, ShaderUniform*> children_;
+    std::unordered_map<std::string, ShaderUniform*> children_;
 };
 
+/**
+    根据uniform的名名称，自动设置值。比如各种矩阵。
+*/
 class ShaderAutoUniform
 {
 public:
@@ -115,7 +115,7 @@ protected:
     ShaderAutoUniform();
     virtual ~ShaderAutoUniform();
 
-    static std::map<std::string, ShaderAutoUniform*> s_autoConstMap;
+    static std::unordered_map<std::string, ShaderAutoUniform*> s_autoConstMap;
 };
 
 #endif // SHADER_UNIFORM_H

@@ -5,8 +5,11 @@
 #include "SmartPointer.h"
 #include "VertexUsage.h"
 
+#include <vector>
+
 class VertexDeclaration;
 class ShaderUniform;
+class ShaderAutoUniform;
 
 class ShaderProgram : public ReferenceCount
 {
@@ -32,6 +35,8 @@ public:
     
     ShaderUniform* findUniform(const std::string &name);
 
+    void applyAutoUniforms();
+
 private:
 	bool parseAttributes();
 	bool parseUniforms();
@@ -40,6 +45,7 @@ private:
     std::string     fileName_;
 	int             attributes_[VertexUsageMax];
 	ShaderUniform*	uniformRoot_;
+    std::vector<std::pair<ShaderAutoUniform*, ShaderUniform*>> autoUnfiorms_;
 };
 
 typedef SmartPointer<ShaderProgram> ShaderProgramPtr;

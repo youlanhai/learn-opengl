@@ -53,6 +53,8 @@ bool Material::begin()
 	}
 
 	shader_->bind();
+	shader_->applyAutoUniforms();
+
 	for (auto &pair : textures_)
 	{
 		bindUniform(pair.first, pair.second.get());

@@ -146,6 +146,11 @@ void Mesh::setVertexDecl(VertexDeclarationPtr decl)
     vertexDecl_ = decl;
 }
 
+void Mesh::setVertexDecl(const std::string & type)
+{
+	vertexDecl_ = VertexDeclMgr::instance()->get(type);
+}
+
 void Mesh::setSubMeshes(const Mesh::SubMeshes & subMeshes)
 {
     subMeshs_ = subMeshes;

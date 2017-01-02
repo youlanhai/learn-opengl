@@ -56,9 +56,10 @@ public:
 
     void draw();
 
-    void setVertexBuffer(SmartPointer<VertexBuffer> vertex);
-    void setIndexBuffer(SmartPointer<IndexBuffer> index);
-    void setVertexDecl(SmartPointer<VertexDeclaration> decl);
+    void setVertexBuffer(VertexBufferPtr vertex);
+    void setIndexBuffer(IndexBufferPtr index);
+    void setVertexDecl(VertexDeclarationPtr decl);
+	void setVertexDecl(const std::string &type);
 
     const SubMeshes & getSubMeshes() const;
     void setSubMeshes(const SubMeshes & subMeshes);

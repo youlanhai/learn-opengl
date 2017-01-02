@@ -164,7 +164,7 @@ void ShaderUniform::bindValue(const Texture *texture)
 
 //////////////////////////////////////////////////////////////////
 
-/*static*/ std::map<std::string, ShaderAutoUniform*> ShaderAutoUniform::s_autoConstMap;
+/*static*/ std::unordered_map<std::string, ShaderAutoUniform*> ShaderAutoUniform::s_autoConstMap;
 
 /*static*/ ShaderAutoUniform * ShaderAutoUniform::get(const std::string & name)
 {
