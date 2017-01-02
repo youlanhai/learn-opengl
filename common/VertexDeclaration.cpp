@@ -17,26 +17,16 @@ AttrMap[ATTR] = VertexUsage::USAGE
 
         REGISTER_ATTR("a_position",    POSITION);
         REGISTER_ATTR("a_normal",      NORMAL);
-        REGISTER_ATTR("a_color",       COLOR);
         REGISTER_ATTR("a_tangent",     TANGENT);
-        REGISTER_ATTR("a_biNormal",    BINORMAL);
-        REGISTER_ATTR("a_blendWeights", BLENDWEIGHTS);
-        REGISTER_ATTR("a_blendIndices",BLENDINDICES);
-        REGISTER_ATTR("a_pSize",       PSIZE);
-        REGISTER_ATTR("a_tessFactor",  TESSFACTOR);
-        REGISTER_ATTR("a_positionT",   POSITIONT);
-        REGISTER_ATTR("a_fog",         FOG);
-        REGISTER_ATTR("a_depth",       DEPTH);
-        REGISTER_ATTR("a_sample",      SAMPLE);
         REGISTER_ATTR("a_texcoord",    TEXCOORD0);
         REGISTER_ATTR("a_texcoord0",   TEXCOORD0);
         REGISTER_ATTR("a_texcoord1",   TEXCOORD1);
         REGISTER_ATTR("a_texcoord2",   TEXCOORD2);
         REGISTER_ATTR("a_texcoord3",   TEXCOORD3);
         REGISTER_ATTR("a_texcoord4",   TEXCOORD4);
-        REGISTER_ATTR("a_texcoord5",   TEXCOORD5);
-        REGISTER_ATTR("a_texcoord6",   TEXCOORD6);
-        REGISTER_ATTR("a_texcoord7",   TEXCOORD7);
+        REGISTER_ATTR("a_color",       COLOR);
+		REGISTER_ATTR("a_blendWeights", BLENDWEIGHTS);
+		REGISTER_ATTR("a_blendIndices", BLENDINDICES);
 
 #undef REGISTER_ATTR
 
@@ -69,6 +59,14 @@ VertexUsage vertexAttr2Usage(const std::string & attr)
         return it->second;
 
     return VertexUsage::NONE;
+}
+
+void bindProgramAttribLocation(uint32_t program)
+{
+	for (auto &pair : AttrMap)
+	{
+		glBindAttribLocation(program, (int)pair.second, pair.first.c_str());
+	}
 }
 
 bool vertexType2Element(const std::string & type, VertexElement & e)

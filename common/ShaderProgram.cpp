@@ -74,6 +74,8 @@ bool ShaderProgram::loadFromData(const std::string &data)
         LOG_ERROR("Failed to create shader prgram");
         return false;
     }
+
+	bindProgramAttribLocation(handle_);
     
     glAttachShader(handle_, vs.getHandle());
     glAttachShader(handle_, fs.getHandle());

@@ -106,8 +106,7 @@ void Mesh::draw()
 		return;
 	}
     
-	// TODO 简化这里
-    if(!vertexAttribute_->init(firstMaterial->getShader().get(), vertexBuffer_.get(), vertexDecl_.get()))
+    if(!vertexAttribute_->init(vertexBuffer_.get(), vertexDecl_.get()))
     {
         return;
     }

@@ -65,7 +65,7 @@ public:
         }
         
         va_ = new VertexAttribute();
-        if(!va_->init(shader_.get(), vb_.get(), decl.get()))
+        if(!va_->init(vb_.get(), decl.get()))
         {
             LOG_ERROR("Failed to init vertex attribute");
             return false;

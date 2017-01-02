@@ -7,7 +7,6 @@
 
 class VertexBuffer;
 class VertexDeclaration;
-class ShaderProgram;
 
 class VertexAttribute : public ReferenceCount
 {
@@ -15,7 +14,7 @@ public:
     VertexAttribute();
     ~VertexAttribute();
 
-	virtual bool init(ShaderProgram *shader, VertexBuffer *vb, VertexDeclaration *decl);
+	virtual bool init(VertexBuffer *vb, VertexDeclaration *decl);
 
 	/**
 	*	激活顶点属性组。
@@ -27,10 +26,11 @@ public:
     
 private:
     void bindAttributes();
+	void unbindAttributes();
+
     void destroy();
     
     uint32_t    handle_;
-    SmartPointer<ShaderProgram> shader_;
     SmartPointer<VertexBuffer>  vb_;
     SmartPointer<VertexDeclaration> decl_;
 };

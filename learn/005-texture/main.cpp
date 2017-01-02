@@ -50,7 +50,7 @@ class MyApplication : public Application
         VertexBufferPtr vb = new VertexBufferEx<VertexXYZUV>(BufferUsage::Static, 4, vertices);
         
         va_ = new VertexAttribute();
-        if(!va_->init(shader_.get(), vb.get(), VertexDeclMgr::instance()->get(VertexXYZUV::getType()).get()))
+        if(!va_->init(vb.get(), VertexDeclMgr::instance()->get(VertexXYZUV::getType()).get()))
         {
             LOG_ERROR("Failed create vertex attribute.");
             return false;
