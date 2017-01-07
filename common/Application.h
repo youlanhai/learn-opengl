@@ -48,6 +48,10 @@ public:
     virtual void onError(int error, const char *description);
     
     virtual void onSizeChange(int width, int height);
+
+    virtual void onFrameBufferSizeChange(int width, int height);
+
+	virtual void onChar(uint32_t ch);
     
 protected:
 

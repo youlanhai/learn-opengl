@@ -52,14 +52,29 @@ static void mouseScrollCallback(GLFWwindow *window, double xoffset, double yoffs
     }
 }
 
+static void windowSizeChangeCallback(GLFWwindow *window, int width, int height)
+{
+	if (window == gApp->getWindow())
+	{
+		gApp->onSizeChange(width, height);
+	}
+}
+
 static void frameBufferSizeChangeCallback(GLFWwindow *window, int width, int height)
 {
     if(window == gApp->getWindow())
     {
-        gApp->onSizeChange(width, height);
+        gApp->onFrameBufferSizeChange(width, height);
     }
 }
 
+static void charCallback(GLFWwindow* window, unsigned int ch)
+{
+	if (window == gApp->getWindow())
+	{
+		gApp->onChar(ch);
+	}
+}
 
 Application::Application()
 : pWindow_(nullptr)
@@ -129,8 +144,12 @@ bool Application::createWindow(int width, int height, const std::string &title)
     glfwSetMouseButtonCallback(pWindow_, mouseButtonCallback);
     glfwSetScrollCallback(pWindow_, mouseScrollCallback);
     glfwSetCursorPosCallback(pWindow_, mouseMoveCallback);
+	glfwSetWindowSizeCallback(pWindow_, windowSizeChangeCallback);
     glfwSetFramebufferSizeCallback(pWindow_, frameBufferSizeChangeCallback);
+	glfwSetCharCallback(pWindow_, charCallback);
     
+	onSizeChange(width, height);
+
     // 开启垂直同步
     glfwSwapInterval(1);
     // 屏幕清成蓝色
@@ -209,7 +228,11 @@ void Application::onError(int error, const char *description)
 
 void Application::onSizeChange(int width, int height)
 {
-    glViewport(0, 0, width, height);
+}
+
+void Application::onFrameBufferSizeChange(int width, int height)
+{
+	glViewport(0, 0, width, height);
 }
 
 void Application::onMouseButton(int button, int action, int mods)
@@ -225,4 +248,9 @@ void Application::onMouseMove(double x, double y)
 void Application::onMouseScroll(double xoffset, double yoffset)
 {
     
+}
+
+void Application::onChar(uint32_t ch)
+{
+
 }

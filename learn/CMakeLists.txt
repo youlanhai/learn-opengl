@@ -1,6 +1,8 @@
 
 set(COMMON_LINK_LIBRARIES glfw3 glad stb smartjson common)
 
+add_definitions(-DTW_STATIC -DTW_NO_LIB_PRAGMA)
+
 if (WIN32)
 	set(COMMON_LINK_LIBRARIES ${COMMON_LINK_LIBRARIES} winmm imm32 version opengl32 shlwapi Ws2_32)
 elseif (APPLE)

@@ -13,6 +13,8 @@
 #include "Model.h"
 #include "Renderer.h"
 
+#include <AntTweakBar/AntTweakBar.h>
+
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -92,7 +94,46 @@ public:
 		//glEnable(GL_CULL_FACE);
 		//glCullFace(GL_BACK);
 		//glDisable(GL_CULL_FACE);
+
+
+		// Initialize AntTweakBar
+		TwInit(TW_OPENGL, NULL);
+
+		// Create a tweak bar
+		bar = TwNewBar("TweakBar");
+		TwDefine(" GLOBAL help='This example shows how to integrate AntTweakBar with GLFW and OpenGL.' "); // Message added to the help bar.
+
+																										   // Add 'speed' to 'bar': it is a modifable (RW) variable of type TW_TYPE_DOUBLE. Its key shortcuts are [s] and [S].
+		static double time = 0, dt;// Current time and enlapsed time
+		static double turn = 0;    // Model turn counter
+		static double speed = 0.3; // Model rotation speed
+		static int wire = 0;       // Draw model in wireframe?
+		static float bgColor[] = { 0.1f, 0.2f, 0.4f };         // Background color 
+		static unsigned char cubeColor[] = { 255, 0, 0, 128 }; // Model color (32bits RGBA)
+
+		TwAddVarRW(bar, "speed", TW_TYPE_DOUBLE, &speed,
+			" label='Rot speed' min=0 max=2 step=0.01 keyIncr=s keyDecr=S help='Rotation speed (turns/second)' ");
+
+		// Add 'wire' to 'bar': it is a modifable variable of type TW_TYPE_BOOL32 (32 bits boolean). Its key shortcut is [w].
+		
+		TwAddVarRW(bar, "wire", TW_TYPE_BOOL32, &wire,
+			" label='Wireframe mode' key=w help='Toggle wireframe display mode.' ");
+
+		// Add 'time' to 'bar': it is a read-only (RO) variable of type TW_TYPE_DOUBLE, with 1 precision digit
+		TwAddVarRO(bar, "time", TW_TYPE_DOUBLE, &time, " label='Time' precision=1 help='Time (in seconds).' ");
+
+		// Add 'bgColor' to 'bar': it is a modifable variable of type TW_TYPE_COLOR3F (3 floats color)
+		TwAddVarRW(bar, "bgColor", TW_TYPE_COLOR3F, &bgColor, " label='Background color' ");
+
+		// Add 'cubeColor' to 'bar': it is a modifable variable of type TW_TYPE_COLOR32 (32 bits color) with alpha
+		TwAddVarRW(bar, "cubeColor", TW_TYPE_COLOR32, &cubeColor,
+			" label='Cube color' alpha help='Color and transparency of the cube.' ");
 		return true;
+	}
+
+	void onDestroy() override
+	{
+		TwTerminate();
 	}
 
 	void setupDynamicUniform()
@@ -107,6 +148,8 @@ public:
 		bindShaderUniform(shader_.get(), "cameraPos", camera_.getPosition());
 
 		shader_->unbind();
+
+		TwDraw();
 	}
 
 	void onTick() override
@@ -135,6 +178,8 @@ public:
 	{
 		Application::onSizeChange(width, height);
 		setupViewProjMatrix();
+
+		TwWindowSize(width, height);
 	}
 
 	void setupViewProjMatrix()
@@ -142,20 +187,34 @@ public:
 		Vector2 size = getWindowSize();
 		camera_.setPerspective(PI_QUARTER, size.x / size.y, 1.0f, 1000.0f);
 	}
+	
+	virtual void onKey(int key, int scancode, int action, int mods) override
+	{
+		Application::onKey(key, scancode, action, mods);
+		TwEventKeyGLFW(key, action);
+	}
 
 	virtual void onMouseButton(int button, int action, int mods) override
 	{
 		camera_.handleMouseButton(button, action, mods);
+		TwEventMouseButtonGLFW(button, action);
 	}
 
 	virtual void onMouseMove(double x, double y) override
 	{
 		camera_.handleMouseMove(x, y);
+		TwEventMousePosGLFW(x, y);
 	}
 
 	virtual void onMouseScroll(double xoffset, double yoffset) override
 	{
 		camera_.handleMouseScroll(xoffset, yoffset);
+		TwEventMouseWheelGLFW(yoffset);
+	}
+
+	virtual void onChar(uint32_t ch) override
+	{
+		TwEventCharGLFW(ch, 0);
 	}
 
 	ShaderProgramPtr shader_;
@@ -163,6 +222,7 @@ public:
 	MeshPtr     mesh_;
 	Camera		camera_;
 	ModelPtr	model_;
+	TwBar *bar;         // Pointer to a tweak bar
 };
 
 int main()
