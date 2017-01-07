@@ -53,6 +53,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <map>
 
+#include "StringUtils.h"
+
 struct aiScene;
 struct aiNode;
 
@@ -108,7 +110,7 @@ protected:
     enum FloatDataType { FloatType_Vector, FloatType_TexCoord2, FloatType_TexCoord3, FloatType_Color };
 
     /// Writes a float array of the given type
-    void WriteFloatArray( const std::string& pIdString, FloatDataType pType, const float* pData, size_t pElementCount);
+    void WriteFloatArray( const std::string& pIdString, FloatDataType pType, const ai_real* pData, size_t pElementCount);
 
     /// Writes the scene library
     void WriteSceneLibrary();
@@ -122,7 +124,9 @@ protected:
     void PopTag() { ai_assert( startstr.length() > 1); startstr.erase( startstr.length() - 2); }
 
     /// Creates a mesh ID for the given mesh
-    std::string GetMeshId( size_t pIndex) const { return std::string( "meshId" ) + std::to_string(pIndex); }
+    std::string GetMeshId( size_t pIndex) const {
+        return std::string( "meshId" ) + to_string(pIndex);
+    }
 
 public:
     /// Stringstream to write all output into
@@ -160,10 +164,10 @@ protected:
   struct Property
   {
     bool exist;
-     float value;
+     ai_real value;
      Property()
          : exist(false)
-         , value(0.0f)
+         , value(0.0)
      {}
   };
 

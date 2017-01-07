@@ -1,6 +1,15 @@
 Open Asset Import Library (assimp)
 ==================================
 
+[![Linux Build Status](https://travis-ci.org/assimp/assimp.png)](https://travis-ci.org/assimp/assimp)
+[![Windows Build Status](https://ci.appveyor.com/api/projects/status/tmo433wax6u6cjp4?svg=true)](https://ci.appveyor.com/project/kimkulling/assimp)
+<a href="https://scan.coverity.com/projects/5607">
+  <img alt="Coverity Scan Build Status"
+       src="https://scan.coverity.com/projects/5607/badge.svg"/>
+</a>
+[![Coverage Status](https://coveralls.io/repos/github/assimp/assimp/badge.svg?branch=master)](https://coveralls.io/github/assimp/assimp?branch=master)
+<br>
+
 APIs are provided for C and C++. There are various bindings to other languages (C#, Java, Python, Delphi, D). Assimp also runs on Android and iOS.
 
 Additionally, assimp features various __mesh post processing tools__: normals and tangent space generation, triangulation, vertex cache locality optimization, removal of degenerate primitives and duplicate vertices, sorting by primitive type, merging of redundant materials and many more.
@@ -8,14 +17,7 @@ Additionally, assimp features various __mesh post processing tools__: normals an
 This is the development trunk containing the latest features and bugfixes. For productive use though, we recommend one of the stable releases available from [assimp.sf.net](http://assimp.sf.net) or from *nix package repositories.
 The current build status is:
 
-Linux [![Linux Build Status](https://travis-ci.org/assimp/assimp.png)](https://travis-ci.org/assimp/assimp)
-Windows [![Windows Build Status](https://ci.appveyor.com/api/projects/status/tmo433wax6u6cjp4?svg=true)](https://ci.appveyor.com/project/kimkulling/assimp)
-Coverity<a href="https://scan.coverity.com/projects/5607">
-  <img alt="Coverity Scan Build Status"
-       src="https://scan.coverity.com/projects/5607/badge.svg"/>
-</a>
-Gitter [![Join the chat at https://gitter.im/assimp/assimp](https://badges.gitter.im/assimp/assimp.svg)](https://gitter.im/assimp/assimp?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-<br>
+Gitter chat: [![Join the chat at https://gitter.im/assimp/assimp](https://badges.gitter.im/assimp/assimp.svg)](https://gitter.im/assimp/assimp?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)<br>
 __[open3mod](https://github.com/acgessler/open3mod) is a powerful 3D model viewer based on Assimp's import and export abilities.__
 
 #### Supported file formats ####
@@ -117,8 +119,7 @@ For development discussions, there is also a (very low-volume) mailing list, _as
 
 Open Asset Import Library is a library to load various 3d file formats into a shared, in-memory format. It supports more than __40 file formats__ for import and a growing selection of file formats for export.
 
-And we also have an IRC-channel at freenode: #assetimporterlib . You can easily join us via: [KiwiIRC/freenote](https://kiwiirc.com/client/irc.freenode.net), choose your nickname and type
-> /join #assetimporterlib
+And we also have a Gitter-channel:Gitter [![Join the chat at https://gitter.im/assimp/assimp](https://badges.gitter.im/assimp/assimp.svg)](https://gitter.im/assimp/assimp?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)<br>
 
 ### Contributing ###
 Contributions to assimp are highly appreciated. The easiest way to get involved is to submit

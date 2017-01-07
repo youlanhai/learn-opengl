@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include <assimp/version.h>
+#include <assimp/config.h>
 
 // ------------------------------------------------------------------------------------------------
 /* Uncomment this line to prevent Assimp from catching unknown exceptions.
@@ -653,7 +654,7 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
         uint32_t fileSize = 0;
         if (fileIO)
         {
-            fileSize = fileIO->FileSize();
+            fileSize = static_cast<uint32_t>(fileIO->FileSize());
             pimpl->mIOHandler->Close( fileIO );
         }
 
@@ -789,7 +790,7 @@ const aiScene* Importer::ApplyPostProcessing(unsigned int pFlags)
     for( unsigned int a = 0; a < pimpl->mPostProcessingSteps.size(); a++)   {
 
         BaseProcess* process = pimpl->mPostProcessingSteps[a];
-        pimpl->mProgressHandler->UpdatePostProcess( a, pimpl->mPostProcessingSteps.size() );
+        pimpl->mProgressHandler->UpdatePostProcess(static_cast<int>(a), static_cast<int>(pimpl->mPostProcessingSteps.size()) );
         if( process->IsActive( pFlags)) {
 
             if (profiler) {
@@ -824,7 +825,7 @@ const aiScene* Importer::ApplyPostProcessing(unsigned int pFlags)
         }
 #endif // ! DEBUG
     }
-    pimpl->mProgressHandler->UpdatePostProcess( pimpl->mPostProcessingSteps.size(), pimpl->mPostProcessingSteps.size() );
+    pimpl->mProgressHandler->UpdatePostProcess( static_cast<int>(pimpl->mPostProcessingSteps.size()), static_cast<int>(pimpl->mPostProcessingSteps.size()) );
 
     // update private scene flags
   if( pimpl->mScene )
@@ -1017,11 +1018,11 @@ bool Importer::SetPropertyInteger(const char* szName, int iValue)
 
 // ------------------------------------------------------------------------------------------------
 // Set a configuration property
-bool Importer::SetPropertyFloat(const char* szName, float iValue)
+bool Importer::SetPropertyFloat(const char* szName, ai_real iValue)
 {
     bool exising;
     ASSIMP_BEGIN_EXCEPTION_REGION();
-        exising = SetGenericProperty<float>(pimpl->mFloatProperties, szName,iValue);
+        exising = SetGenericProperty<ai_real>(pimpl->mFloatProperties, szName,iValue);
     ASSIMP_END_EXCEPTION_REGION(bool);
     return exising;
 }
@@ -1058,10 +1059,10 @@ int Importer::GetPropertyInteger(const char* szName,
 
 // ------------------------------------------------------------------------------------------------
 // Get a configuration property
-float Importer::GetPropertyFloat(const char* szName,
-    float iErrorReturn /*= 10e10*/) const
+ai_real Importer::GetPropertyFloat(const char* szName,
+    ai_real iErrorReturn /*= 10e10*/) const
 {
-    return GetGenericProperty<float>(pimpl->mFloatProperties,szName,iErrorReturn);
+    return GetGenericProperty<ai_real>(pimpl->mFloatProperties,szName,iErrorReturn);
 }
 
 // ------------------------------------------------------------------------------------------------

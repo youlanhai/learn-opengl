@@ -41,6 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file vector3.h
  *  @brief 3D vector structure, including operators when compiling in C++
  */
+#pragma once
 #ifndef AI_VECTOR3D_H_INC
 #define AI_VECTOR3D_H_INC
 
@@ -51,6 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #include "./Compiler/pushpack1.h"
+#include "defs.h"
 
 #ifdef __cplusplus
 
@@ -96,7 +98,6 @@ public:
     operator aiVector3t<TOther> () const;
 
 public:
-
     /** @brief Set the components of a vector
      *  @param pX X component
      *  @param pY Y component
@@ -106,7 +107,6 @@ public:
     /** @brief Get the squared length of the vector
      *  @return Square length */
     TReal SquareLength() const;
-
 
     /** @brief Get the length of the vector
      *  @return length */
@@ -129,12 +129,12 @@ public:
 } PACK_STRUCT;
 
 
-typedef aiVector3t<float> aiVector3D;
+typedef aiVector3t<ai_real> aiVector3D;
 
 #else
 
 struct aiVector3D {
-    float x, y, z;
+    ai_real x, y, z;
 } PACK_STRUCT;
 
 #endif // __cplusplus

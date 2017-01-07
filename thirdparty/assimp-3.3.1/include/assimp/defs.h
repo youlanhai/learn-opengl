@@ -44,8 +44,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  blocks to find out how to customize _your_ Assimp build.
  */
 
-#ifndef INCLUDED_AI_DEFINES_H
-#define INCLUDED_AI_DEFINES_H
+#pragma once
+#ifndef AI_DEFINES_H_INC
+#define AI_DEFINES_H_INC
+
+#include <assimp/config.h>
 
     //////////////////////////////////////////////////////////////////////////
     /* Define ASSIMP_BUILD_NO_XX_IMPORTER to disable a specific
@@ -228,6 +231,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
     //////////////////////////////////////////////////////////////////////////
+    /* Define ASSIMP_DOUBLE_PRECISION to compile assimp
+     * with double precision support (64-bit). */
+    //////////////////////////////////////////////////////////////////////////
+
+#ifdef ASSIMP_DOUBLE_PRECISION
+    typedef double ai_real;
+    typedef signed long long int ai_int;
+    typedef unsigned long long int ai_uint;
+#else // ASSIMP_DOUBLE_PRECISION
+    typedef float ai_real;
+    typedef signed int ai_int;
+    typedef unsigned int ai_uint;
+#endif // ASSIMP_DOUBLE_PRECISION
+
+    //////////////////////////////////////////////////////////////////////////
     /* Useful constants */
     //////////////////////////////////////////////////////////////////////////
 
@@ -242,8 +260,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_MATH_HALF_PI_F   (AI_MATH_PI_F * 0.5f)
 
 /* Tiny macro to convert from radians to degrees and back */
-#define AI_DEG_TO_RAD(x) ((x)*0.0174532925f)
-#define AI_RAD_TO_DEG(x) ((x)*57.2957795f)
+#define AI_DEG_TO_RAD(x) ((x)*(ai_real)0.0174532925)
+#define AI_RAD_TO_DEG(x) ((x)*(ai_real)57.2957795)
 
 /* Support for big-endian builds */
 #if defined(__BYTE_ORDER__)
@@ -268,5 +286,4 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #define AI_MAX_ALLOC(type) ((256U * 1024 * 1024) / sizeof(type))
 
-
-#endif // !! INCLUDED_AI_DEFINES_H
+#endif // !! AI_DEFINES_H_INC
