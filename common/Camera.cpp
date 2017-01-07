@@ -35,7 +35,7 @@ void Camera::translate(const Vector3 & delta)
 
 void Camera::setRotation(float pitch, float yaw, float roll)
 {
-	rotation_.set(yaw, pitch, roll);
+	rotation_.set(pitch, yaw, roll);
 	matRotation_.setRotate(pitch, yaw, roll);
 	dirtyFlag_ |= DIRTY_VIEW;
 }

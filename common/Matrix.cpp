@@ -138,10 +138,10 @@ void Matrix::setRotate( const Quaternion & q )
 // pitch -> x, yaw -> y, roll -> z
 void Matrix::setRotate( float pitch, float yaw, float roll )
 {
+	const double sxa = sin(pitch);
+	const double cxa = cos(pitch);
     const double sya = sin(yaw);
     const double cya = cos(yaw);
-    const double sxa = sin(pitch);
-    const double cxa = cos(pitch);
     const double sza = sin(roll);
     const double cza = cos(roll);
 

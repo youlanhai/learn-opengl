@@ -21,7 +21,7 @@ template<typename T>
 IndexBufferPtr extractIndices(const aiMesh *mesh)
 {
 	size_t nIndices = mesh->mNumFaces * 3;
-	T *indices = new T[nIndices];
+	T *indices = new T[nIndices * 2];
 	T *p = indices;
 
 	for (size_t i = 0; i < mesh->mNumFaces; ++i)
@@ -35,9 +35,16 @@ IndexBufferPtr extractIndices(const aiMesh *mesh)
 		}
 		LOG_DEBUG("%d %d %d", (int)face.mIndices[0], (int)face.mIndices[1], (int)face.mIndices[2]);
 		//LOG_DEBUG("%d %d %d", (int)face.mIndices[3], (int)face.mIndices[4], (int)face.mIndices[5]);
+
+		for (size_t i = 0; i < face.mNumIndices; ++i)
+		{
+			*p++ = T(face.mIndices[i]) + 3;
+		}
 	}
 
-	return new IndexBufferEx<T>(BufferUsage::Static, nIndices, indices);
+	IndexBufferPtr ib = new IndexBufferEx<T>(BufferUsage::Static, nIndices, indices);
+	delete[] indices;
+	return ib;
 }
 
 MeshPtr processMesh(const aiMesh *mesh)
@@ -57,10 +64,10 @@ MeshPtr processMesh(const aiMesh *mesh)
 			v.tangent.set(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z);
 		}
 
-		const aiVector3D *uv = mesh->mTextureCoords[0];
-		if (uv)
+		const aiVector3D *uvs = mesh->mTextureCoords[0];
+		if (uvs)
 		{
-			v.uv.set(uv->x, uv->y);
+			v.uv.set(uvs[i].x, uvs[i].y);
 		}
 		else
 		{
@@ -68,6 +75,8 @@ MeshPtr processMesh(const aiMesh *mesh)
 		}
 	}
 	VertexBufferPtr vb = new VertexBufferEx<MeshVertex>(BufferUsage::Static, mesh->mNumVertices, p);
+	delete[] p;
+	p = nullptr;
 
 	IndexBufferPtr ib;
 	size_t nIndices = mesh->mNumFaces * 3;
@@ -135,7 +144,7 @@ public:
 		n->name_ = node->mName.C_Str();
 
 		memcpy(n->localTransform_._m, &(node->mTransformation.a1), 16 * sizeof(float));
-		//n->localTransform_.transpose();
+		n->localTransform_.transpose();
 
 		for (size_t i = 0; i < node->mNumMeshes; ++i)
 		{
@@ -191,31 +200,16 @@ bool Model::load(const std::string & path, ShaderProgramPtr shader)
 
 	Assimp::Importer importer;
 
-	// default pp steps
-	unsigned int ppsteps = aiProcess_CalcTangentSpace | // calculate tangents and bitangents if possible
-		aiProcess_JoinIdenticalVertices | // join identical vertices/ optimize indexing
-		aiProcess_ValidateDataStructure | // perform a full validation of the loader's output
-		aiProcess_ImproveCacheLocality | // improve the cache locality of the output vertices
-		aiProcess_RemoveRedundantMaterials | // remove redundant materials
-		aiProcess_FindDegenerates | // remove degenerated polygons from the import
-		aiProcess_FindInvalidData | // detect invalid model data, such as invalid normal vectors
-		aiProcess_GenUVCoords | // convert spherical, cylindrical, box and planar mapping to proper UVs
-		aiProcess_TransformUVCoords | // preprocess UV transformations (scaling, translation ...)
-		aiProcess_FindInstances | // search for instanced meshes and remove them by references to one master
-		aiProcess_LimitBoneWeights | // limit bone weights to 4 per vertex
-		aiProcess_OptimizeMeshes | // join small meshes, if possible;
-		aiProcess_SplitByBoneCount | // split meshes with too many bones. Necessary for our (limited) hardware skinning shader
-		0;
 
 	const aiScene* scene = importer.ReadFile(fullPath,
 		//aiProcessPreset_TargetRealtime_MaxQuality);
-		//aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices | aiProcess_SortByPType);
-		ppsteps |
-		aiProcess_GenSmoothNormals | // generate smooth normal vectors if not existing
-		aiProcess_SplitLargeMeshes | // split large, unrenderable meshes into submeshes
-		aiProcess_Triangulate | // triangulate polygons with more than 3 edges
-		aiProcess_ConvertToLeftHanded | // convert everything to D3D left handed space
-		aiProcess_SortByPType | // make 'clean' meshes which consist of a single typ of primitives
+		aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_FlipUVs | aiProcess_SortByPType |
+		//ppsteps |
+		//aiProcess_GenSmoothNormals | // generate smooth normal vectors if not existing
+		//aiProcess_SplitLargeMeshes | // split large, unrenderable meshes into submeshes
+		//aiProcess_Triangulate | // triangulate polygons with more than 3 edges
+		//aiProcess_ConvertToLeftHanded | // convert everything to D3D left handed space
+		//aiProcess_SortByPType | // make 'clean' meshes which consist of a single typ of primitives
 		0);
 	if (scene == nullptr || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 	{
@@ -255,7 +249,7 @@ bool Model::load(const std::string & path, ShaderProgramPtr shader)
 	for (size_t i = 0; i < scene->mNumMeshes; ++i)
 	{
 		aiMesh *mesh = scene->mMeshes[i];
-		MeshPtr newMesh = processMesh(scene->mMeshes[i]);
+		MeshPtr newMesh = processMesh(mesh);
 		if (newMesh)
 		{
 			if (mesh->mMaterialIndex >= 0)
@@ -292,7 +286,7 @@ void Model::draw()
 		{
 			for (int i : info.meshes)
 			{
-				//Renderer::instance()->setMatrix(info.node->worldTransform_);
+				Renderer::instance()->setWorldMatrix(info.node->worldTransform_);
 				meshes_[i]->draw();
 			}
 		}

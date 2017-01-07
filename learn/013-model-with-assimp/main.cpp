@@ -81,7 +81,7 @@ public:
 
 
 		model_ = new Model();
-		if (!model_->load("model/axe.x", shader_))
+		if (!model_->load("model/jingtian.x", modelShader_))
 		{
 			return false;
 		}
@@ -91,7 +91,7 @@ public:
 
 		//glEnable(GL_CULL_FACE);
 		//glCullFace(GL_BACK);
-		glDisable(GL_CULL_FACE);
+		//glDisable(GL_CULL_FACE);
 		return true;
 	}
 
@@ -124,6 +124,7 @@ public:
 
 		Matrix matWorld;
 		matWorld.setScale(0.1f, 0.1f, 0.1f);
+		//matWorld.setIdentity();
 		Renderer::instance()->setViewMatrix(camera_.getViewMatrix());
 		Renderer::instance()->setProjMatrix(camera_.getProjMatrix());
 		model_->applyMatrix(matWorld);
