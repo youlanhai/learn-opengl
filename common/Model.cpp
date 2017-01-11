@@ -21,34 +21,33 @@ template<typename T>
 IndexBufferPtr extractIndices(const aiMesh *mesh)
 {
 	size_t nIndices = mesh->mNumFaces * 3;
-	T *indices = new T[nIndices * 2];
+	T *indices = new T[nIndices];
 	T *p = indices;
 
 	for (size_t i = 0; i < mesh->mNumFaces; ++i)
 	{
-		const aiFace &face = mesh->mFaces[i++];
-		assert(face.mNumIndices == 3);
+		const aiFace &face = mesh->mFaces[i];
+		if (face.mNumIndices != 3)
+			continue;
 
 		for (size_t i = 0; i < face.mNumIndices; ++i)
 		{
 			*p++ = T(face.mIndices[i]);
 		}
-		LOG_DEBUG("%d %d %d", (int)face.mIndices[0], (int)face.mIndices[1], (int)face.mIndices[2]);
-		//LOG_DEBUG("%d %d %d", (int)face.mIndices[3], (int)face.mIndices[4], (int)face.mIndices[5]);
-
-		for (size_t i = 0; i < face.mNumIndices; ++i)
-		{
-			*p++ = T(face.mIndices[i]) + 3;
-		}
 	}
 
-	IndexBufferPtr ib = new IndexBufferEx<T>(BufferUsage::Static, nIndices, indices);
+	IndexBufferPtr ib = new IndexBufferEx<T>(BufferUsage::Static, p - indices, indices);
 	delete[] indices;
 	return ib;
 }
 
 MeshPtr processMesh(const aiMesh *mesh)
 {
+	//LOG_DEBUG("Num Vertices %d", mesh->mNumVertices);
+	//LOG_DEBUG("Num Faces %d", mesh->mNumFaces);
+	//LOG_DEBUG("Num Bones %d", mesh->mNumBones);
+	//LOG_DEBUG("Num AnimMeshes %d", mesh->mNumAnimMeshes);
+
 	MeshVertex *p = new MeshVertex[mesh->mNumVertices];
 	for (size_t i = 0; i < mesh->mNumVertices; ++i)
 	{
@@ -82,9 +81,9 @@ MeshPtr processMesh(const aiMesh *mesh)
 	size_t nIndices = mesh->mNumFaces * 3;
 	if (nIndices == 0)
 	{
-
+		ib = nullptr;
 	}
-	if (nIndices < 256)
+	else if (nIndices < 256)
 	{
 		ib = extractIndices<uint8_t>(mesh);
 	}
@@ -200,22 +199,25 @@ bool Model::load(const std::string & path, ShaderProgramPtr shader)
 
 	Assimp::Importer importer;
 
+	const unsigned int flags =
+		aiProcess_Triangulate |
+		aiProcess_JoinIdenticalVertices |
+		aiProcess_GenSmoothNormals |
+		aiProcess_SortByPType |
+		aiProcess_OptimizeMeshes |
+		aiProcess_OptimizeGraph |
+		aiProcess_FlipUVs |
+		aiProcess_MakeLeftHanded |
+		0;
 
-	const aiScene* scene = importer.ReadFile(fullPath,
-		//aiProcessPreset_TargetRealtime_MaxQuality);
-		aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_FlipUVs | aiProcess_SortByPType |
-		//ppsteps |
-		//aiProcess_GenSmoothNormals | // generate smooth normal vectors if not existing
-		//aiProcess_SplitLargeMeshes | // split large, unrenderable meshes into submeshes
-		//aiProcess_Triangulate | // triangulate polygons with more than 3 edges
-		//aiProcess_ConvertToLeftHanded | // convert everything to D3D left handed space
-		//aiProcess_SortByPType | // make 'clean' meshes which consist of a single typ of primitives
-		0);
+	const aiScene* scene = importer.ReadFile(fullPath, flags);
 	if (scene == nullptr || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 	{
 		LOG_ERROR("Failed to import model '%s', error: %s", fullPath.c_str(), importer.GetErrorString());
 		return false;
 	}
+
+	//LOG_DEBUG("Num Meshes: %d", scene->mNumMeshes);
 
 	Mesh::Materials mtls;
 	mtls.reserve(scene->mNumMaterials);

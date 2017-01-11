@@ -83,7 +83,7 @@ public:
 
 
 		model_ = new Model();
-		if (!model_->load("model/jingtian.x", modelShader_))
+		if (!model_->load("model/axe.x", modelShader_))
 		{
 			return false;
 		}
@@ -91,8 +91,8 @@ public:
 		camera_.lookAt(Vector3(0, 1, -2), Vector3::Zero, Vector3::YAxis);
 		setupViewProjMatrix();
 
-		//glEnable(GL_CULL_FACE);
-		//glCullFace(GL_BACK);
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
 		//glDisable(GL_CULL_FACE);
 
 
@@ -148,8 +148,6 @@ public:
 		bindShaderUniform(shader_.get(), "cameraPos", camera_.getPosition());
 
 		shader_->unbind();
-
-		TwDraw();
 	}
 
 	void onTick() override
@@ -163,15 +161,17 @@ public:
 
 		setupDynamicUniform();
 
-		mesh_->draw();
+		//mesh_->draw();
 
 		Matrix matWorld;
+		matWorld.setIdentity();
 		matWorld.setScale(0.1f, 0.1f, 0.1f);
-		//matWorld.setIdentity();
 		Renderer::instance()->setViewMatrix(camera_.getViewMatrix());
 		Renderer::instance()->setProjMatrix(camera_.getProjMatrix());
 		model_->applyMatrix(matWorld);
 		model_->draw();
+
+		TwDraw();
 	}
 
 	void onSizeChange(int width, int height) override
