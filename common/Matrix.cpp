@@ -112,26 +112,26 @@ void Matrix::setRotate( const Quaternion & q )
     float wy = q.w * q.y * 2.f;
     float wz = q.w * q.z * 2.f;
 
-    m[0][0] = 1.f - (yy + zz);
-    m[1][0] = xy - wz;
-    m[2][0] = xz + wy;
+    _11 = 1.f - (yy + zz);
+    _21 = xy - wz;
+    _31 = xz + wy;
 
-    m[0][1] = xy + wz;
-    m[1][1] = 1.f - (xx + zz);
-    m[2][1] = yz - wx;
+    _12 = xy + wz;
+    _22 = 1.f - (xx + zz);
+    _32 = yz - wx;
 
-    m[0][2] = xz - wy;
-    m[1][2] = yz + wx;
-    m[2][2] = 1.f - (xx + yy);
+    _13 = xz - wy;
+    _23 = yz + wx;
+    _33 = 1.f - (xx + yy);
 
-    m[0][3] = 0.f;
-    m[1][3] = 0.f;
-    m[2][3] = 0.f;
+    _14 = 0.f;
+    _24 = 0.f;
+    _34 = 0.f;
 
-    m[3][0] = 0.0f;
-    m[3][1] = 0.0f;
-    m[3][2] = 0.0f;
-    m[3][3] = 1.0f;
+    _41 = 0.0f;
+    _42 = 0.0f;
+    _43 = 0.0f;
+    _44 = 1.0f;
 }
 
 
@@ -145,25 +145,25 @@ void Matrix::setRotate( float pitch, float yaw, float roll )
     const double sza = sin(roll);
     const double cza = cos(roll);
 
-    m[0][0] = cya * cza;
-    m[0][1] = cxa * sza;
-    m[0][2] = -sya * cza + cya * sza * sxa;
-    m[0][3] = 0.f;
+    _11 = cya * cza;
+    _12 = cxa * sza;
+    _13 = -sya * cza + cya * sza * sxa;
+    _14 = 0.f;
 
-    m[1][0] = -cya * sza;
-    m[1][1] = cxa * cza;
-    m[1][2] = sya * sza + cya * cza * sxa;
-    m[1][3] = 0.f;
+    _21 = -cya * sza;
+    _22 = cxa * cza;
+    _23 = sya * sza + cya * cza * sxa;
+    _24 = 0.f;
 
-    m[2][0] = sya * cxa;
-    m[2][1] = -sxa;
-    m[2][2] = cxa * cya;
-    m[2][3] = 0.f;
+    _31 = sya * cxa;
+    _32 = -sxa;
+    _33 = cxa * cya;
+    _34 = 0.f;
 
-    m[3][0] = 0.f;
-    m[3][1] = 0.f;
-    m[3][2] = 0.f;
-    m[3][3] = 1.f;
+    _41 = 0.f;
+    _42 = 0.f;
+    _43 = 0.f;
+    _44 = 1.f;
 }
 
 void Matrix::multiply( const Matrix& m1, const Matrix& m2 )
@@ -191,25 +191,25 @@ void Matrix::multiply( const Matrix& m1, const Matrix& m2 )
 
 void Matrix::invertOrthonormal( const Matrix& matrix)
 {
-    m[0][0] = matrix.m[0][0];
-    m[0][1] = matrix.m[1][0];
-    m[0][2] = matrix.m[2][0];
-    m[0][3] = 0.f;
+    _11 = matrix._11;
+    _12 = matrix._21;
+    _13 = matrix._31;
+    _14 = 0.f;
 
-    m[1][0] = matrix.m[0][1];
-    m[1][1] = matrix.m[1][1];
-    m[1][2] = matrix.m[2][1];
-    m[1][3] = 0.f;
+    _21 = matrix._12;
+    _22 = matrix._22;
+    _23 = matrix._32;
+    _24 = 0.f;
 
-    m[2][0] = matrix.m[0][2];
-    m[2][1] = matrix.m[1][2];
-    m[2][2] = matrix.m[2][2];
-    m[2][3] = 0.f;
+    _31 = matrix._13;
+    _32 = matrix._23;
+    _33 = matrix._33;
+    _34 = 0.f;
 
-    m[3][0] = -(matrix.m[3][0] * m[0][0] + matrix.m[3][1] * m[1][0] + matrix.m[3][2] * m[2][0]);
-    m[3][1] = -(matrix.m[3][0] * m[0][1] + matrix.m[3][1] * m[1][1] + matrix.m[3][2] * m[2][1]);
-    m[3][2] = -(matrix.m[3][0] * m[0][2] + matrix.m[3][1] * m[1][2] + matrix.m[3][2] * m[2][2]);
-    m[3][3] = 1.f;
+    _41 = -(matrix._41 * _11 + matrix._42 * _21 + matrix._43 * _31);
+    _42 = -(matrix._41 * _12 + matrix._42 * _22 + matrix._43 * _32);
+    _43 = -(matrix._41 * _13 + matrix._42 * _23 + matrix._43 * _33);
+    _44 = 1.f;
 }
 
 bool Matrix::invert( const Matrix& matrix)
@@ -224,31 +224,31 @@ bool Matrix::invert( const Matrix& matrix)
 
     float rcp = 1 / determinant;
 
-    m[0][0] = matrix.m[1][1] * matrix.m[2][2] - matrix.m[1][2] * matrix.m[2][1];
-    m[0][1] = matrix.m[0][2] * matrix.m[2][1] - matrix.m[0][1] * matrix.m[2][2];
-    m[0][2] = matrix.m[0][1] * matrix.m[1][2] - matrix.m[0][2] * matrix.m[1][1];
-    m[1][0] = matrix.m[1][2] * matrix.m[2][0] - matrix.m[1][0] * matrix.m[2][2];
-    m[1][1] = matrix.m[0][0] * matrix.m[2][2] - matrix.m[0][2] * matrix.m[2][0];
-    m[1][2] = matrix.m[0][2] * matrix.m[1][0] - matrix.m[0][0] * matrix.m[1][2];
-    m[2][0] = matrix.m[1][0] * matrix.m[2][1] - matrix.m[1][1] * matrix.m[2][0];
-    m[2][1] = matrix.m[0][1] * matrix.m[2][0] - matrix.m[0][0] * matrix.m[2][1];
-    m[2][2] = matrix.m[0][0] * matrix.m[1][1] - matrix.m[0][1] * matrix.m[1][0];
+    _11 = matrix._22 * matrix._33 - matrix._23 * matrix._32;
+    _12 = matrix._13 * matrix._32 - matrix._12 * matrix._33;
+    _13 = matrix._12 * matrix._23 - matrix._13 * matrix._22;
+    _21 = matrix._23 * matrix._31 - matrix._21 * matrix._33;
+    _22 = matrix._11 * matrix._33 - matrix._13 * matrix._31;
+    _23 = matrix._13 * matrix._21 - matrix._11 * matrix._23;
+    _31 = matrix._21 * matrix._32 - matrix._22 * matrix._31;
+    _32 = matrix._12 * matrix._31 - matrix._11 * matrix._32;
+    _33 = matrix._11 * matrix._22 - matrix._12 * matrix._21;
 
-    m[0][0] *= rcp;
-    m[0][1] *= rcp;
-    m[0][2] *= rcp;
+    _11 *= rcp;
+    _12 *= rcp;
+    _13 *= rcp;
 
-    m[1][0] *= rcp;
-    m[1][1] *= rcp;
-    m[1][2] *= rcp;
+    _21 *= rcp;
+    _22 *= rcp;
+    _23 *= rcp;
 
-    m[2][0] *= rcp;
-    m[2][1] *= rcp;
-    m[2][2] *= rcp;
+    _31 *= rcp;
+    _32 *= rcp;
+    _33 *= rcp;
 
-    m[3][0] = -(matrix.m[3][0] * m[0][0] + matrix.m[3][1] * m[1][0] + matrix.m[3][2] * m[2][0]);
-    m[3][1] = -(matrix.m[3][0] * m[0][1] + matrix.m[3][1] * m[1][1] + matrix.m[3][2] * m[2][1]);
-    m[3][2] = -(matrix.m[3][0] * m[0][2] + matrix.m[3][1] * m[1][2] + matrix.m[3][2] * m[2][2]);
+    _41 = -(matrix._41 * _11 + matrix._42 * _21 + matrix._43 * _31);
+    _42 = -(matrix._41 * _12 + matrix._42 * _22 + matrix._43 * _32);
+    _43 = -(matrix._41 * _13 + matrix._42 * _23 + matrix._43 * _33);
 
     if (determinant == 0)
     {
@@ -262,9 +262,9 @@ float Matrix::getDeterminant() const
 {
     float det = 0;
 
-    det += m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1]);
-    det -= m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0]);
-    det += m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0]);
+    det += _11 * (_22 * _33 - _23 * _32);
+    det -= _12 * (_21 * _33 - _23 * _31);
+    det += _13 * (_21 * _32 - _22 * _31);
 
     return det;
 }
@@ -359,25 +359,25 @@ void Matrix::lookAt(const Vector3& position, const Vector3& target, const Vector
     Up.crossProduct(Forward, Right);
 	Up.normalize();
 
-    m[0][0] = Right.x;
-    m[1][0] = Right.y;
-    m[2][0] = Right.z;
-    m[3][0] = -position.dotProduct(Right);
+    _11 = Right.x;
+    _21 = Right.y;
+    _31 = Right.z;
+    _41 = -position.dotProduct(Right);
 
-    m[0][1] = Up.x;
-    m[1][1] = Up.y;
-    m[2][1] = Up.z;
-    m[3][1] = -position.dotProduct(Up);
+    _12 = Up.x;
+    _22 = Up.y;
+    _32 = Up.z;
+    _42 = -position.dotProduct(Up);
 
-    m[0][2] = Forward.x;
-    m[1][2] = Forward.y;
-    m[2][2] = Forward.z;
-    m[3][2] = -position.dotProduct(Forward);
+    _13 = Forward.x;
+    _23 = Forward.y;
+    _33 = Forward.z;
+    _43 = -position.dotProduct(Forward);
 
-	m[0][3] = 0.0f;
-    m[1][3] = 0.0f;
-    m[2][3] = 0.0f;
-    m[3][3] = 1.0f;
+	_14 = 0.0f;
+    _24 = 0.0f;
+    _34 = 0.0f;
+    _44 = 1.0f;
 }
 
 void Matrix::decompose(Quaternion & rotation, Vector3 & scale, Vector3 & translate) const
@@ -424,25 +424,25 @@ void Matrix::perspectiveProjection( float fov, float aspectRatio,
     float cot = 1 / (float)tan(fov * 0.5f);
     float rcp = 1 / (farPlane - nearPlane);
 
-    m[0][0] = (cot / aspectRatio);
-    m[0][1] = 0;
-    m[0][2] = 0;
-    m[0][3] = 0;
+    _11 = (cot / aspectRatio);
+    _12 = 0;
+    _13 = 0;
+    _14 = 0;
 
-    m[1][0] = 0;
-    m[1][1] = cot;
-    m[1][2] = 0;
-    m[1][3] = 0;
+    _21 = 0;
+    _22 = cot;
+    _23 = 0;
+    _24 = 0;
 
-    m[2][0] = 0;
-    m[2][1] = 0;
-    m[2][2] = rcp * farPlane;
-    m[2][3] = 1;
+    _31 = 0;
+    _32 = 0;
+    _33 = rcp * farPlane;
+    _34 = 1;
 
-    m[3][0] = 0;
-    m[3][1] = 0;
-    m[3][2] = - rcp  * farPlane * nearPlane;
-    m[3][3] = 0;
+    _41 = 0;
+    _42 = 0;
+    _43 = - rcp  * farPlane * nearPlane;
+    _44 = 0;
 }
 
 void Matrix::perspectiveProjectionGL( float fov, float aspectRatio,
@@ -454,10 +454,10 @@ void Matrix::perspectiveProjectionGL( float fov, float aspectRatio,
     float a = (farPlane + nearPlane) / (farPlane - nearPlane);
     float b = -2.0f * farPlane * nearPlane / (farPlane - nearPlane);
     
-    m[0][0] = xScale;   m[0][1] = 0;        m[0][2] = 0; m[0][3] = 0;
-    m[1][0] = 0;        m[1][1] = yScale;   m[1][2] = 0; m[1][3] = 0;
-    m[2][0] = 0;        m[2][1] = 0;        m[2][2] = a; m[2][3] = 1;
-    m[3][0] = 0;        m[3][1] = 0;        m[3][2] = b; m[3][3] = 0;
+    _11 = xScale;   _12 = 0;        _13 = 0; _14 = 0;
+    _21 = 0;        _22 = yScale;   _23 = 0; _24 = 0;
+    _31 = 0;        _32 = 0;        _33 = a; _34 = 1;
+    _41 = 0;        _42 = 0;        _43 = b; _44 = 0;
 }
 
 // 原点落在屏幕中间，x轴向右为正，y轴向上为正
@@ -474,23 +474,23 @@ void Matrix::orthogonalProjectionOffCenterGL(float left, float right, float bott
     float h1 = 1.f / (top - bottom);
     float z1 = 1.f / (zf - zn);
     
-    m[0][0] = 2 * w1;
-    m[1][0] = 0;
-    m[2][0] = 0;
-    m[3][0] = -(right + left) * w1;
+    _11 = 2 * w1;
+    _21 = 0;
+    _31 = 0;
+    _41 = -(right + left) * w1;
     
-    m[0][1] = 0;
-    m[1][1] = 2 * h1;
-    m[2][1] = 0;
-    m[3][1] = -(top + bottom) * h1;
+    _12 = 0;
+    _22 = 2 * h1;
+    _32 = 0;
+    _42 = -(top + bottom) * h1;
     
-    m[0][2] = 0;
-    m[1][2] = 0;
-    m[2][2] = 2 * z1;
-    m[3][2] = -(zf + zn) * z1;
+    _13 = 0;
+    _23 = 0;
+    _33 = 2 * z1;
+    _43 = -(zf + zn) * z1;
     
-    m[0][3] = 0;
-    m[1][3] = 0;
-    m[2][3] = 0;
-    m[3][3] = 1;
+    _14 = 0;
+    _24 = 0;
+    _34 = 0;
+    _44 = 1;
 }
