@@ -2,17 +2,9 @@
 #include "MathDef.h"
 #include "Application.h"
 
-enum DirtyFlag
-{
-	DIRTY_VIEW = 1 << 0,
-	DIRTY_PROJ = 1 << 1,
-
-	DIRTY_ALL = DIRTY_VIEW | DIRTY_PROJ,
-};
 
 Camera::Camera()
-	: dirtyFlag_(DIRTY_ALL)
-	, moveSpeed_(1.0f)
+	: moveSpeed_(1.0f)
 {
 	matRotation_.setIdentity();
 	matProj_.setIdentity();
@@ -20,79 +12,6 @@ Camera::Camera()
 
 Camera::~Camera()
 {
-}
-
-void Camera::setPosition(const Vector3 & position)
-{
-	position_ = position;
-	dirtyFlag_ |= DIRTY_VIEW;
-}
-
-void Camera::translate(const Vector3 & delta)
-{
-	setPosition(position_ + delta);
-}
-
-void Camera::setRotation(float pitch, float yaw, float roll)
-{
-	rotation_.set(pitch, yaw, roll);
-	matRotation_.setRotate(pitch, yaw, roll);
-	dirtyFlag_ |= DIRTY_VIEW;
-}
-
-void Camera::setRotation(const Vector3 &rotation)
-{
-	rotation_ = rotation;
-	matRotation_.setRotate(rotation.x, rotation.y, rotation.z);
-	dirtyFlag_ |= DIRTY_VIEW;
-}
-
-void Camera::lookAt(const Vector3 & position, const Vector3 & target, const Vector3 & up)
-{
-	dirtyFlag_ |= DIRTY_VIEW;
-	position_ = position;
-
-	Vector3 forward = target - position;
-	forward.normalize();
-
-	Vector3 right = up.crossProduct(forward);
-	right.normalize();
-
-	Vector3 newUp = forward.crossProduct(right);
-	newUp.normalize();
-
-	matRotation_.setIdentity();
-	matRotation_[0] = right;
-	matRotation_[1] = newUp;
-	matRotation_[2] = forward;
-
-	float yaw = atan2(forward.x, forward.z);
-	float pitch = -asin(forward.y);
-	float roll = 0.0f;
-
-	const float zdirxzlen = sqrtf(forward.z * forward.z + forward.x * forward.x);
-	if (zdirxzlen != 0.0f)
-	{
-		const float acarg = (forward.z * right.x - forward.x * right.z) / zdirxzlen;
-		if (acarg <= -1.0f)
-		{
-			roll = PI_FULL;
-		}
-		else if (acarg >= 1.f)
-		{
-			roll = 0.0f;
-		}
-		else
-		{
-			roll = acos(acarg);
-			if (forward.y < 0.f)
-			{
-				roll = -roll;
-			}
-		}
-	}
-
-	rotation_.set(pitch, yaw, roll);
 }
 
 void Camera::setPerspective(float fov, float aspect, float znear, float zfar)

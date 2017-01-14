@@ -134,36 +134,64 @@ void Matrix::setRotate( const Quaternion & q )
     _44 = 1.0f;
 }
 
-
-// pitch -> x, yaw -> y, roll -> z
-void Matrix::setRotate( float pitch, float yaw, float roll )
+void Matrix::setRotate(float x, float y, float z)
 {
-	const double sxa = sin(pitch);
-	const double cxa = cos(pitch);
-    const double sya = sin(yaw);
-    const double cya = cos(yaw);
-    const double sza = sin(roll);
-    const double cza = cos(roll);
+	const double sp = sin(x); // pitch
+	const double cp = cos(x);
+	const double sh = sin(y); // heading / yaw
+	const double ch = cos(y);
+	const double sb = sin(z); // bank / row
+	const double cb = cos(z);
 
-    _11 = cya * cza;
-    _12 = cxa * sza;
-    _13 = -sya * cza + cya * sza * sxa;
-    _14 = 0.f;
+	_11 = float(ch * cb + sh * sp * sb);
+	_12 = float(sb * cp);
+	_13 = float(-sh * cb + ch * sp * sb);
+	_14 = 0.0f;
 
-    _21 = -cya * sza;
-    _22 = cxa * cza;
-    _23 = sya * sza + cya * cza * sxa;
-    _24 = 0.f;
+	_21 = float(-ch * sb + sh * sp * cb);
+	_22 = float(cb * cp);
+	_23 = float(sb * sh + ch * sp * cb);
+	_24 = 0.0f;
 
-    _31 = sya * cxa;
-    _32 = -sxa;
-    _33 = cxa * cya;
-    _34 = 0.f;
+	_31 = float(sh * cp);
+	_32 = float(-sp);
+	_33 = float(ch * cp);
+	_34 = 0.0f;
 
-    _41 = 0.f;
-    _42 = 0.f;
-    _43 = 0.f;
-    _44 = 1.f;
+	_41 = 0.f;
+	_42 = 0.f;
+	_43 = 0.f;
+	_44 = 1.f;
+}
+
+Vector3 Matrix::getRotate() const
+{
+	float h, p, b;
+	float sp = -_32;
+	if (sp <= -1.0f)
+	{
+		p = -PI_HALF;
+	}
+	else if (sp >= 1.0f)
+	{
+		p = PI_HALF;
+	}
+	else
+	{
+		p = asin(sp);
+	}
+
+	if (sp > 0.9999f)
+	{
+		b = 0.0f;
+		h = atan2(-_13, _11);
+	}
+	else
+	{
+		h = atan2(_31, _33);
+		b = atan2(_12, _22);
+	}
+	return Vector3(p, h, b);
 }
 
 void Matrix::multiply( const Matrix& m1, const Matrix& m2 )

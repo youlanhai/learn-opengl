@@ -19,11 +19,95 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+TwType TW_TYPE_VECTOR3;
+
+void getTransformRotate(Vector3 *value, Transform *transfrom)
+{
+	Vector3 rotation = transfrom->getRotation();
+	rotation *= 180.0f / PI_FULL;
+	*value = rotation;
+}
+
+void setTransformRotate(const Vector3 *value, Transform *transfrom)
+{
+	Vector3 rotation = *value;
+	rotation *= PI_FULL / 180.0f;
+	transfrom->setRotation(rotation);
+}
+
+class TransformUI
+{
+public:
+	TransformUI()
+		: bar_(nullptr)
+		, transform_(nullptr)
+	{}
+
+	bool init(const std::string &name, Transform *transform)
+	{
+		if (bar_ != nullptr)
+		{
+			return false;
+		}
+
+		bar_ = TwNewBar(name.c_str());
+		transform_ = transform;
+
+#define ADD_VECTOR_VAR(NAME) \
+		TwAddVarCB(bar_, #NAME, TW_TYPE_VECTOR3, (TwSetVarCallback)set##NAME, (TwGetVarCallback)get##NAME, transform_, 0)
+
+		ADD_VECTOR_VAR(Position);
+		ADD_VECTOR_VAR(Rotation);
+		ADD_VECTOR_VAR(Scale);
+		return true;
+	}
+
+	static void getPosition(Vector3 *value, Transform *transfrom)
+	{
+		*value = transfrom->getPosition();
+	}
+
+	static void setPosition(const Vector3 *value, Transform *transfrom)
+	{
+		transfrom->setPosition(*value);
+	}
+
+	static void getRotation(Vector3 *value, Transform *transfrom)
+	{
+		Vector3 rotation = transfrom->getRotation();
+		rotation *= 180.0f / PI_FULL;
+		*value = rotation;
+	}
+
+	static void setRotation(const Vector3 *value, Transform *transfrom)
+	{
+		Vector3 rotation = *value;
+		rotation *= PI_FULL / 180.0f;
+		transfrom->setRotation(rotation);
+	}
+
+	static void getScale(Vector3 *value, Transform *transfrom)
+	{
+		*value = transfrom->getScale();
+	}
+
+	static void setScale(const Vector3 *value, Transform *transfrom)
+	{
+		transfrom->setScale(*value);
+	}
+
+private:
+	Transform*  transform_;
+	TwBar*		bar_;
+};
+
 class MyApplication : public Application
 {
 public:
 
 	MyApplication()
+		: modelUI_(nullptr)
+		, cameraUI_(nullptr)
 	{
 		glfwWindowHint(GLFW_SAMPLES, 4);
 	}
@@ -41,22 +125,6 @@ public:
 			return false;
 		}
 
-		TexturePtr texture = TextureMgr::instance()->get("rock.png");
-		TexturePtr normalMap = TextureMgr::instance()->get("rock-normal.png");
-		if (!texture || !normalMap)
-		{
-			return false;
-		}
-		texture->setQuality(TextureQuality::TwoLinear);
-		normalMap->setQuality(TextureQuality::ThreeLinear);
-
-		const char *ShaderFile = "shader/light_pixel.shader";
-		shader_ = ShaderProgramMgr::instance()->get(ShaderFile);
-		if (!shader_)
-		{
-			return false;
-		}
-
 		Vector3 lightDir(1, 1, 0);
 		lightDir.normalize();
 
@@ -66,27 +134,12 @@ public:
 		bindShaderUniform(modelShader_.get(), "ambientColor", Vector3(0.5f));
 		modelShader_->unbind();
 
-		shader_->bind();
-		bindShaderUniform(shader_.get(), "lightDir", lightDir);
-		bindShaderUniform(shader_.get(), "lightColor", Vector3(1.5f));
-		bindShaderUniform(shader_.get(), "ambientColor", Vector3(0.5f));
-		bindShaderUniform(shader_.get(), "shininess", 64.0f);
-		bindShaderUniform(shader_.get(), "specularStrength", 4.0f);
-		shader_->unbind();
-
-		mesh_ = createCube(Vector3(1.0f, 1.0f, 1.0f));
-		MaterialPtr material = new Material();
-		material->setShader(shader_);
-		material->setTexture("u_texture0", texture.get());
-		material->setTexture("u_texture1", normalMap.get());
-		mesh_->addMaterial(material);
-
-
 		model_ = new Model();
 		if (!model_->load("model/axe.x", modelShader_))
 		{
 			return false;
 		}
+		modelTransform_.setScale(0.1f);
 
 		camera_.lookAt(Vector3(0, 1, -2), Vector3::Zero, Vector3::YAxis);
 		setupViewProjMatrix();
@@ -99,55 +152,29 @@ public:
 		// Initialize AntTweakBar
 		TwInit(TW_OPENGL, NULL);
 
-		// Create a tweak bar
-		bar = TwNewBar("TweakBar");
-		TwDefine(" GLOBAL help='This example shows how to integrate AntTweakBar with GLFW and OpenGL.' "); // Message added to the help bar.
+		TwStructMember twVector3[] = {
+			{ "x", TW_TYPE_FLOAT, offsetof(Vector3, x), nullptr },
+			{ "y", TW_TYPE_FLOAT, offsetof(Vector3, y), nullptr },
+			{ "z", TW_TYPE_FLOAT, offsetof(Vector3, z), nullptr },
+		};
 
-																										   // Add 'speed' to 'bar': it is a modifable (RW) variable of type TW_TYPE_DOUBLE. Its key shortcuts are [s] and [S].
-		static double time = 0, dt;// Current time and enlapsed time
-		static double turn = 0;    // Model turn counter
-		static double speed = 0.3; // Model rotation speed
-		static int wire = 0;       // Draw model in wireframe?
-		static float bgColor[] = { 0.1f, 0.2f, 0.4f };         // Background color 
-		static unsigned char cubeColor[] = { 255, 0, 0, 128 }; // Model color (32bits RGBA)
+		TW_TYPE_VECTOR3 = TwDefineStruct("Vector3", twVector3, 3, sizeof(Vector3), 0, 0);
 
-		TwAddVarRW(bar, "speed", TW_TYPE_DOUBLE, &speed,
-			" label='Rot speed' min=0 max=2 step=0.01 keyIncr=s keyDecr=S help='Rotation speed (turns/second)' ");
+		modelUI_ = new TransformUI();
+		modelUI_->init("Model", &modelTransform_);
+		TwDefine("Model refresh=0.1");
 
-		// Add 'wire' to 'bar': it is a modifable variable of type TW_TYPE_BOOL32 (32 bits boolean). Its key shortcut is [w].
-		
-		TwAddVarRW(bar, "wire", TW_TYPE_BOOL32, &wire,
-			" label='Wireframe mode' key=w help='Toggle wireframe display mode.' ");
-
-		// Add 'time' to 'bar': it is a read-only (RO) variable of type TW_TYPE_DOUBLE, with 1 precision digit
-		TwAddVarRO(bar, "time", TW_TYPE_DOUBLE, &time, " label='Time' precision=1 help='Time (in seconds).' ");
-
-		// Add 'bgColor' to 'bar': it is a modifable variable of type TW_TYPE_COLOR3F (3 floats color)
-		TwAddVarRW(bar, "bgColor", TW_TYPE_COLOR3F, &bgColor, " label='Background color' ");
-
-		// Add 'cubeColor' to 'bar': it is a modifable variable of type TW_TYPE_COLOR32 (32 bits color) with alpha
-		TwAddVarRW(bar, "cubeColor", TW_TYPE_COLOR32, &cubeColor,
-			" label='Cube color' alpha help='Color and transparency of the cube.' ");
+		cameraUI_ = new TransformUI();
+		cameraUI_->init("Camera", &camera_);
+		TwDefine("Camera refresh=0.1 position='500 10'");
 		return true;
 	}
 
 	void onDestroy() override
 	{
+		delete modelUI_;
+		delete cameraUI_;
 		TwTerminate();
-	}
-
-	void setupDynamicUniform()
-	{
-		shader_->bind();
-
-		Matrix matWorld;
-		matWorld.setRotateY(glfwGetTime() * 0.5f);
-
-		bindShaderUniform(shader_.get(), "matWorld", matWorld);
-		bindShaderUniform(shader_.get(), "matMVP", matWorld * camera_.getViewProjMatrix());
-		bindShaderUniform(shader_.get(), "cameraPos", camera_.getPosition());
-
-		shader_->unbind();
 	}
 
 	void onTick() override
@@ -159,16 +186,9 @@ public:
 	{
 		Application::onDraw();
 
-		setupDynamicUniform();
-
-		//mesh_->draw();
-
-		Matrix matWorld;
-		matWorld.setIdentity();
-		matWorld.setScale(0.1f, 0.1f, 0.1f);
 		Renderer::instance()->setViewMatrix(camera_.getViewMatrix());
 		Renderer::instance()->setProjMatrix(camera_.getProjMatrix());
-		model_->applyMatrix(matWorld);
+		model_->applyMatrix(modelTransform_.getModelMatrix());
 		model_->draw();
 
 		TwDraw();
@@ -190,26 +210,49 @@ public:
 	
 	virtual void onKey(int key, int scancode, int action, int mods) override
 	{
+		if (TwEventKeyGLFW(key, action))
+			return;
 		Application::onKey(key, scancode, action, mods);
-		TwEventKeyGLFW(key, action);
 	}
 
 	virtual void onMouseButton(int button, int action, int mods) override
 	{
+		lastCursorPos_ = getCursorPos();
+		if (TwEventMouseButtonGLFW(button, action))
+			return;
 		camera_.handleMouseButton(button, action, mods);
-		TwEventMouseButtonGLFW(button, action);
 	}
 
 	virtual void onMouseMove(double x, double y) override
 	{
-		camera_.handleMouseMove(x, y);
-		TwEventMousePosGLFW(x, y);
+		if (TwEventMousePosGLFW(x, y))
+			return;
+
+		if (gApp->isMousePress(GLFW_MOUSE_BUTTON_LEFT))
+		{
+			Vector2 size = gApp->getWindowSize();
+
+			float dx = (float(x) - lastCursorPos_.x) / size.x;
+			float dy = (float(y) - lastCursorPos_.y) / size.y;
+
+			Vector3 rotation = modelTransform_.getRotation();
+			rotation.y -= dx * PI_FULL;
+			rotation.x -= dy * PI_FULL;
+			modelTransform_.setRotation(rotation);
+		}
+		else
+		{
+			camera_.handleMouseMove(x, y);
+		}
+
+		lastCursorPos_.set(x, y);
 	}
 
 	virtual void onMouseScroll(double xoffset, double yoffset) override
 	{
+		if (TwEventMouseWheelGLFW(yoffset))
+			return;
 		camera_.handleMouseScroll(xoffset, yoffset);
-		TwEventMouseWheelGLFW(yoffset);
 	}
 
 	virtual void onChar(uint32_t ch) override
@@ -217,12 +260,14 @@ public:
 		TwEventCharGLFW(ch, 0);
 	}
 
-	ShaderProgramPtr shader_;
 	ShaderProgramPtr modelShader_;
-	MeshPtr     mesh_;
 	Camera		camera_;
 	ModelPtr	model_;
-	TwBar *bar;         // Pointer to a tweak bar
+	Vector2		lastCursorPos_;
+
+	Transform	modelTransform_;
+	TransformUI* modelUI_;
+	TransformUI* cameraUI_;
 };
 
 int main()

@@ -50,8 +50,8 @@ public:
     void setRotateZ( const float angle );
     void setRotate( const Quaternion & q );
 
-    // pitch -> x, yaw -> y, roll -> z
-    void setRotate( float pitch, float yaw, float roll );
+	void setRotate(float x, float y, float z);
+	Vector3 getRotate() const;
 
     void multiply( const Matrix& m1, const Matrix& m2 );
     void preMultiply( const Matrix& m );
