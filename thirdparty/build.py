@@ -11,6 +11,10 @@ MODULE_PATH = os.path.dirname(os.path.abspath(__file__))
 MAKE = "nmake" if sys.platform == "win32" else "make"
 GENERATOR = "NMake Makefiles" if sys.platform == "win32" else "Unix Makefiles"
 
+CONFIGS = {
+	"assimp-3.3.1" : "-DASSIMP_BUILD_TESTS=OFF -DASSIMP_BUILD_ASSIMP_TOOLS=OFF -DASSIMP_BUILD_SAMPLES=OFF"
+}
+
 def safe_mkdir(path):
 	if not os.path.exists(path):
 		os.mkdir(path)
@@ -51,7 +55,9 @@ def main():
 
 			os.chdir(temp_path)
 
-			cmd = '''cmake -G"%s" -DCMAKE_INSTALL_PREFIX="%s" "%s"''' % (GENERATOR, install_path, source_path)
+			config = CONFIGS.get(path, "")
+
+			cmd = '''cmake -G"%s" -DCMAKE_INSTALL_PREFIX="%s" %s "%s"''' % (GENERATOR, install_path, config, source_path)
 			call_cmd(cmd, quiet)
 			call_cmd("%s" % (MAKE, ), quiet)
 			call_cmd("%s install" % (MAKE, ), quiet)

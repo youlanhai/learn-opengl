@@ -18,7 +18,6 @@ set(C_FILES
 	src/TwMgr.cpp
 	src/TwOpenGL.cpp
 	src/TwOpenGLCore.cpp
-	src/TwPrecomp.cpp
 )
 
 if(WIN32)
@@ -26,6 +25,12 @@ if(WIN32)
 		src/TWDirect3D9.cpp
 		src/TWDirect3D10.cpp
 		#src/TWDirect3D11.cpp
+		src/TwPrecomp.cpp
+	)
+elseif(APPLE)
+	add_definitions(-fPIC -fno-strict-aliasing -D_MACOSX -ObjC++  -D__PLACEMENT_NEW_INLINE)
+	set(C_FILES ${C_FILES}
+		src/TwEventGLUT.c
 	)
 endif()
 
