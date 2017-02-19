@@ -55,7 +55,11 @@ public:
 		material_->bindUniform("specularStrength", 2.0f);
 
 		materialVolume_ = new Material();
+#if TEST_SHADOW_VOLUME
 		if (!materialVolume_->loadShader("shader/xyzcolor.shader"))
+#else
+		if (!materialVolume_->loadShader("shader/xyz.shader"))
+#endif
 		{
 			return false;
 		}
@@ -128,7 +132,7 @@ public:
 		matWorld.setIdentity();
 
 		renderer->setWorldMatrix(matWorld);
-		mesh1_->draw();
+		//mesh1_->draw();
 
 		matWorld.setTranslate(-1.0f, 1.0f, 0.0f);
 		renderer->setWorldMatrix(matWorld);
@@ -143,8 +147,11 @@ public:
 			volume->addMaterial(materialVolume_);
 
 			glDisable(GL_CULL_FACE);
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			renderer->setWorldMatrix(Matrix::Identity);
 			volume->draw();
+			glDisable(GL_BLEND);
 			glEnable(GL_CULL_FACE);
 		}
 	}

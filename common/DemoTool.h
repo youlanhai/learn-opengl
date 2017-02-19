@@ -21,6 +21,7 @@ MeshPtr createPlane(const Vector2 &size, float gridSize);
 
 MeshPtr createCube(const Vector3 &size);
 
+#define TEST_SHADOW_VOLUME 1
 MeshPtr createShaowVolumeForDirectionLight(MeshPtr source, const Matrix &matWorld, const Vector3 &lightDir);
 
 template<typename T>

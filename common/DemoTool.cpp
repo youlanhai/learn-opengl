@@ -6,6 +6,7 @@
 #include "Matrix.h"
 
 #include <unordered_map>
+#include <unordered_set>
 #include <map>
 #include <cmath>
 
@@ -409,6 +410,29 @@ static uint32_t extractIndex(const char *data, size_t i, size_t stride)
 	assert(0 && "shouldn't reach here!");
 }
 
+typedef std::unordered_set<uint64_t> EdgeSet;
+void unionEdge(EdgeSet &edges, uint32_t a, uint32_t b)
+{
+	uint64_t e;
+	if (a > b)
+	{
+		std::swap(a, b);
+	}
+	e = (uint64_t)a << 32 | (uint64_t)b;
+
+	auto it = edges.find(e);
+	if (it == edges.end())
+	{
+		edges.insert(e);
+	}
+	else
+	{
+		// 如果已经存在该边，说明这不是边界
+		edges.erase(it);
+	}
+}
+
+
 MeshPtr createShaowVolumeForDirectionLight(MeshPtr source, const Matrix &matWorld, const Vector3 &lightDir)
 {
 	VertexDeclarationPtr decl = source->getVertexDecl();
@@ -420,7 +444,7 @@ MeshPtr createShaowVolumeForDirectionLight(MeshPtr source, const Matrix &matWorl
 		return nullptr;
 	}
 
-	std::unordered_map<uint32_t, uint32_t> edges;
+	EdgeSet edges;
 
 	std::map<uint32_t, uint32_t> frontIndexSet;
 	std::vector<uint32_t> frontIndices;
@@ -446,19 +470,29 @@ MeshPtr createShaowVolumeForDirectionLight(MeshPtr source, const Matrix &matWorl
 			frontIndexSet[i0] = 0;
 			frontIndexSet[i1] = 0;
 			frontIndexSet[i2] = 0;
+
+			unionEdge(edges, i0, i1);
+			unionEdge(edges, i1, i2);
+			unionEdge(edges, i2, i0);
 		}
 	}
 	ib->unlock();
 	vb->unlock();
 
+#if TEST_SHADOW_VOLUME
 	typedef VertexXYZColor VertexType;
+#else
+	typedef VertexXYZ VertexType;
+#endif
 	std::vector<VertexType> vertices;
 	std::vector<uint16_t> indices;
 
 	// 拷贝正面的顶点数据
 	vertices.reserve(frontIndexSet.size());
 	VertexType vertex;
-	vertex.color = Color(0xffffffff);
+#if TEST_SHADOW_VOLUME
+	vertex.color.set(1.0f, 1.0f, 1.0f, 0.5f);
+#endif
 	for (auto & pair : frontIndexSet)
 	{
 		// 将正面的索引重新映射为更紧凑的索引
@@ -475,6 +509,40 @@ MeshPtr createShaowVolumeForDirectionLight(MeshPtr source, const Matrix &matWorl
 		auto it = frontIndexSet.find(index);
 		assert(it != frontIndexSet.end());
 		indices.push_back(it->second);
+	}
+
+	// 向无穷远处平移，生成背面顶点数据
+	size_t nVertices = vertices.size();
+	vertices.reserve(nVertices * 2.0f);
+	for (size_t i = 0; i < nVertices; ++i)
+	{
+		vertices.push_back(vertices[i]);
+		vertices.back().position += lightDir * 5.0f;
+	}
+	size_t nIndices = indices.size();
+	for (size_t i = 0; i < nIndices; ++i)
+	{
+		indices.push_back(indices[i] + nVertices);
+	}
+
+	// 生成侧面
+	for (uint64_t e : edges)
+	{
+		uint32_t a = (e >> 32) & 0xffffffff;
+		uint32_t b = e & 0xffffffff;
+
+		a = frontIndexSet[a];
+		b = frontIndexSet[b];
+		uint32_t c = a + nVertices;
+		uint32_t d = b + nVertices;
+
+		indices.push_back(a);
+		indices.push_back(c);
+		indices.push_back(b);
+
+		indices.push_back(b);
+		indices.push_back(c);
+		indices.push_back(d);
 	}
 
 	MeshPtr ret = new Mesh();
