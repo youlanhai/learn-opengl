@@ -81,10 +81,10 @@ public:
 
 		ShaderUniform *un;
 
-		un = shader_->findUniform("matWorld");
+		un = shader_->findUniform("u_matWorld");
 		if (un) un->bindValue(matWorld);
 
-		un = shader_->findUniform("matMVP");
+		un = shader_->findUniform("u_matWorldViewProj");
 		if (un) un->bindValue(matWorld * camera_.getViewProjMatrix());
 
 		shader_->unbind();

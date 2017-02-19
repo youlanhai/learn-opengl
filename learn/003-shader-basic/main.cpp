@@ -33,13 +33,13 @@ public:
         FileSystem::instance()->dumpSearchPath();
         
         shader_ = new ShaderProgram();
-        if(!shader_->loadFromFile("test.shader"))
+        if(!shader_->loadFromFile("shader/xyzcolor.shader"))
         {
             LOG_ERROR("Failed load shader.");
 			return false;
         }
         
-        int matrixLocation = shader_->getUniformLocation("matWorldViewProj");
+        int matrixLocation = shader_->getUniformLocation("u_matWorldViewProj");
         int posLocation = shader_->getAttribLocation("a_position");
         int crLocation = shader_->getAttribLocation("a_color");
 

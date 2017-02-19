@@ -76,8 +76,8 @@ public:
 		Matrix matWorld;
 		matWorld.setRotateY(glfwGetTime() * 0.5f);
 
-		bindShaderUniform(shader_.get(), "matWorld", matWorld);
-		bindShaderUniform(shader_.get(), "matMVP", matWorld * camera_.getViewProjMatrix());
+		bindShaderUniform(shader_.get(), "u_matWorld", matWorld);
+		bindShaderUniform(shader_.get(), "u_matWorldViewProj", matWorld * camera_.getViewProjMatrix());
 		bindShaderUniform(shader_.get(), "cameraPos", camera_.getPosition());
 
 		shader_->unbind();

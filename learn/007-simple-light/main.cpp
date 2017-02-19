@@ -153,10 +153,10 @@ class MyApplication : public Application
 
 		ShaderUniform *un;
 
-		un = curShader_->findUniform("matWorld");
+		un = curShader_->findUniform("u_matWorld");
 		un->bindValue(matWorld);
 
-		un = curShader_->findUniform("matMVP");
+		un = curShader_->findUniform("u_matWorldViewProj");
 		un->bindValue(matWorld * matViewProj);
 
 		curShader_->unbind();

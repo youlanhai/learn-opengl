@@ -2,8 +2,8 @@ attribute vec4 a_position;
 attribute vec3 a_normal;
 attribute vec2 a_texcoord0;
 
-uniform mat4 matWorld;
-uniform mat4 matMVP;
+uniform mat4 u_matWorld;
+uniform mat4 u_matWorldViewProj;
 
 uniform vec3 ambientColor;
 
@@ -21,9 +21,9 @@ vec3 light(vec3 normal)
 
 void main()
 {
-	gl_Position = matMVP * a_position;
+	gl_Position = u_matWorldViewProj * a_position;
 	v_texcoord = a_texcoord0;
 
-	vec3 normal = (matWorld * vec4(a_normal, 0.0)).xyz;
+	vec3 normal = (u_matWorld * vec4(a_normal, 0.0)).xyz;
 	v_color = vec4(light(normal), 1.0);
 }

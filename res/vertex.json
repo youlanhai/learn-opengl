@@ -6,7 +6,7 @@
 		"a_position" : "float3",
 		"a_color" : "ubyte4n"
 	},
-	"xyzd" : {
+	"xyzduv" : {
 		"a_position" : "float3",
 		"a_color" : "ubyte4n",
 		"a_texcoord" : "float2"

@@ -1,8 +1,8 @@
 attribute vec4 a_position;
 
-uniform mat4 matMVP;
+uniform mat4 u_matWorldViewProj;
 
 void main()
 {
-	gl_Position = matMVP * a_position;
+	gl_Position = u_matWorldViewProj * a_position;
 }

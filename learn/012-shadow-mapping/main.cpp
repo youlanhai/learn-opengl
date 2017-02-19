@@ -101,12 +101,12 @@ public:
 		matWorld.setRotateY(glfwGetTime() * 0.5f);
 
 		mtlOnlyPos_->bindShader();
-		mtlOnlyPos_->bindUniform("matMVP", matWorld * lightCamera_.getViewProjMatrix());
+		mtlOnlyPos_->bindUniform("u_matWorldViewProj", matWorld * lightCamera_.getViewProjMatrix());
 
 
 		mtlShadowMapping_->bindShader();
-		mtlShadowMapping_->bindUniform("matWorld", matWorld);
-		mtlShadowMapping_->bindUniform("matMVP", matWorld * camera_.getViewProjMatrix());
+		mtlShadowMapping_->bindUniform("u_matWorld", matWorld);
+		mtlShadowMapping_->bindUniform("u_matWorldViewProj", matWorld * camera_.getViewProjMatrix());
 		mtlShadowMapping_->bindUniform("cameraPos", camera_.getPosition());
 		mtlShadowMapping_->bindUniform("matLightProj", matWorld * lightCamera_.getViewProjMatrix());
 

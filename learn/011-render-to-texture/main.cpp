@@ -92,8 +92,8 @@ public:
 		Matrix matWorld;
 		matWorld.setRotateY(glfwGetTime() * 0.5f);
 
-		material1_->bindUniform("matWorld", matWorld);
-		material1_->bindUniform("matMVP", matWorld * camera_.getViewProjMatrix());
+		material1_->bindUniform("u_matWorld", matWorld);
+		material1_->bindUniform("u_matWorldViewProj", matWorld * camera_.getViewProjMatrix());
 		material1_->bindUniform("cameraPos", camera_.getPosition());
 
 
