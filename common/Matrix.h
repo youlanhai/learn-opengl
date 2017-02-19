@@ -41,6 +41,7 @@ public:
 
     void setScale( const float x, const float y, const float z );
     void setScale( const Vector3 & scale );
+	void setScale( float scale );
 
     void setTranslate( const float x, const float y, const float z );
     void setTranslate( const Vector3 & pos );
@@ -102,6 +103,11 @@ public:
 inline void Matrix::setScale( const Vector3 & scale )
 {
     setScale(scale.x, scale.y, scale.z);
+}
+
+inline void Matrix::setScale(float scale)
+{
+	setScale(scale, scale, scale);
 }
 
 inline void Matrix::setTranslate( const Vector3 & pos )

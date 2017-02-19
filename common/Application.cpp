@@ -154,6 +154,8 @@ bool Application::createWindow(int width, int height, const std::string &title)
     glfwSwapInterval(1);
     // 屏幕清成蓝色
     glClearColor(0.15f, 0.24f, 0.24f, 0.0f);
+	glClearStencil(0);
+	glClearDepth(1.0f);
     
 	glEnable(GL_DEPTH_TEST);
     return onCreate();

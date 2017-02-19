@@ -28,19 +28,13 @@ public:
         FileSystem::instance()->addSearchPath(joinPath(resPath, "common"));
         FileSystem::instance()->dumpSearchPath();
         
-        VertexXYZColor vertices[4];
-        // left bottom
-        vertices[0].position.set(-0.5f, -0.5f, 0.0f);
-        vertices[0].color.set(1.0f, 0.0f, 0.0f);
-        // left top 
-        vertices[1].position.set(-0.5f, 0.5f, 0.0f);
-        vertices[1].color.set(0.0f, 1.0f, 0.0f); 
-        // right bottom
-        vertices[2].position.set(0.5f, -0.5f, 0.0f);
-        vertices[2].color.set(0.0f, 0.0f, 1.0f);
-        // right top 
-        vertices[3].position.set(0.5f, 0.5f, 0.0f);
-        vertices[3].color.set(1.0f, 0.0f, 1.0f);
+		// ÄæÊ±ÕëË³Ðò
+		VertexXYZColor vertices[4] = {
+			{ { -0.5f, 0.5f, 0.0f },{ 0.0f, 1.0f, 0.0f, 1.0f } }, // left top
+			{ { -0.5f, -0.5f, 0.0f },{ 1.0f, 0.0f, 0.0f, 1.0f } }, // left bottom
+			{ { 0.5f, 0.5f, 0.0f },{ 0.0f, 0.0f, 1.0f, 1.0f } }, // right top
+			{ { 0.5f, -0.5f, 0.0f },{ 1.0f, 0.0f, 0.0f, 1.0f } }, // right bottom
+		};
         
         vb_ = new VertexBufferEx<VertexXYZColor>(BufferUsage::Static, 4, vertices);
         VertexDeclarationPtr decl = VertexDeclMgr::instance()->get(VertexXYZColor::getType());
@@ -51,14 +45,14 @@ public:
         }
         
         shader_ = new ShaderProgram();
-        if(!shader_->loadFromFile("test.shader"))
+        if(!shader_->loadFromFile("shader/xyzcolor.shader"))
         {
             LOG_ERROR("Failed to load shader");
             return false;
         }
         
         shader_->bind();
-        ShaderUniform *uniform = shader_->findUniform("matWorldViewProj");
+        ShaderUniform *uniform = shader_->findUniform("u_matWorldViewProj");
         if(uniform != nullptr)
         {
             uniform->bindValue(Matrix::Identity);
@@ -70,6 +64,9 @@ public:
             LOG_ERROR("Failed to init vertex attribute");
             return false;
         }
+
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
         return true;
     }
     
