@@ -1,5 +1,6 @@
 #include "Renderer.h"
 #include "ShaderUniformAuto.h"
+#include "Camera.h"
 
 IMPLEMENT_SINGLETON(Renderer);
 
@@ -17,6 +18,8 @@ Renderer::Renderer()
 	: dirtyFlag_(DF_ALL)
 	, matView_(Matrix::Identity)
 	, matProj_(Matrix::Identity)
+	, camera_(nullptr)
+	, ambientColor_(0.2f, 0.2f, 0.2f, 1.0f)
 {
 	registerDefaultAutoShaderUniform();
 	pushMatrix(Matrix::Identity);
@@ -87,3 +90,13 @@ const Matrix& Renderer::getViewProjMatrix() const
 	return matViewProj_;
 }
 
+void Renderer::applyCameraMatrix()
+{
+	if (nullptr == camera_)
+	{
+		return;
+	}
+
+	setViewMatrix(camera_->getViewMatrix());
+	setProjMatrix(camera_->getProjMatrix());
+}

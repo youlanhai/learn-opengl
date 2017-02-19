@@ -1,7 +1,8 @@
 uniform sampler2D u_texture0; // 主纹理
 uniform sampler2D u_texture1; // 法线贴图
+uniform vec3 u_ambientColor;
+
 uniform vec3 lightColor;
-uniform vec3 ambientColor;
 uniform float shininess;
 uniform float specularStrength;
 
@@ -27,6 +28,6 @@ void main()
 #endif
 	vec3 specular = lightColor * (specularStrength * spec);
 
-	vec3 color = ambientColor + diffuse + specular;
+	vec3 color = u_ambientColor + diffuse + specular;
 	gl_FragColor = texture2D(u_texture0, v_texcoord0) * vec4(color, 1.0);
 }

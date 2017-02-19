@@ -94,6 +94,9 @@ public:
     void orthogonalProjectionGL(float w, float h, float zn, float zf);
     void orthogonalProjectionOffCenterGL(float left, float right, float bottom, float top, float zn, float zfar);
 
+	Vector3 transformPoint(const Vector3 &pos) const;
+	Vector3 transformNormal(const Vector3 &pos) const;
+
 public:
     static Matrix Identity;
     static Matrix Zero;

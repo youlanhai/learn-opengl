@@ -2,7 +2,10 @@
 
 #include "Singleton.h"
 #include "Matrix.h"
+#include "Color.h"
 #include <vector>
+
+class Camera;
 
 class Renderer : public Singleton<Renderer>
 {
@@ -26,10 +29,20 @@ public:
     const Matrix& getWorldViewProjMatrix() const;
     const Matrix& getViewProjMatrix() const;
 
+	void setCamera(Camera *camera) { camera_ = camera; }
+	Camera* getCamera() { return camera_; }
+
+	void applyCameraMatrix();
+
+	void setAmbientColor(const Color &color) { ambientColor_ = color; }
+	const Color& getAmbientColor() const { return ambientColor_; }
+
 private:
     std::vector<Matrix> matrixs_;
     Matrix      matView_;
     Matrix      matProj_;
+	Camera*		camera_;
+	Color		ambientColor_;
     
     mutable Matrix      matViewProj_;
     mutable Matrix      matWorldViewProj_;

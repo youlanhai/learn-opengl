@@ -13,11 +13,15 @@ class Mesh;
 class Vector2;
 class Vector3;
 
-SmartPointer<Mesh> createSimpleGround(const Vector2 &size, float height,  float gridSize, float waveSize);
+typedef SmartPointer<Mesh> MeshPtr;
 
-SmartPointer<Mesh> createPlane(const Vector2 &size, float gridSize);
+MeshPtr createSimpleGround(const Vector2 &size, float height,  float gridSize, float waveSize);
 
-SmartPointer<Mesh> createCube(const Vector3 &size);
+MeshPtr createPlane(const Vector2 &size, float gridSize);
+
+MeshPtr createCube(const Vector3 &size);
+
+MeshPtr createShaowVolumeForDirectionLight(MeshPtr source, const Matrix &matWorld, const Vector3 &lightDir);
 
 template<typename T>
 bool bindShaderUniform(ShaderProgram *shader, const char *name, const T &value)

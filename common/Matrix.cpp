@@ -522,3 +522,23 @@ void Matrix::orthogonalProjectionOffCenterGL(float left, float right, float bott
     _34 = 0;
     _44 = 1;
 }
+
+Vector3 Matrix::transformPoint(const Vector3 & pos) const
+{
+	Vector3 ret(
+		pos.dotProduct(*(Vector3*)m[0]),
+		pos.dotProduct(*(Vector3*)m[1]),
+		pos.dotProduct(*(Vector3*)m[2])
+	);
+	ret += *(Vector3*)m[3];
+	return ret;
+}
+
+Vector3 Matrix::transformNormal(const Vector3 & pos) const
+{
+	return Vector3(
+		pos.dotProduct(*(Vector3*)m[0]),
+		pos.dotProduct(*(Vector3*)m[1]),
+		pos.dotProduct(*(Vector3*)m[2])
+	);
+}

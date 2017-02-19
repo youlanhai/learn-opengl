@@ -5,7 +5,8 @@ attribute vec3 a_tangent;
 
 uniform mat4 u_matWorld;
 uniform mat4 u_matWorldViewProj;
-uniform vec3 cameraPos;
+uniform vec3 u_cameraPos;
+
 uniform vec3 lightDir;
 
 varying vec2 v_texcoord0;
@@ -26,7 +27,7 @@ void main()
 
 	// 将世界空间中坐标和向量，都转换到切线空间中。
 	vec3 tangentPos = TBN * vec3(u_matWorld * a_position);
-	vec3 tangentCameraPos = TBN * cameraPos;
+	vec3 tangentCameraPos = TBN * u_cameraPos;
 	v_viewDir = normalize(tangentCameraPos - tangentPos);
 
 	v_lightDir = normalize(TBN * lightDir);

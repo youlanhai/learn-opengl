@@ -1,5 +1,6 @@
 ﻿#include "ShaderUniformAuto.h"
 #include "Renderer.h"
+#include "Camera.h"
 
 
 ShaderAutoUniformProxy::ShaderAutoUniformProxy(ShaderUniformApplyFun fun)
@@ -51,7 +52,7 @@ void shaderApplyWorldViewProj(ShaderUniform *pUniform)
 
 void shaderApplyAmbient(ShaderUniform *pUniform)
 {
-    assert(0);
+	pUniform->bindValue(Renderer::instance()->getAmbientColor());
 }
 
 void shaderApplyOmitLight(ShaderUniform *pUniform)
@@ -67,6 +68,19 @@ void shaderApplyDirLight(ShaderUniform *pUniform)
 void shaderApplySpotLight(ShaderUniform *pUniform)
 {
     assert(0);
+}
+
+void shaderApplyCameraPos(ShaderUniform *pUniform)
+{
+	auto camera = Renderer::instance()->getCamera();
+	if (camera)
+	{
+		pUniform->bindValue(camera->getPosition());
+	}
+	else
+	{
+		pUniform->bindValue(Vector3::Zero);
+	}
 }
 
 //////////////////////////////////////////////////////////////////
@@ -85,6 +99,7 @@ void registerDefaultAutoShaderUniform()
     REG_SHADER_CONST_FACTORY(AutoUniform::OmitLight, shaderApplyOmitLight);
     REG_SHADER_CONST_FACTORY(AutoUniform::DirLight, shaderApplyDirLight);
     REG_SHADER_CONST_FACTORY(AutoUniform::SpotLight, shaderApplySpotLight);
+	REG_SHADER_CONST_FACTORY(AutoUniform::CameraPos, shaderApplyCameraPos);
 
 #undef REG_SHADER_CONST_FACTORY
 }
