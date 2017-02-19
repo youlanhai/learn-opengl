@@ -15,6 +15,8 @@ enum DirtyFlag
 
 Renderer::Renderer()
 	: dirtyFlag_(DF_ALL)
+	, matView_(Matrix::Identity)
+	, matProj_(Matrix::Identity)
 {
 	registerDefaultAutoShaderUniform();
 	pushMatrix(Matrix::Identity);

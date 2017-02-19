@@ -43,6 +43,7 @@ public:
 		{
 			return false;
 		}
+		material1_->setAutoBindUniform(false);
 
 		material1_->bindShader();
 		material1_->bindUniform("lightDir", lightDir);
@@ -59,6 +60,7 @@ public:
 		{
 			return false;
 		}
+		material2_->setAutoBindUniform(false);
 
 		frameSize_.set(1024, 1024);
 #if 1 

@@ -42,12 +42,14 @@ public:
 		{
 			return false;
 		}
+		mtlOnlyPos_->setAutoBindUniform(false);
 
 		mtlQuad_ = new Material();
 		if (!mtlQuad_->loadShader("shader/xyzuv_upsidedown.shader"))
 		{
 			return false;
 		}
+		mtlQuad_->setAutoBindUniform(false);
 
 		mtlShadowMapping_ = new Material();
 		if (!mtlShadowMapping_->loadShader("shader/shadowmapping.shader") ||
@@ -55,6 +57,8 @@ public:
 		{
 			return false;
 		}
+
+		mtlShadowMapping_->setAutoBindUniform(false);
 
 		mtlShadowMapping_->bindShader();
 		mtlShadowMapping_->bindUniform("lightDir", lightDir);
@@ -114,9 +118,7 @@ public:
 		mtlQuad_->bindShader();
 
 		matWorld.setRotateX(-PI_HALF);
-		Matrix mat2;
-		mat2.setTranslate(0, 0, 2.0f);
-		matWorld.postMultiply(mat2);
+		matWorld[3].set(0, 0, 2.0f);
 		mtlQuad_->bindUniform("u_matWorldViewProj", matWorld * camera_.getViewProjMatrix());
 	}
 
@@ -136,7 +138,6 @@ public:
 			glViewport(0, 0, frameSize_.x, frameSize_.y);
 			glClearColor(0, 0, 0, 0);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			glCullFace(GL_FRONT);
 			
 			mesh_->setMaterial(0, mtlOnlyPos_);
 			mesh_->draw();
@@ -150,7 +151,6 @@ public:
 
 		glClearColor(0.15f, 0.24f, 0.24f, 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glCullFace(GL_BACK);
 
 		mesh_->setMaterial(0, mtlShadowMapping_);
 		mesh_->draw();

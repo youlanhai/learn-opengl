@@ -59,6 +59,7 @@ public:
 		mesh_ = createCube(Vector3(1.0f, 1.0f, 1.0f));
 		MaterialPtr material = new Material();
 		material->setShader(shader_);
+		material->setAutoBindUniform(false);
 		mesh_->addMaterial(material);
 
 		camera_.lookAt(Vector3(0, 1, -2), Vector3::Zero, Vector3::YAxis);

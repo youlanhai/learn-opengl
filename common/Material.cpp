@@ -3,6 +3,7 @@
 #include "TextureMgr.h"
 
 Material::Material()
+	: autoBindUniform_(true)
 {
 }
 
@@ -53,7 +54,10 @@ bool Material::begin()
 	}
 
 	shader_->bind();
-	shader_->applyAutoUniforms();
+	if (autoBindUniform_)
+	{
+		shader_->applyAutoUniforms();
+	}
 
 	for (auto &pair : textures_)
 	{

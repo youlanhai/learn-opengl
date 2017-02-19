@@ -27,9 +27,12 @@ public:
 	bool loadTexture(const std::string & key, const std::string &path);
 	void bindShader();
 
+	void setAutoBindUniform(bool enable) { autoBindUniform_ = enable; }
+
 private:
 	ShaderProgramPtr shader_;
 	std::unordered_map<std::string, TexturePtr> textures_;
+	bool	autoBindUniform_;
 };
 
 typedef SmartPointer<Material> MaterialPtr;

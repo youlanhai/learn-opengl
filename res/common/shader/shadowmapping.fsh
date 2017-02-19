@@ -29,8 +29,8 @@ float shadowMapping()
 	// 如果当前的深度值更大，说明当前的点就在阴影中
 	// return currentDepth > closestDepth;
 
-	//float diffuse = dot(normalize(v_normal), normalize(lightDir));
-	float bias = 0.0001;// max(0.05 * (1.0 - diffuse), 0.005);
+	float diffuse = dot(normalize(v_normal), normalize(lightDir));
+	float bias = max(0.05 * (1.0 - diffuse), 0.0005);
 
 	float shadow = 0.0;
 	for(int x = -1; x <= 1; ++x)

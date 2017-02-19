@@ -45,6 +45,7 @@ class MyApplication : public Application
 		//mesh_ = createCube(Vector3(1.0f, 1.0f, 1.0f));
 		MaterialPtr material = new Material();
 		material->setShader(curShader_);
+		material->setAutoBindUniform(false);
 		mesh_->addMaterial(material);
 
 		LOG_DEBUG("num vertices: %d", (int)mesh_->getVertexBuffer()->count());
@@ -105,7 +106,7 @@ class MyApplication : public Application
 		un->bindValue(lightDir);
 
 		un = shader->findUniform("lightColor");
-		un->bindValue(Vector3(1.0f));
+		un->bindValue(Vector3(1.5f));
 
 		un = shader->findUniform("ambientColor");
 		un->bindValue(Vector3(0.1f));

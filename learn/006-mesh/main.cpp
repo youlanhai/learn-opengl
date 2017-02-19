@@ -40,6 +40,7 @@ class MyApplication : public Application
         mesh_ = createSimpleGround(Vector2(1.0f, 1.0f), 0.3f, 0.1f, 0.4f);
 		MaterialPtr material = new Material();
 		material->setShader(shader_);
+		material->setAutoBindUniform(false);
         mesh_->addMaterial(material);
         return true;
     }

@@ -35,7 +35,7 @@ public:
 			return false;
 		}
 		texture->setQuality(TextureQuality::TwoLinear);
-		//texNormalMap->setQuality(TextureQuality::Nearest);
+		texNormalMap->setQuality(TextureQuality::ThreeLinear);
 
 		const char *ShaderFile = "shader/normalmap.shader";
 		shader_ = ShaderProgramMgr::instance()->get(ShaderFile);
@@ -60,7 +60,7 @@ public:
 		if (un) un->bindValue(lightDir);
 
 		un = shader_->findUniform("lightColor");
-		if (un) un->bindValue(Vector3(1.2f));
+		if (un) un->bindValue(Vector3(1.5f));
 
 		un = shader_->findUniform("ambientColor");
 		if (un) un->bindValue(Vector3(0.2f));
@@ -70,6 +70,7 @@ public:
 		mesh_ = createCube(Vector3(1.0f, 1.0f, 1.0f));
 		MaterialPtr material = new Material();
 		material->setShader(shader_);
+		material->setAutoBindUniform(false);
 		mesh_->addMaterial(material);
 
 		setupViewProjMatrix();
@@ -117,7 +118,7 @@ public:
 		Vector2 size = getWindowSize();
 
 		Matrix matView;
-		matView.lookAt(Vector3(0, 1, -2.f), Vector3::Zero, Vector3::YAxis);
+		matView.lookAt(Vector3(0, 1, -1.8f), Vector3::Zero, Vector3::YAxis);
 
 		Matrix matProj;
 		matProj.setIdentity();
