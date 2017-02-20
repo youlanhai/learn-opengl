@@ -26,6 +26,7 @@ public:
 		: lightDir_(1, 1, 0)
 		, showVolume_(false)
 		, showShadow_(true)
+		, showCaster_(true)
 	{
 		lightDir_.normalize();
 		glfwWindowHint(GLFW_SAMPLES, 4);
@@ -72,10 +73,11 @@ public:
 		meshQuad_->addMaterial(materialVolume_);
 
 		camera_.lookAt(Vector3(0, 2, -4), Vector3::Zero, Vector3::YAxis);
+		camera_.setMoveSpeed(3.0f);
 		setupViewProjMatrix();
 		Renderer::instance()->setCamera(&camera_);
 
-		lightTransform_.lookAt(Vector3(1, 1, 0), Vector3::Zero, Vector3::YAxis);
+		lightTransform_.lookAt(Vector3(1, 1, -0.5), Vector3::Zero, Vector3::YAxis);
 
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
@@ -120,7 +122,10 @@ public:
 
 		matWorld.setTranslate(1.0f, 1.0f, 0.0f);
 		renderer->setWorldMatrix(matWorld);
-		meshCube_->draw();
+		if (showCaster_)
+		{
+			meshCube_->draw();
+		}
 	}
 
 	void renderShadow()
@@ -174,14 +179,18 @@ public:
 		{
 			// 然后渲染一个全屏的黑色图
 			materialVolume_->bindShader();
-			materialVolume_->bindUniform("u_color", Color(0.0f, 0.0f, 0.0f, 1.0f));
+			materialVolume_->bindUniform("u_color", Color(0.0f, 0.0f, 0.0f, 0.8f));
 			renderer->setViewMatrix(Matrix::Identity);
 			renderer->setProjMatrix(Matrix::Identity);
+
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 			glDisable(GL_DEPTH_TEST);
 			glStencilFunc(GL_LESS, 0, 0xffffffff);
 			meshQuad_->draw();
 
+			glDisable(GL_BLEND);
 			glEnable(GL_DEPTH_TEST);
 		}
 
@@ -200,6 +209,29 @@ public:
 		camera_.setPerspective(PI_QUARTER, size.x / size.y, 1.0f, 1000.0f);
 	}
 	
+	virtual void onKey(int key, int scancode, int action, int mods) override
+	{
+		Application::onKey(key, scancode, action, mods);
+
+		if (action == GLFW_RELEASE)
+		{
+			switch(key)
+			{
+			case GLFW_KEY_1:
+				showShadow_ = !showShadow_;
+				break;
+			case GLFW_KEY_2:
+				showVolume_ = !showVolume_;
+				break;
+			case GLFW_KEY_3:
+				showCaster_ = !showCaster_;
+				break;
+			default:
+				break;
+			}
+		}
+	}
+
 	virtual void onMouseButton(int button, int action, int mods) override
 	{
 		lastCursorPos_ = getCursorPos();
@@ -217,7 +249,7 @@ public:
 
 			Vector3 rotation = lightTransform_.getRotation();
 			rotation.y -= dx * PI_FULL;
-			rotation.x -= dy * PI_FULL;
+			rotation.x += dy * PI_FULL;
 			lightTransform_.setRotation(rotation);
 		}
 		else
@@ -247,6 +279,7 @@ public:
 
 	bool		showVolume_;
 	bool		showShadow_;
+	bool		showCaster_;
 };
 
 int main()

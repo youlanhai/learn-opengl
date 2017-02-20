@@ -18,7 +18,7 @@ bool Material::loadShader(const std::string &path)
 	return shader_;
 }
 
-bool Material::loadTexture(const std::string & key, const std::string & path)
+TexturePtr Material::loadTexture(const std::string & key, const std::string & path)
 {
 	TexturePtr texture = TextureMgr::instance()->get(path);
 	textures_[key] = texture;

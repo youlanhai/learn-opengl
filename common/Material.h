@@ -24,7 +24,7 @@ public:
 	bool bindUniform(const std::string &name, const T &value);
 
 	bool loadShader(const std::string &path);
-	bool loadTexture(const std::string & key, const std::string &path);
+	TexturePtr loadTexture(const std::string & key, const std::string &path);
 	void bindShader();
 
 	void setAutoBindUniform(bool enable) { autoBindUniform_ = enable; }
