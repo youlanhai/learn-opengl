@@ -37,6 +37,9 @@ public:
 	void setAmbientColor(const Color &color) { ambientColor_ = color; }
 	const Color& getAmbientColor() const { return ambientColor_; }
 
+	void setZWriteEnable(bool enable);
+	void setColorWriteEnable(bool enable);
+
 private:
     std::vector<Matrix> matrixs_;
     Matrix      matView_;

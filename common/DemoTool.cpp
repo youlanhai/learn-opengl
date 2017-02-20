@@ -32,10 +32,10 @@ std::string findResPath()
 }
 
 template<typename VertexType, typename IndexType>
-MeshPtr createMesh(const std::vector<VertexType> &vertices, const std::vector<IndexType> &indices)
+MeshPtr createMesh(const VertexType *vertices, size_t nVertices, const IndexType *indices, size_t nIndices)
 {
-	VertexBufferPtr vb = new VertexBufferEx<VertexType>(BufferUsage::Static, vertices.size(), vertices.data());
-	IndexBufferPtr ib = new IndexBufferEx<IndexType>(BufferUsage::Static, indices.size(), indices.data());
+	VertexBufferPtr vb = new VertexBufferEx<VertexType>(BufferUsage::Static, nVertices, vertices);
+	IndexBufferPtr ib = new IndexBufferEx<IndexType>(BufferUsage::Static, nIndices, indices);
 
 	MeshPtr mesh = new Mesh();
 	mesh->setVertexBuffer(vb);
@@ -43,7 +43,7 @@ MeshPtr createMesh(const std::vector<VertexType> &vertices, const std::vector<In
 	mesh->setVertexDecl(VertexDeclMgr::instance()->get(VertexType::getType()));
 
 	SubMeshPtr subMesh = new SubMesh();
-	subMesh->setPrimitive(PrimitiveType::TriangleList, 0, indices.size(), 0, true);
+	subMesh->setPrimitive(PrimitiveType::TriangleList, 0, nIndices, 0, true);
 	mesh->addSubMesh(subMesh);
 
 	return mesh;
@@ -234,7 +234,7 @@ MeshPtr createSimpleGround(const Vector2 &size, float height, float gridSize, fl
 	std::vector<uint16_t> indices;
 
 	createSimpleGround(vertices, indices, size, height, gridSize, waveSize);
-	return createMesh<VertexType, uint16_t>(vertices, indices);
+	return createMesh<VertexType, uint16_t>(vertices.data(), vertices.size(), indices.data(), indices.size());
 }
 
 void createPlane(std::vector<MeshVertex> &vertices, std::vector<uint16_t> &indices,
@@ -297,7 +297,7 @@ MeshPtr createPlane(const Vector2 &size, float gridSize)
 	std::vector<uint16_t> indices;
 
 	createPlane(vertices, indices, size, gridSize);
-	return createMesh<VertexType, uint16_t>(vertices, indices);
+	return createMesh<VertexType, uint16_t>(vertices.data(), vertices.size(), indices.data(), indices.size());
 }
 
 void createCube(std::vector<MeshVertex> &vertices, std::vector<uint16_t> &indices,
@@ -390,7 +390,29 @@ MeshPtr createCube(const Vector3 &size)
 	std::vector<uint16_t> indices;
 
 	createCube(vertices, indices, size);
-	return createMesh<VertexType, uint16_t>(vertices, indices);
+	return createMesh<VertexType, uint16_t>(vertices.data(), vertices.size(), indices.data(), indices.size());
+}
+
+MeshPtr createQuad(const Vector2 & size)
+{
+	typedef MeshVertex VertexType;
+
+	float hx = size.x * 0.5f;
+	float hy = size.y * 0.5f;
+
+	VertexXYZ vertices[4] = {
+		{ { -hx, hy, 0.0f }, }, // left top
+		{ { -hx, -hy, 0.0f }, }, // left bottom
+		{ { hx, hy, 0.0f },}, // right top
+		{ { hx, -hy, 0.0f }, }, // right bottom
+	};
+
+	uint16_t indices[6] = {
+		0, 1, 2,
+		2, 1, 3,
+	};
+
+	return createMesh<VertexXYZ, uint16_t>(vertices, 4, indices, 6);
 }
 
 static uint32_t extractIndex(const char *data, size_t i, size_t stride)
@@ -408,22 +430,26 @@ static uint32_t extractIndex(const char *data, size_t i, size_t stride)
 		return ((uint32_t*)data)[i];
 	}
 	assert(0 && "shouldn't reach here!");
+	return 0;
 }
 
-typedef std::unordered_set<uint64_t> EdgeSet;
+typedef std::unordered_map<uint64_t, uint64_t> EdgeSet;
 void unionEdge(EdgeSet &edges, uint32_t a, uint32_t b)
 {
 	uint64_t e;
-	if (a > b)
+	if (a <= b)
 	{
-		std::swap(a, b);
+		e = (uint64_t)a << 32 | (uint64_t)b;
 	}
-	e = (uint64_t)a << 32 | (uint64_t)b;
+	else
+	{
+		e = (uint64_t)b << 32 | (uint64_t)a;
+	}
 
 	auto it = edges.find(e);
 	if (it == edges.end())
 	{
-		edges.insert(e);
+		edges[e] = (uint64_t)a << 32 | (uint64_t)b;
 	}
 	else
 	{
@@ -479,26 +505,20 @@ MeshPtr createShaowVolumeForDirectionLight(MeshPtr source, const Matrix &matWorl
 	ib->unlock();
 	vb->unlock();
 
-#if TEST_SHADOW_VOLUME
-	typedef VertexXYZColor VertexType;
-#else
 	typedef VertexXYZ VertexType;
-#endif
 	std::vector<VertexType> vertices;
 	std::vector<uint16_t> indices;
 
 	// 拷贝正面的顶点数据
 	vertices.reserve(frontIndexSet.size());
 	VertexType vertex;
-#if TEST_SHADOW_VOLUME
-	vertex.color.set(1.0f, 1.0f, 1.0f, 0.5f);
-#endif
 	for (auto & pair : frontIndexSet)
 	{
 		// 将正面的索引重新映射为更紧凑的索引
 		pair.second = vertices.size();
 
 		vertex.position = matWorld.transformPoint(pVertex[pair.first].position);
+		vertex.position += lightDir * 0.1f;
 		vertices.push_back(vertex);
 	}
 
@@ -517,17 +537,21 @@ MeshPtr createShaowVolumeForDirectionLight(MeshPtr source, const Matrix &matWorl
 	for (size_t i = 0; i < nVertices; ++i)
 	{
 		vertices.push_back(vertices[i]);
-		vertices.back().position += lightDir * 5.0f;
+		vertices.back().position += lightDir * 10.0f;
 	}
 	size_t nIndices = indices.size();
-	for (size_t i = 0; i < nIndices; ++i)
+	for (size_t i = 0; i < nIndices; i += 3)
 	{
-		indices.push_back(indices[i] + nVertices);
+		// 背面的顶点顺序跟正面相反
+		indices.push_back(indices[i + 0] + nVertices);
+		indices.push_back(indices[i + 2] + nVertices);
+		indices.push_back(indices[i + 1] + nVertices);
 	}
 
 	// 生成侧面
-	for (uint64_t e : edges)
+	for (auto &pair : edges)
 	{
+		uint64_t e = pair.second;
 		uint32_t a = (e >> 32) & 0xffffffff;
 		uint32_t b = e & 0xffffffff;
 

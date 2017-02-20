@@ -1,6 +1,7 @@
 #include "Renderer.h"
 #include "ShaderUniformAuto.h"
 #include "Camera.h"
+#include "glconfig.h"
 
 IMPLEMENT_SINGLETON(Renderer);
 
@@ -99,4 +100,16 @@ void Renderer::applyCameraMatrix()
 
 	setViewMatrix(camera_->getViewMatrix());
 	setProjMatrix(camera_->getProjMatrix());
+}
+
+void Renderer::setZWriteEnable(bool enable)
+{
+	GLboolean e = enable ? GL_TRUE : GL_FALSE;
+	glDepthMask(e);
+}
+
+void Renderer::setColorWriteEnable(bool enable)
+{
+	GLboolean e = enable ? GL_TRUE : GL_FALSE;
+	glColorMask(e, e, e, e);
 }

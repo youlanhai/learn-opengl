@@ -24,6 +24,8 @@ public:
 
 	MyApplication()
 		: lightDir_(1, 1, 0)
+		, showVolume_(false)
+		, showShadow_(true)
 	{
 		lightDir_.normalize();
 		glfwWindowHint(GLFW_SAMPLES, 4);
@@ -55,32 +57,28 @@ public:
 		material_->bindUniform("specularStrength", 2.0f);
 
 		materialVolume_ = new Material();
-#if TEST_SHADOW_VOLUME
-		if (!materialVolume_->loadShader("shader/xyzcolor.shader"))
-#else
-		if (!materialVolume_->loadShader("shader/xyz.shader"))
-#endif
+		if (!materialVolume_->loadShader("shader/xyz_ucolor.shader"))
 		{
 			return false;
 		}
 
-		mesh1_ = createPlane(Vector2(10.0f, 10.0f), 1.0f);
-		mesh1_->addMaterial(material_);
+		meshPlane_ = createPlane(Vector2(10.0f, 10.0f), 1.0f);
+		meshPlane_->addMaterial(material_);
 
-		mesh2_ = createCube(Vector3(1.0f, 1.0f, 1.0f));
-		mesh2_->addMaterial(material_);
+		meshCube_ = createCube(Vector3(1.0f, 1.0f, 1.0f));
+		meshCube_->addMaterial(material_);
 
-		modelTransform_.setScale(0.1f);
+		meshQuad_ = createQuad(Vector2(2, 2));
+		meshQuad_->addMaterial(materialVolume_);
 
 		camera_.lookAt(Vector3(0, 2, -4), Vector3::Zero, Vector3::YAxis);
 		setupViewProjMatrix();
-
 		Renderer::instance()->setCamera(&camera_);
 
-		glDisable(GL_CULL_FACE);
+		lightTransform_.lookAt(Vector3(1, 1, 0), Vector3::Zero, Vector3::YAxis);
+
+		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
-		// 开启模板测试
-		//glEnable(GL_STENCIL_TEST);
 		return true;
 	}
 
@@ -96,32 +94,14 @@ public:
 		auto renderer = Renderer::instance();
 		renderer->applyCameraMatrix();
 
-		lightDir_ = modelTransform_.getForwardVector();
+		lightDir_ = lightTransform_.getForwardVector();
 		lightDir_.normalize();
 
 		material_->bindShader();
 		material_->bindUniform("lightDir", -lightDir_);
 
-#if 0
-		// 把矩形覆盖的区域模版值增加为 1
-		glStencilFunc(GL_ALWAYS, 0, 0xffffffff);
-		glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
-
-		// 关闭颜色写入和深度写入。目的是只改变模板的值，而不影响原来的深度值和颜色值。
-		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-		glDepthMask(GL_FALSE);
-		drawQuad();
-
-		// 恢复颜色写入和深度写入
-		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-		glDepthMask(GL_TRUE);
-
-		// 只允许掩码值(0) < 模板值的区域可以进行渲染
-		glStencilFunc(GL_LESS, 0, 0xffffffff);
-		glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-#endif
-
 		renderScene();
+		renderShadow();
 	}
 
 	void renderScene()
@@ -132,28 +112,80 @@ public:
 		matWorld.setIdentity();
 
 		renderer->setWorldMatrix(matWorld);
-		//mesh1_->draw();
+		meshPlane_->draw();
 
 		matWorld.setTranslate(-1.0f, 1.0f, 0.0f);
 		renderer->setWorldMatrix(matWorld);
-		mesh2_->draw();
+		meshCube_->draw();
 
 		matWorld.setTranslate(1.0f, 1.0f, 0.0f);
 		renderer->setWorldMatrix(matWorld);
-		//mesh2_->draw();
-		MeshPtr volume = createShaowVolumeForDirectionLight(mesh2_, matWorld, lightDir_);
-		if (volume)
-		{
-			volume->addMaterial(materialVolume_);
+		meshCube_->draw();
+	}
 
-			glDisable(GL_CULL_FACE);
+	void renderShadow()
+	{
+		auto renderer = Renderer::instance();
+
+		Matrix matWorld = renderer->getWorldMatrix();
+		MeshPtr volume = createShaowVolumeForDirectionLight(meshCube_, matWorld, lightDir_);
+		if (!volume)
+		{
+			return;
+		}
+
+		volume->addMaterial(materialVolume_);
+		renderer->setWorldMatrix(Matrix::Identity);
+
+		// ZFail 算法
+		glEnable(GL_STENCIL_TEST);
+		glStencilFunc(GL_ALWAYS, 0, 0xffffffff);
+		renderer->setColorWriteEnable(false);
+		renderer->setZWriteEnable(false);
+
+		// 先渲染背面。深度测试失败时，模板值+1
+		glCullFace(GL_FRONT);
+		glStencilOp(GL_KEEP, GL_INCR, GL_KEEP);
+		volume->draw();
+
+		// 再渲染正面。深度测试是吧时，模板值-1
+		glCullFace(GL_BACK);
+		glStencilOp(GL_KEEP, GL_DECR, GL_KEEP);
+		volume->draw();
+
+		renderer->setColorWriteEnable(true);
+		glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+
+		// 显示阴影体
+		if (showVolume_)
+		{
+			materialVolume_->bindShader();
+			materialVolume_->bindUniform("u_color", Color(0.5f, 0.5f, 0.5f, 0.5f));
+
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			renderer->setWorldMatrix(Matrix::Identity);
 			volume->draw();
 			glDisable(GL_BLEND);
-			glEnable(GL_CULL_FACE);
 		}
+
+		renderer->setZWriteEnable(true);
+
+		if (showShadow_)
+		{
+			// 然后渲染一个全屏的黑色图
+			materialVolume_->bindShader();
+			materialVolume_->bindUniform("u_color", Color(0.0f, 0.0f, 0.0f, 1.0f));
+			renderer->setViewMatrix(Matrix::Identity);
+			renderer->setProjMatrix(Matrix::Identity);
+
+			glDisable(GL_DEPTH_TEST);
+			glStencilFunc(GL_LESS, 0, 0xffffffff);
+			meshQuad_->draw();
+
+			glEnable(GL_DEPTH_TEST);
+		}
+
+		glDisable(GL_STENCIL_TEST);
 	}
 
 	void onSizeChange(int width, int height) override
@@ -183,10 +215,10 @@ public:
 			float dx = (float(x) - lastCursorPos_.x) / size.x;
 			float dy = (float(y) - lastCursorPos_.y) / size.y;
 
-			Vector3 rotation = modelTransform_.getRotation();
+			Vector3 rotation = lightTransform_.getRotation();
 			rotation.y -= dx * PI_FULL;
 			rotation.x -= dy * PI_FULL;
-			modelTransform_.setRotation(rotation);
+			lightTransform_.setRotation(rotation);
 		}
 		else
 		{
@@ -203,14 +235,18 @@ public:
 
 	Camera		camera_;
 	Vector2		lastCursorPos_;
-	Transform	modelTransform_;
+	Transform	lightTransform_;
 
-	MeshPtr		mesh1_;
-	MeshPtr		mesh2_;
+	MeshPtr		meshPlane_;
+	MeshPtr		meshCube_;
+	MeshPtr		meshQuad_;
 
 	MaterialPtr material_;
 	Vector3		lightDir_;
 	MaterialPtr  materialVolume_;
+
+	bool		showVolume_;
+	bool		showShadow_;
 };
 
 int main()
