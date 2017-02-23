@@ -108,7 +108,7 @@ class MyApplication : public Application
 		un = shader->findUniform("lightColor");
 		un->bindValue(Vector3(1.5f));
 
-		un = shader->findUniform("ambientColor");
+		un = shader->findUniform("u_ambientColor");
 		un->bindValue(Vector3(0.1f));
 	}
 

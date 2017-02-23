@@ -5,7 +5,7 @@ attribute vec2 a_texcoord0;
 uniform mat4 u_matWorld;
 uniform mat4 u_matWorldViewProj;
 
-uniform vec3 ambientColor;
+uniform vec3 u_ambientColor;
 
 uniform vec3 lightDir;
 uniform vec3 lightColor;
@@ -16,7 +16,7 @@ varying vec4 v_color;
 vec3 light(vec3 normal)
 {
 	float diffuse = dot(lightDir, normalize(normal));
-	return ambientColor + lightColor * max(0, diffuse);
+	return u_ambientColor + lightColor * max(0, diffuse);
 }
 
 void main()

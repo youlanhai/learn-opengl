@@ -62,7 +62,7 @@ public:
 		un = shader_->findUniform("lightColor");
 		if (un) un->bindValue(Vector3(1.5f));
 
-		un = shader_->findUniform("ambientColor");
+		un = shader_->findUniform("u_ambientColor");
 		if (un) un->bindValue(Vector3(0.2f));
 
 		//mesh_ = createSimpleGround(Vector2(2.0f, 2.0f), 0.4f, 0.1f, 4.0f);

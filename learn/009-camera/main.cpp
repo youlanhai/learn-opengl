@@ -56,7 +56,7 @@ public:
 		un = shader_->findUniform("lightColor");
 		if (un) un->bindValue(Vector3(1.0f));
 
-		un = shader_->findUniform("ambientColor");
+		un = shader_->findUniform("u_ambientColor");
 		if (un) un->bindValue(Vector3(0.3f));
 
 		mesh_ = createCube(Vector3(1.0f, 1.0f, 1.0f));

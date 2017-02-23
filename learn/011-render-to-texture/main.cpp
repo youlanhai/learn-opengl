@@ -48,7 +48,7 @@ public:
 		material1_->bindShader();
 		material1_->bindUniform("lightDir", lightDir);
 		material1_->bindUniform("lightColor", Vector3(1.5f));
-		material1_->bindUniform("ambientColor", Vector3(0.5f));
+		material1_->bindUniform("u_ambientColor", Vector3(0.5f));
 		material1_->bindUniform("shininess", 64.0f);
 		material1_->bindUniform("specularStrength", 4.0f);
 
@@ -96,7 +96,7 @@ public:
 
 		material1_->bindUniform("u_matWorld", matWorld);
 		material1_->bindUniform("u_matWorldViewProj", matWorld * camera_.getViewProjMatrix());
-		material1_->bindUniform("cameraPos", camera_.getPosition());
+		material1_->bindUniform("u_cameraPos", camera_.getPosition());
 
 
 		material2_->bindShader();

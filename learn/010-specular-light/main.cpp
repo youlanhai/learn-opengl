@@ -51,7 +51,7 @@ public:
 		bindShaderUniform(shader_.get(), "u_texture1", normalMap.get());
 		bindShaderUniform(shader_.get(), "lightDir", lightDir);
 		bindShaderUniform(shader_.get(), "lightColor", Vector3(1.5f));
-		bindShaderUniform(shader_.get(), "ambientColor", Vector3(0.5f));
+		bindShaderUniform(shader_.get(), "u_ambientColor", Vector3(0.5f));
 		bindShaderUniform(shader_.get(), "shininess", 64.0f);
 		bindShaderUniform(shader_.get(), "specularStrength", 4.0f);
 		shader_->unbind();
@@ -79,7 +79,7 @@ public:
 
 		bindShaderUniform(shader_.get(), "u_matWorld", matWorld);
 		bindShaderUniform(shader_.get(), "u_matWorldViewProj", matWorld * camera_.getViewProjMatrix());
-		bindShaderUniform(shader_.get(), "cameraPos", camera_.getPosition());
+		bindShaderUniform(shader_.get(), "u_cameraPos", camera_.getPosition());
 
 		shader_->unbind();
 	}

@@ -63,7 +63,7 @@ public:
 		mtlShadowMapping_->bindShader();
 		mtlShadowMapping_->bindUniform("lightDir", lightDir);
 		mtlShadowMapping_->bindUniform("lightColor", Vector3(1.2f));
-		mtlShadowMapping_->bindUniform("ambientColor", Vector3(0.2f));
+		mtlShadowMapping_->bindUniform("u_ambientColor", Vector3(0.2f));
 		mtlShadowMapping_->bindUniform("shininess", 32.0f);
 		mtlShadowMapping_->bindUniform("specularStrength", 4.0f);
 		mtlShadowMapping_->bindUniform("texelSize", Vector2(1.0f / frameSize_.x, 1.0f / frameSize_.y));
@@ -111,7 +111,7 @@ public:
 		mtlShadowMapping_->bindShader();
 		mtlShadowMapping_->bindUniform("u_matWorld", matWorld);
 		mtlShadowMapping_->bindUniform("u_matWorldViewProj", matWorld * camera_.getViewProjMatrix());
-		mtlShadowMapping_->bindUniform("cameraPos", camera_.getPosition());
+		mtlShadowMapping_->bindUniform("u_cameraPos", camera_.getPosition());
 		mtlShadowMapping_->bindUniform("matLightProj", matWorld * lightCamera_.getViewProjMatrix());
 
 

@@ -44,7 +44,7 @@ public:
 		modelShader_->bind();
 		bindShaderUniform(modelShader_.get(), "lightDir", lightDir);
 		bindShaderUniform(modelShader_.get(), "lightColor", Vector3(1.5f));
-		bindShaderUniform(modelShader_.get(), "ambientColor", Vector3(0.5f));
+		bindShaderUniform(modelShader_.get(), "u_ambientColor", Vector3(0.5f));
 		modelShader_->unbind();
 
 		model_ = new Model();

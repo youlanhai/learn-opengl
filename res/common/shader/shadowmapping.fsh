@@ -3,8 +3,8 @@ uniform sampler2D u_texture0; // main texture
 uniform sampler2D u_texture1; // shadow map
 uniform vec3 lightDir;
 uniform vec3 lightColor;
-uniform vec3 ambientColor;
-uniform vec3 cameraPos;
+uniform vec3 u_ambientColor;
+uniform vec3 u_cameraPos;
 uniform float specularStrength;
 uniform float shininess;
 uniform vec2 texelSize; // 1 / textureSize
@@ -50,12 +50,12 @@ void main()
 {
 	float diff = max(dot(v_normal, lightDir), 0.0);
 
-	vec3 viewDir = normalize(cameraPos - v_posInWorld);
+	vec3 viewDir = normalize(u_cameraPos - v_posInWorld);
 	vec3 halfDir = normalize(viewDir + lightDir);
 	float spec = max(dot(v_normal, halfDir), 0.0);
 	spec = pow(spec, shininess) * specularStrength;
 
-	vec3 color = ambientColor + lightColor * ((diff + spec) * (1.0 - shadowMapping()));
+	vec3 color = u_ambientColor + lightColor * ((diff + spec) * (1.0 - shadowMapping()));
 
 	gl_FragColor = texture2D(u_texture0, v_texcoord) * vec4(color, 1.0);
 }
