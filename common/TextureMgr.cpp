@@ -1,5 +1,6 @@
 ﻿#include "TextureMgr.h"
 #include "LogTool.h"
+#include "TextureCube.h"
 
 IMPLEMENT_SINGLETON(TextureMgr);
 
@@ -22,7 +23,16 @@ TexturePtr TextureMgr::get(const std::string &fileName, bool load)
     
     if(load)
     {
-        TexturePtr tex = new Texture();
+		TexturePtr tex;
+		if (fileName.size() >= 5 && strcmp(&fileName[(int)fileName.size() - 5], ".cube") == 0)
+		{
+			tex = new TextureCube();
+		}
+		else
+		{
+			tex = new Texture();
+		}
+
         if(tex->load(fileName))
         {
             textures_[fileName] = tex;

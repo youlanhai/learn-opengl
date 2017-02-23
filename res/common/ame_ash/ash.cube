@@ -1,0 +1,9 @@
+{
+	"type" : "TextureCube",
+	"left" : "ashcanyon_lf.tga",
+	"right" : "ashcanyon_rt.tga",
+	"up" : "ashcanyon_up.tga",
+	"down" : "ashcanyon_dn.tga",
+	"back" : "ashcanyon_bk.tga",
+	"front" : "ashcanyon_ft.tga"
+}

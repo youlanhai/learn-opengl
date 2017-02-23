@@ -17,8 +17,10 @@ public:
     virtual bool load(const std::string & filename);
     virtual bool save(const std::string & filename) const;
 
-    bool create(uint32_t levels, uint32_t width, uint32_t height, TextureFormat format, const void* pPixelData, uint32_t pxieType);
-    bool create(GLuint handle, uint32_t width, uint32_t height, TextureFormat format);
+    virtual bool create(uint32_t levels, uint32_t width, uint32_t height, TextureFormat format, const void* pPixelData, uint32_t pxieType);
+    virtual bool create(GLuint handle, uint32_t width, uint32_t height, TextureFormat format);
+
+	void setWrap(TextureWrap wrap);
 
     void setUWrap(TextureWrap wrap);
     TextureWrap getUWrap() const{ return uwrap_; }
@@ -26,10 +28,14 @@ public:
     void setVWrap(TextureWrap wrap);
     TextureWrap getVWrap() const { return vwrap_; }
 
+	void setRWrap(TextureWrap wrap);
+	TextureWrap getRWrap() const { return rwrap_; }
+
     void setQuality(TextureQuality quality);
     TextureQuality getQuality() const { return quality_; }
 
     const std::string & getResource() const {  return resource_; }
+	TextureTarget getTarget() const { return target_; }
     TextureFormat getFormat() const { return format_; }
     uint32_t getWidth() const { return width_; }
     uint32_t getHeight() const { return height_; }
@@ -47,6 +53,9 @@ protected:
     
     void destroy();
 
+	TextureFormat component2format(int n) const;
+	GLuint getCurrentBinding() const;
+
     virtual void updateParameter();
     virtual void generateMipmaps();
 
@@ -59,6 +68,7 @@ protected:
     bool                parameterDirty_;
     TextureWrap         uwrap_;
     TextureWrap         vwrap_;
+	TextureWrap			rwrap_;
     TextureTarget       target_;
     TextureQuality      quality_;
     

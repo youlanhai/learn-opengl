@@ -143,7 +143,18 @@ void ShaderUniform::bindValue(const Color & color)
 
 void ShaderUniform::bindValue(const Texture *texture)
 {
-    assert(type_ == GL_SAMPLER_2D);
+	if (texture)
+	{
+		if (texture->getTarget() == TextureTarget::Tex2D && type_ != GL_SAMPLER_2D)
+		{
+			return;
+		}
+
+		if (texture->getTarget() == TextureTarget::TexCubeMap && type_ != GL_SAMPLER_CUBE)
+		{
+			return;
+		}
+	}
 
     texture_ = const_cast<Texture*>(texture);
 

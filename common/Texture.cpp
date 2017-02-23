@@ -23,6 +23,7 @@ Texture::Texture()
     , parameterDirty_(true)
     , uwrap_(TextureWrap::Clamp)
     , vwrap_(TextureWrap::Clamp)
+	, rwrap_(TextureWrap::Clamp)
     , target_(TextureTarget::Tex2D)
     , quality_(TextureQuality::Default)
 {
@@ -50,6 +51,27 @@ void Texture::destroy()
     parameterDirty_ = true;
 }
 
+TextureFormat Texture::component2format(int n) const
+{
+	switch (n)
+	{
+	case STBI_grey:
+		return TextureFormat::Luminance;
+
+	case STBI_grey_alpha:
+		return TextureFormat::LuminanceAlpha;
+
+	case STBI_rgb:
+		return TextureFormat::RGB;
+
+	case STBI_rgb_alpha:
+		return TextureFormat::RGBA;
+
+	default:
+		return TextureFormat::Unknown;
+	}
+}
+
 bool Texture::load(const std::string & filename)
 {
     std::string buffer;
@@ -69,27 +91,7 @@ bool Texture::load(const std::string & filename)
         return false;
     }
 
-    TextureFormat format = TextureFormat::Unknown;
-    switch (comp)
-    {
-    case STBI_grey:
-        format = TextureFormat::Luminance;
-        break;
-
-    case STBI_grey_alpha:
-        format = TextureFormat::LuminanceAlpha;
-        break;
-
-    case STBI_rgb:
-        format = TextureFormat::RGB;
-        break;
-
-    case STBI_rgb_alpha:
-        format = TextureFormat::RGBA;
-        break;
-    default:
-        break;
-    }
+	TextureFormat format = component2format(comp);
 
     bool ret = false;
     if (format != TextureFormat::Unknown)
@@ -112,7 +114,7 @@ bool Texture::save(const std::string & filename) const
     int oldAligment;
     glGetIntegerv(GL_PACK_ALIGNMENT, &oldAligment);
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
-    glBindTexture(GL_TEXTURE_2D, handle_);
+    glBindTexture((GLenum)target_, handle_);
     glReadPixels(0, 0, width_, height_, saveFormat, GL_UNSIGNED_BYTE, pData);// split x and y sizes into bytes
     if (GLenum error = glGetError())
     {
@@ -120,7 +122,7 @@ bool Texture::save(const std::string & filename) const
     }
     glPixelStorei(GL_PACK_ALIGNMENT, oldAligment);
 
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture((GLenum)target_, 0);
 
     std::string fullpath = FileSystem::instance()->resolveWritablePath(filename);
     int ret = stbi_write_tga(fullpath.c_str(), width_, height_, saveChannels, pData);
@@ -143,13 +145,13 @@ bool Texture::create(uint32_t levels, uint32_t width, uint32_t height, TextureFo
     GLenum internalFormat = GLenum(format_);
     
 	GL_ASSERT(glGenTextures(1, &handle_));
-	GL_ASSERT(glBindTexture(GL_TEXTURE_2D, handle_));
+	GL_ASSERT(glBindTexture((GLenum)target_, handle_));
 
 	int oldAlignment;
 	glGetIntegerv(GL_PACK_ALIGNMENT, &oldAlignment);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
-	GL_ASSERT(glTexImage2D(GL_TEXTURE_2D, levels, internalFormat, width_, height_,
+	GL_ASSERT(glTexImage2D((GLenum)target_, levels, internalFormat, width_, height_,
 		0, internalFormat, pxieType, pPixelData));
 
 	glPixelStorei(GL_PACK_ALIGNMENT, oldAlignment);
@@ -165,6 +167,12 @@ bool Texture::create(GLuint handle, uint32_t width, uint32_t height, TextureForm
     height_ = height;
     format_ = format;
     return true;
+}
+
+void Texture::setWrap(TextureWrap wrap)
+{
+	uwrap_ = vwrap_ = rwrap_ = wrap;
+	parameterDirty_ = true;
 }
 
 void Texture::setUWrap(TextureWrap wrap)
@@ -183,6 +191,14 @@ void Texture::setVWrap(TextureWrap wrap)
     parameterDirty_ = true;
 }
 
+void Texture::setRWrap(TextureWrap wrap)
+{
+	if (wrap == rwrap_) return;
+
+	rwrap_ = wrap;
+	parameterDirty_ = true;
+}
+
 void Texture::setQuality(TextureQuality quality)
 {
     if (quality == quality_) return;
@@ -195,13 +211,25 @@ void Texture::generateMipmaps()
 {
     if (handle_ == 0 || mipmapped_) return;
 
-    assert(target_ == TextureTarget::Tex2D && "this format does't supported rightnow!");
-
     mipmapped_ = true;
     if(glGenerateMipmap != nullptr)
     {
-        GL_ASSERT(glGenerateMipmap(GL_TEXTURE_2D));
+        GL_ASSERT(glGenerateMipmap((GLenum)target_));
     }
+}
+
+GLuint Texture::getCurrentBinding() const
+{
+	GLint curTexture = 0;
+	if (target_ == TextureTarget::Tex2D)
+	{
+		glGetIntegerv(GL_TEXTURE_BINDING_2D, &curTexture);
+	}
+	else if (target_ == TextureTarget::TexCubeMap)
+	{
+		glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, &curTexture);
+	}
+	return curTexture;
 }
 
 void Texture::updateParameter()
@@ -212,9 +240,7 @@ void Texture::updateParameter()
     GLenum target = GLenum(target_);
 
 #ifdef DEBUG 
-    GLint handle = 0;
-    glGetIntegerv(GL_TEXTURE_BINDING_2D, &handle);
-    assert(handle == handle_);
+    assert(getCurrentBinding() == handle_);
 #endif
 
     TextureQuality quality = quality_;
@@ -264,11 +290,16 @@ void Texture::updateParameter()
 
     glTexParameteri(target, GL_TEXTURE_WRAP_S, GLenum(uwrap_));
     glTexParameteri(target, GL_TEXTURE_WRAP_T, GLenum(vwrap_));
+
+	if (target_ == TextureTarget::TexCubeMap)
+	{
+		glTexParameteri(target, GL_TEXTURE_WRAP_R, GLenum(rwrap_));
+	}
 }
 
 bool Texture::bind()
 {
-    glBindTexture(GL_TEXTURE_2D, handle_);
+    glBindTexture((GLenum)target_, handle_);
     if(handle_ == 0)
     {
         return false;
@@ -280,19 +311,16 @@ bool Texture::bind()
 
 void Texture::unbind()
 {
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture((GLenum)target_, 0);
 }
 
 bool Texture::tryUnbind()
 {
-    GLint curTexture;
-    glGetIntegerv(GL_TEXTURE_BINDING_2D, &curTexture);
-    if (handle_ == curTexture)
+    if (handle_ == getCurrentBinding())
     {
-        glBindTexture(GL_TEXTURE_2D, 0);
+        glBindTexture((GLenum)target_, 0);
         return true;
     }
 
     return false;
 }
-
