@@ -76,6 +76,27 @@ const Matrix& Transform::getModelMatrix() const
     return matModel_;
 }
 
+Matrix Transform::getLocalToWorldMatrix() const
+{
+    Matrix matrix = getModelMatrix();
+
+    Transform *p = parent_;
+    while (p != nullptr)
+    {
+        matrix.postMultiply(p->getModelMatrix());
+        p = p->getParent();
+    }
+
+    return matrix;
+}
+
+Matrix Transform::getWorldToLocalMatrix() const
+{
+    Matrix matrix = getLocalToWorldMatrix();
+    matrix.invert();
+    return matrix;
+}
+
 void Transform::lookAt(const Vector3 & position, const Vector3 & target, const Vector3 & up)
 {
     dirtyFlag_ |= DIRTY_MODEL_VIEW;
@@ -241,6 +262,10 @@ void Transform::tick(float elapse)
     {
         removeUnusedComponents();
     }
+    if (childrenDirty_)
+    {
+        removeUnusedChildren();
+    }
 }
 
 void Transform::draw(Renderer * renderer)
@@ -267,13 +292,13 @@ void Transform::draw(Renderer * renderer)
 void Transform::removeUnusedComponents()
 {
     componentDirty_ = false;
-    auto it = std::remove_if(components_.begin(), components_.end(),
-        [](ComponentPair &pair) {
-        return !pair.first;
-    });
+    auto it = std::remove_if(components_.begin(), components_.end(), [](ComponentPair &pair) { return !pair.first; });
     components_.erase(it, components_.end());
 }
 
 void Transform::removeUnusedChildren()
 {
+    childrenDirty_ = false;
+    auto it = std::remove_if(children_.begin(), children_.end(), [](TransformPair &pair) { return !pair.first; });
+    children_.erase(it, children_.end());
 }

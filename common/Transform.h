@@ -35,6 +35,7 @@ public:
     void setName(const std::string & name) { name_ = name; }
     
     Transform* getParent() { return parent_; }
+    const Transform* getParent() const { return parent_; }
 
     void setPosition(float x, float y, float z);
     void setPosition(const Vector3 &position);
@@ -57,6 +58,9 @@ public:
     const Vector3& getForwardVector() const { return matRotation_[2]; }
 
     const Matrix& getModelMatrix() const;
+
+    Matrix getLocalToWorldMatrix() const;
+    Matrix getWorldToLocalMatrix() const;
 
     void lookAt(const Vector3& position, const Vector3 &target, const Vector3 &up);
 
