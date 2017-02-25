@@ -38,26 +38,46 @@ public:
         MeshPtr cubeMesh = createCube(Vector3(1, 1, 1));
         MeshPtr skyMesh = createCube(Vector3(50));
 
-		MaterialPtr cubeMaterial = new Material();
+        MaterialPtr cubeMaterial = new Material();
 		if (!cubeMaterial->loadShader("shader/normalmap_diffuse.shader"))
 		{
 			return false;
 		}
-		cubeMaterial->loadTexture("u_texture0", "rock.png");
-		cubeMaterial->loadTexture("u_texture1", "rock-normal.png");
+        cubeMaterial->loadTexture("u_texture0", "rock.png");
+        cubeMaterial->loadTexture("u_texture1", "rock-normal.png");
 
-		cubeMaterial->bindShader();
-		cubeMaterial->bindUniform("lightDir", lightDir);
-		cubeMaterial->bindUniform("lightColor", Vector3(1.5f));
+        cubeMaterial->bindShader();
+        cubeMaterial->bindUniform("lightDir", lightDir);
+        cubeMaterial->bindUniform("lightColor", Vector3(1.5f));
+
+        TexturePtr cubeTexture = TextureMgr::instance()->get("skybox/skybox.cube");
+
+        MaterialPtr reflectMaterial = new Material();
+        if (!reflectMaterial->loadShader("shader/cube_reflect.shader"))
+        {
+            return false;
+        }
+        reflectMaterial->setTexture("u_texture0", cubeTexture);
+
+        MaterialPtr refractMaterial = new Material();
+        if (!refractMaterial->loadShader("shader/cube_refract.shader"))
+        {
+            return false;
+        }
+        refractMaterial->setTexture("u_texture0", cubeTexture);
+
+        materials_[0] = cubeMaterial;
+        materials_[1] = reflectMaterial;
+        materials_[2] = refractMaterial;
 
 		MaterialPtr skyMaterial = new Material();
 		if (!skyMaterial->loadShader("shader/cube_map.shader"))
 		{
 			return false;
 		}
-		skyMaterial->loadTexture("u_texture0", "ame_ash/ash.cube");
+		skyMaterial->setTexture("u_texture0", cubeTexture);
 
-		cubeMesh->addMaterial(cubeMaterial);
+		cubeMesh->addMaterial(materials_[2]);
 		skyMesh->addMaterial(skyMaterial);
 
         modelTransform_.addComponent(cubeMesh);
@@ -133,11 +153,38 @@ public:
 		camera_.handleMouseScroll(xoffset, yoffset);
 	}
 
+    virtual void onKey(int key, int scancode, int action, int mods) override
+    {
+        Application::onKey(key, scancode, action, mods);
+
+        if (action == GLFW_RELEASE)
+        {
+            int i = -1;
+            switch(key)
+            {
+            case GLFW_KEY_1: i = 0; break;
+            case GLFW_KEY_2: i = 1; break;
+            case GLFW_KEY_3: i = 2; break;
+            }
+
+            if (i >= 0)
+            {
+                MeshPtr mesh = modelTransform_.getComponentByType(typeid(Mesh));
+                if (mesh)
+                {
+                    mesh->setMaterial(0, materials_[i]);
+                }
+            }
+        }
+    }
+
 	Camera		camera_;
 	Vector2		lastCursorPos_;
 
 	Transform	modelTransform_;
     Transform   skyTransform_;
+
+    MaterialPtr materials_[3];
 };
 
 int main()

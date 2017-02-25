@@ -1,0 +1,9 @@
+{
+	"type" : "TextureCube",
+	"left" : "left.jpg",
+	"right" : "right.jpg",
+	"up" : "top.jpg",
+	"down" : "bottom.jpg",
+	"back" : "back.jpg",
+	"front" : "front.jpg"
+}
