@@ -83,6 +83,19 @@ void shaderApplyCameraPos(ShaderUniform *pUniform)
 	}
 }
 
+void shaderApplyCameraDir(ShaderUniform *pUniform)
+{
+    auto camera = Renderer::instance()->getCamera();
+    if (camera)
+    {
+        pUniform->bindValue(camera->getForwardVector());
+    }
+    else
+    {
+        pUniform->bindValue(Vector3::Zero);
+    }
+}
+
 //////////////////////////////////////////////////////////////////
 void registerDefaultAutoShaderUniform()
 {
@@ -100,6 +113,7 @@ void registerDefaultAutoShaderUniform()
     REG_SHADER_CONST_FACTORY(AutoUniform::DirLight, shaderApplyDirLight);
     REG_SHADER_CONST_FACTORY(AutoUniform::SpotLight, shaderApplySpotLight);
 	REG_SHADER_CONST_FACTORY(AutoUniform::CameraPos, shaderApplyCameraPos);
+    REG_SHADER_CONST_FACTORY(AutoUniform::CameraDir, shaderApplyCameraDir);
 
 #undef REG_SHADER_CONST_FACTORY
 }

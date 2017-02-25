@@ -81,8 +81,6 @@ public:
 	{
 		Application::onDraw(renderer);
 
-		renderer->applyCameraMatrix();
-
 		glCullFace(GL_FRONT);
         skyTransform_.draw(renderer);
 		

@@ -29,6 +29,7 @@ namespace AutoUniform
     const std::string DirLight = "u_dirLight";
     const std::string SpotLight = "u_spotLight";
 	const std::string CameraPos = "u_cameraPos";
+    const std::string CameraDir = "u_cameraDir";
     const std::string Texture = "u_texture";
     const std::string Texture0 = "u_texture0";
     const std::string Texture1 = "u_texture1";

@@ -118,3 +118,14 @@ void Renderer::setColorWriteEnable(bool enable)
 	GLboolean e = enable ? GL_TRUE : GL_FALSE;
 	glColorMask(e, e, e, e);
 }
+
+bool Renderer::beginDraw()
+{
+    applyCameraMatrix();
+    return true;
+}
+
+void Renderer::endDraw()
+{
+
+}

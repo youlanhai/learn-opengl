@@ -190,7 +190,13 @@ void Application::mainLoop()
 		lastTime = curTime;
 
 		onTick(deltaTime_);
-        onDraw(Renderer::instance());
+        
+        auto renderer = Renderer::instance();
+        if (renderer->beginDraw())
+        {
+            onDraw(renderer);
+            renderer->endDraw();
+        }
 
         glfwSwapBuffers(pWindow_);
         glfwPollEvents();

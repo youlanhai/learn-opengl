@@ -42,6 +42,9 @@ public:
 	void setZWriteEnable(bool enable);
 	void setColorWriteEnable(bool enable);
 
+    bool beginDraw();
+    void endDraw();
+
 private:
     std::vector<Matrix> matrixs_;
     Matrix      matView_;
