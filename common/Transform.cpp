@@ -6,7 +6,8 @@
 #include "Renderer.h"
 
 Transform::Transform()
-    : dirtyFlag_(DIRTY_ALL)
+    : parent_(nullptr)
+    , dirtyFlag_(DIRTY_ALL)
     , scale_(Vector3::One)
     , matRotation_(Matrix::Identity)
     , componentDirty_(false)
@@ -99,38 +100,77 @@ void Transform::lookAt(const Vector3 & position, const Vector3 & target, const V
 
 void Transform::addChild(TransformPtr child)
 {
+    child->parent_ = this;
+    children_.push_back(TransformPair(true, child));
 }
 
 std::vector<TransformPtr> Transform::getChildren() const
 {
-    return std::vector<TransformPtr>();
+    std::vector<TransformPtr> ret;
+    ret.reserve(children_.size());
+
+    for (auto &pair : children_)
+    {
+        if (pair.first)
+        {
+            ret.push_back(pair.second);
+        }
+    }
+    return ret;
 }
 
 TransformPtr Transform::getChildByName(const std::string & name)
 {
-    return TransformPtr();
-}
-
-TransformPtr Transform::getChildByIndex(int index)
-{
-    return TransformPtr();
+    for (auto &pair : children_)
+    {
+        if (pair.first && pair.second->getName() == name)
+        {
+            return pair.second;
+        }
+    }
+    return nullptr;
 }
 
 void Transform::removeChild(TransformPtr child)
 {
+    for (auto &pair : children_)
+    {
+        if (pair.first && pair.second == child)
+        {
+            pair.first = false;
+            pair.second->parent_ = nullptr;
+            childrenDirty_ = true;
+            break;
+        }
+    }
 }
 
 void Transform::removeChildByName(const std::string & name)
 {
+    for (auto &pair : children_)
+    {
+        if (pair.first && pair.second->getName() == name)
+        {
+            pair.first = false;
+            pair.second->parent_ = nullptr;
+            childrenDirty_ = true;
+            break;
+        }
+    }
 }
 
 void Transform::removeChildByIndex(int index)
 {
+    TransformPair &pair = children_[index];
+    pair.first = false;
+    pair.second->parent_ = nullptr;
+    childrenDirty_ = true;
 }
 
 
 void Transform::addComponent(ComponentPtr com)
 {
+    com->setTransfrom(this);
     components_.push_back(ComponentPair(true, com));
 }
 
@@ -180,7 +220,8 @@ void Transform::removeComponent(ComponentPtr com)
         if (pair.first && pair.second == com)
         {
             componentDirty_ = true;
-            pair.second = false;
+            pair.first = false;
+            pair.second->setTransfrom(nullptr);
             break;
         }
     }

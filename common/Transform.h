@@ -34,6 +34,8 @@ public:
     const std::string& getName() const { return name_; }
     void setName(const std::string & name) { name_ = name; }
     
+    Transform* getParent() { return parent_; }
+
     void setPosition(float x, float y, float z);
     void setPosition(const Vector3 &position);
     const Vector3& getPosition() const { return position_; }
@@ -65,7 +67,7 @@ public: // 子结点相关功能
     /** 返回所有有效的直属子结点。*/
     std::vector<TransformPtr> getChildren() const;
     TransformPtr getChildByName(const std::string &name);
-    TransformPtr getChildByIndex(int index);
+    TransformPtr getChildByIndex(int index) { return children_[index].second; }
 
     /** remove操作不会立即生效，会等到帧末尾才执行。*/
     void removeChild(TransformPtr child);
@@ -75,12 +77,20 @@ public: // 子结点相关功能
 public: // 组件相关功能
 
     void addComponent(ComponentPtr com);
+
+    /** 返回所有的组件数量。包括无效组件。*/
     int getNumComponents() const { return components_.size(); }
+
     /** 返回所有有效的组件。*/
     std::vector<ComponentPtr> getComponents() const;
+
+    /** 根据类型，查找第一个有效的组件。*/
     ComponentPtr getComponentByType(const std::type_info &info);
+
+    /** 根据名称，查找第一个有效的组件。*/
     ComponentPtr getComponentByName(const std::string &name);
-    /** remove操作不会立即生效，会等到帧末尾才执行。*/
+
+    /** 删除第一个匹配的有效组件。注意：remove操作不会立即生效，会等到帧末尾才执行。*/
     void removeComponent(ComponentPtr com);
 
     void tick(float elapse);
@@ -91,6 +101,7 @@ protected:
     void removeUnusedChildren();
 
     std::string     name_;
+    Transform*      parent_;
 
     mutable uint32_t dirtyFlag_;
     mutable Matrix  matModel_;
