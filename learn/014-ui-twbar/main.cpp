@@ -174,19 +174,19 @@ public:
 		TwTerminate();
 	}
 
-	void onTick() override
+	void onTick(float elapse) override
 	{
 		camera_.handleCameraMove();
 	}
 
-	void onDraw() override
+	void onDraw(Renderer *renderer) override
 	{
-		Application::onDraw();
+		Application::onDraw(renderer);
 
-		Renderer::instance()->setViewMatrix(camera_.getViewMatrix());
-		Renderer::instance()->setProjMatrix(camera_.getProjMatrix());
-		model_->applyMatrix(modelTransform_.getModelMatrix());
-		model_->draw();
+        renderer->setViewMatrix(camera_.getViewMatrix());
+        renderer->setProjMatrix(camera_.getProjMatrix());
+        renderer->setWorldMatrix(modelTransform_.getModelMatrix());
+		model_->draw(renderer);
 
 		TwDraw();
 	}

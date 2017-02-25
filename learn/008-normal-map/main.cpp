@@ -98,13 +98,13 @@ public:
 		shader_->unbind();
 	}
 
-	void onDraw() override
+	void onDraw(Renderer *renderer) override
 	{
-		Application::onDraw();
+		Application::onDraw(renderer);
 
 		setupWorldMatrix();
 
-		mesh_->draw();
+		mesh_->draw(renderer);
 	}
 
 	void onSizeChange(int width, int height) override

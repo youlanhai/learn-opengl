@@ -84,16 +84,15 @@ public:
 		return true;
 	}
 
-	void onTick() override
+	void onTick(float elapse) override
 	{
 		camera_.handleCameraMove();
 	}
 
-	void onDraw() override
+	void onDraw(Renderer *renderer) override
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-		auto renderer = Renderer::instance();
 		renderer->applyCameraMatrix();
 
 		lightDir_ = lightTransform_.getForwardVector();
@@ -114,17 +113,17 @@ public:
 		matWorld.setIdentity();
 
 		renderer->setWorldMatrix(matWorld);
-		meshPlane_->draw();
+		meshPlane_->draw(renderer);
 
 		matWorld.setTranslate(-1.0f, 1.0f, 0.0f);
 		renderer->setWorldMatrix(matWorld);
-		meshCube_->draw();
+		meshCube_->draw(renderer);
 
 		matWorld.setTranslate(1.0f, 1.0f, 0.0f);
 		renderer->setWorldMatrix(matWorld);
 		if (showCaster_)
 		{
-			meshCube_->draw();
+			meshCube_->draw(renderer);
 		}
 	}
 
@@ -151,12 +150,12 @@ public:
 		// 先渲染背面。深度测试失败时，模板值+1
 		glCullFace(GL_FRONT);
 		glStencilOp(GL_KEEP, GL_INCR, GL_KEEP);
-		volume->draw();
+		volume->draw(renderer);
 
 		// 再渲染正面。深度测试是吧时，模板值-1
 		glCullFace(GL_BACK);
 		glStencilOp(GL_KEEP, GL_DECR, GL_KEEP);
-		volume->draw();
+		volume->draw(renderer);
 
 		renderer->setColorWriteEnable(true);
 		glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
@@ -169,7 +168,7 @@ public:
 
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			volume->draw();
+			volume->draw(renderer);
 			glDisable(GL_BLEND);
 		}
 
@@ -188,7 +187,7 @@ public:
 
 			glDisable(GL_DEPTH_TEST);
 			glStencilFunc(GL_LESS, 0, 0xffffffff);
-			meshQuad_->draw();
+			meshQuad_->draw(renderer);
 
 			glDisable(GL_BLEND);
 			glEnable(GL_DEPTH_TEST);

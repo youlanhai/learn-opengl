@@ -108,12 +108,12 @@ public:
 		material2_->bindUniform("u_matWorldViewProj", matWorld * camera_.getViewProjMatrix());
 	}
 
-	void onTick() override
+	void onTick(float elapse) override
 	{
 		camera_.handleCameraMove();
 	}
 
-	void onDraw() override
+	void onDraw(Renderer *renderer) override
 	{
 		setupDynamicUniform();
 
@@ -125,7 +125,7 @@ public:
 			glClearColor(0, 0, 0, 0);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			
-			mesh_->draw();
+			mesh_->draw(renderer);
 
 			frameBuffer_->unbind();
 
@@ -137,8 +137,8 @@ public:
 		glClearColor(0.15f, 0.24f, 0.24f, 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		mesh_->draw();
-		mesh2_->draw();
+		mesh_->draw(renderer);
+		mesh2_->draw(renderer);
 	}
 
 	void onSizeChange(int width, int height) override

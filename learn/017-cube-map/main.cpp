@@ -72,16 +72,15 @@ public:
 		return true;
 	}
 
-	void onTick() override
+	void onTick(float elapse) override
 	{
 		camera_.handleCameraMove();
 	}
 
-	void onDraw() override
+	void onDraw(Renderer *renderer) override
 	{
-		Application::onDraw();
+		Application::onDraw(renderer);
 
-		auto renderer = Renderer::instance();
 		renderer->applyCameraMatrix();
 
 		glCullFace(GL_FRONT);

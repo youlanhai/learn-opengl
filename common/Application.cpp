@@ -189,20 +189,20 @@ void Application::mainLoop()
 		deltaTime_ = float(curTime - lastTime);
 		lastTime = curTime;
 
-		onTick();
-        onDraw();
+		onTick(deltaTime_);
+        onDraw(Renderer::instance());
 
         glfwSwapBuffers(pWindow_);
         glfwPollEvents();
     }
 }
 
-void Application::onTick()
+void Application::onTick(float elapse)
 {
 
 }
 
-void Application::onDraw()
+void Application::onDraw(Renderer *renderer)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }

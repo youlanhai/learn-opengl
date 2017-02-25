@@ -5,6 +5,8 @@
 #include "Vector2.h"
 #include <string>
 
+class Renderer;
+
 class Application
 {
 public:
@@ -55,10 +57,10 @@ public:
     
 protected:
 
-	virtual void onTick();
+	virtual void onTick(float elapse);
     
     /** 重载此函数，实现自己的渲染方法。*/
-    virtual void onDraw();
+    virtual void onDraw(Renderer *renderer);
     
     virtual bool onCreate();
     

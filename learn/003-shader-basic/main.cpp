@@ -85,9 +85,9 @@ public:
         }
     }
     
-    virtual void onDraw() override
+    virtual void onDraw(Renderer *renderer) override
     {
-        Application::onDraw();
+        Application::onDraw(renderer);
 
         shader_->bind();
         glBindBuffer(GL_ARRAY_BUFFER, vb_);

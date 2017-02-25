@@ -82,12 +82,12 @@ public:
 		return true;
 	}
 
-	void onTick() override
+	void onTick(float elapse) override
 	{
 		camera_.handleCameraMove();
 	}
 
-	void onDraw() override
+	void onDraw(Renderer *renderer) override
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
@@ -111,8 +111,8 @@ public:
 		glStencilFunc(GL_LESS, 0, 0xffffffff);
 		glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 
-		model_->applyMatrix(modelTransform_.getModelMatrix());
-		model_->draw();
+		renderer->setWorldMatrix(modelTransform_.getModelMatrix());
+		model_->draw(renderer);
 
 		// 在矩形表面渲染一层半透的图层
 		glEnable(GL_BLEND);

@@ -75,9 +75,9 @@ public:
         
     }
     
-    virtual void onDraw() override
+    virtual void onDraw(Renderer *renderer) override
     {
-        Application::onDraw();
+        Application::onDraw(renderer);
         
         shader_->bind();
         va_->bind();

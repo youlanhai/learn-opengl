@@ -163,13 +163,13 @@ class MyApplication : public Application
 		curShader_->unbind();
 	}
 
-	void onDraw() override
+	void onDraw(Renderer *renderer) override
 	{
-		Application::onDraw();
+		Application::onDraw(renderer);
 
 		setupWorldMatrix();
 
-		mesh_->draw();
+		mesh_->draw(renderer);
 	}
 
 	ShaderProgramPtr shaderVertex_;

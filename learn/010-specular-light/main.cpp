@@ -84,18 +84,18 @@ public:
 		shader_->unbind();
 	}
 
-	void onTick() override
+	void onTick(float elapse) override
 	{
 		camera_.handleCameraMove();
 	}
 
-	void onDraw() override
+	void onDraw(Renderer *renderer) override
 	{
-		Application::onDraw();
+		Application::onDraw(renderer);
 
 		setupDynamicUniform();
 
-		mesh_->draw();
+		mesh_->draw(renderer);
 	}
 
 	void onSizeChange(int width, int height) override

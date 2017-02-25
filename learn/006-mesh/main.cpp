@@ -45,9 +45,9 @@ class MyApplication : public Application
         return true;
     }
     
-    void onDraw() override
+    void onDraw(Renderer *renderer) override
     {
-        Application::onDraw();
+        Application::onDraw(renderer);
         
         shader_->bind();
         ShaderUniform *mvp = shader_->findUniform("u_matWorldViewProj");
@@ -58,7 +58,7 @@ class MyApplication : public Application
             mvp->bindValue(mat);
         }
         
-        mesh_->draw();
+        mesh_->draw(renderer);
         shader_->unbind();
     }
     
