@@ -14,10 +14,12 @@ public:
     ~Renderer();
 
     void pushMatrix(const Matrix &matrix);
+    void pushMatrix();
     void popMatrix();
 
 	void setWorldMatrix(const Matrix &matrix);
     const Matrix& getWorldMatrix() const{ return matrixs_.back(); }
+    Matrix& getWorldMatrix() { return matrixs_.back(); }
 
     void setViewMatrix(const Matrix &mat);
     const Matrix& getViewMatrix() const{ return matView_; }

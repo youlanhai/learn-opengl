@@ -25,7 +25,7 @@ void SubMesh::setPrimitive(PrimitiveType pt,
     useIndex_ = useIndex;
 }
 
-void SubMesh::draw()
+void SubMesh::draw(Renderer *renderer)
 {
     if(count_ == 0)
     {
@@ -93,7 +93,7 @@ MeshPtr Mesh::clone()
     return mesh;
 }
 
-void Mesh::draw()
+void Mesh::draw(Renderer *renderer)
 {
     if(!vertexBuffer_ || !vertexDecl_)
     {
@@ -120,7 +120,7 @@ void Mesh::draw()
         MaterialPtr mtl = getMaterial(ptr->getMaterialID());
         if(mtl && mtl->begin())
         {
-            ptr->draw();
+            ptr->draw(renderer);
 
 			mtl->end();
         }

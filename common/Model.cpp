@@ -280,7 +280,7 @@ void Model::applyMatrix(const Matrix & worldMatrix)
 	}
 }
 
-void Model::draw()
+void Model::draw(Renderer *renderer)
 {
 	for (auto & info : drawInfo_)
 	{
@@ -288,8 +288,12 @@ void Model::draw()
 		{
 			for (int i : info.meshes)
 			{
-				Renderer::instance()->setWorldMatrix(info.node->worldTransform_);
-				meshes_[i]->draw();
+                renderer->pushMatrix();
+                renderer->getWorldMatrix().preMultiply(info.node->worldTransform_);
+
+				meshes_[i]->draw(renderer);
+
+                renderer->popMatrix();
 			}
 		}
 	}

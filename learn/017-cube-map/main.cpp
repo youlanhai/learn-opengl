@@ -35,8 +35,8 @@ public:
 		Vector3 lightDir(1, 1, -1);
 		lightDir.normalize();
 
-		cubeMesh_ = createCube(Vector3(1, 1, 1));
-		skyMesh_ = createCube(Vector3(50));
+        MeshPtr cubeMesh = createCube(Vector3(1, 1, 1));
+        MeshPtr skyMesh = createCube(Vector3(50));
 
 		MaterialPtr cubeMaterial = new Material();
 		if (!cubeMaterial->loadShader("shader/normalmap_diffuse.shader"))
@@ -57,8 +57,11 @@ public:
 		}
 		skyMaterial->loadTexture("u_texture0", "ame_ash/ash.cube");
 
-		cubeMesh_->addMaterial(cubeMaterial);
-		skyMesh_->addMaterial(skyMaterial);
+		cubeMesh->addMaterial(cubeMaterial);
+		skyMesh->addMaterial(skyMaterial);
+
+        modelTransform_.addComponent(cubeMesh);
+        skyTransform_.addComponent(skyMesh);
 
 		camera_.lookAt(Vector3(0, 1, -2), Vector3::Zero, Vector3::YAxis);
 		setupViewProjMatrix();
@@ -82,12 +85,10 @@ public:
 		renderer->applyCameraMatrix();
 
 		glCullFace(GL_FRONT);
-		renderer->setWorldMatrix(Matrix::Identity);
-		skyMesh_->draw();
-
-		glCullFace(GL_BACK);
-		renderer->setWorldMatrix(modelTransform_.getModelMatrix());
-		cubeMesh_->draw();
+        skyTransform_.draw(renderer);
+		
+        glCullFace(GL_BACK);
+        modelTransform_.draw(renderer);
 	}
 
 	void onSizeChange(int width, int height) override
@@ -137,10 +138,9 @@ public:
 
 	Camera		camera_;
 	Vector2		lastCursorPos_;
-	Transform	modelTransform_;
 
-	MeshPtr		cubeMesh_;
-	MeshPtr		skyMesh_;
+	Transform	modelTransform_;
+    Transform   skyTransform_;
 };
 
 int main()

@@ -37,6 +37,11 @@ void Renderer::pushMatrix(const Matrix &matrix)
 	dirtyFlag_ |= DF_WORLD_VIEW | DF_WORLD_VIEW_PROJ;
 }
 
+void Renderer::pushMatrix()
+{
+    pushMatrix(matrixs_.back());
+}
+
 void Renderer::popMatrix()
 {
 	matrixs_.pop_back();

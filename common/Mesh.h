@@ -5,6 +5,7 @@
 #include "VertexDeclaration.h"
 #include "VertexAttribute.h"
 #include "Material.h"
+#include "Component.h"
 
 #include <vector>
 
@@ -17,7 +18,7 @@ public:
     SubMesh();
     ~SubMesh();
 
-    void draw();
+    void draw(Renderer *renderer);
 
     int getMaterialID() const { return mtlID_; }
 
@@ -40,7 +41,7 @@ private:
 typedef SmartPointer<SubMesh> SubMeshPtr;
 
 
-class Mesh : public ReferenceCount 
+class Mesh : public Component
 {
 public:
     typedef std::vector<MaterialPtr> Materials;
@@ -54,7 +55,7 @@ public:
     MeshPtr clone();
     MeshPtr getSource() const { return source_; }
 
-    void draw();
+    virtual void draw(Renderer *renderer) override;
 
     void setVertexBuffer(VertexBufferPtr vertex);
     void setIndexBuffer(IndexBufferPtr index);
