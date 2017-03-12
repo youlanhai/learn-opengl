@@ -83,7 +83,7 @@ public:
         modelTransform_.addComponent(cubeMesh);
         skyTransform_.addComponent(skyMesh);
 
-		camera_.lookAt(Vector3(0, 1, -2), Vector3::Zero, Vector3::YAxis);
+		camera_.lookAt(Vector3(0, 0, -2), Vector3::Zero, Vector3::YAxis);
 		setupViewProjMatrix();
 		Renderer::instance()->setCamera(&camera_);
 
