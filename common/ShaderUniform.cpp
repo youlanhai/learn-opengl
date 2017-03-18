@@ -138,7 +138,14 @@ void ShaderUniform::bindValue(const Vector4* values, int count)
 
 void ShaderUniform::bindValue(const Color & color)
 {
-    GL_ASSERT( glUniform4f(location_, color.r, color.g, color.b, color.a) );
+    if (type_ == GL_FLOAT_VEC4)
+    {
+        GL_ASSERT(glUniform4f(location_, color.r, color.g, color.b, color.a));
+    }
+    else if (type_ == GL_FLOAT_VEC3)
+    {
+        GL_ASSERT(glUniform3f(location_, color.r, color.g, color.b));
+    }
 }
 
 void ShaderUniform::bindValue(const Texture *texture)

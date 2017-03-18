@@ -258,6 +258,14 @@ void Transform::tick(float elapse)
         }
     }
 
+    for (auto & pair : children_)
+    {
+        if (pair.first)
+        {
+            pair.second->tick(elapse);
+        }
+    }
+
     if (componentDirty_)
     {
         removeUnusedComponents();
@@ -281,9 +289,12 @@ void Transform::draw(Renderer * renderer)
         }
     }
 
-    if (componentDirty_)
+    for (auto & pair : children_)
     {
-        removeUnusedComponents();
+        if (pair.first)
+        {
+            pair.second->draw(renderer);
+        }
     }
 
     renderer->popMatrix();

@@ -24,7 +24,7 @@ namespace AutoUniform
     const std::string ViewProj = "u_matViewProj";
     const std::string WorldViewProj = "u_matWorldViewProj";
     const std::string WorldView = "u_matWorldView";
-    const std::string AmbientColor = "u_ambient";
+    const std::string AmbientColor = "u_ambientColor";
     const std::string OmitLight = "u_omitLight";
     const std::string DirLight = "u_dirLight";
     const std::string SpotLight = "u_spotLight";
