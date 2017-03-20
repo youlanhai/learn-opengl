@@ -13,6 +13,7 @@
 #include "Model.h"
 #include "Renderer.h"
 #include "title.h"
+#include "FrameBuffer.h"
 
 class MyApplication : public Application
 {
@@ -23,17 +24,14 @@ public:
 		glfwWindowHint(GLFW_SAMPLES, 4);
 	}
 
-	bool onCreate() override
-	{
-		std::string resPath = findResPath();
-		FileSystem::instance()->addSearchPath(resPath);
-		FileSystem::instance()->addSearchPath(joinPath(resPath, "common"));
-		FileSystem::instance()->dumpSearchPath();
+    bool onCreate() override
+    {
+        std::string resPath = findResPath();
+        FileSystem::instance()->addSearchPath(resPath);
+        FileSystem::instance()->addSearchPath(joinPath(resPath, "common"));
+        FileSystem::instance()->dumpSearchPath();
 
-		Texture::s_defaultQuality = TextureQuality::FourLinear;
-
-        lightTransform_ = new Transform();
-        lightTransform_->setRotation(45.0f, 0.0f, 0.0f);
+        Texture::s_defaultQuality = TextureQuality::FourLinear;
 
         ground_ = new Transform();
         MeshPtr groundMesh = createPlane(Vector2(10, 10), 1);
@@ -43,14 +41,20 @@ public:
 
         MeshPtr cubeMesh = createCube(Vector3(1, 1, 1));
         material_ = new Material();
-		if (!material_->loadShader("shader/light_pixel.shader"))
-		{
-			return false;
-		}
+        if (!material_->loadShader("shader/cascade_shadowmap.shader"))
+        {
+            return false;
+        }
         material_->loadTexture("u_texture0", "white.png");
 
         material_->bindShader();
         material_->bindUniform("lightColor", Color(1.0f, 1.0f, 1.0f, 1.0f));
+
+        lightMaterial_ = new Material();
+        if (!lightMaterial_->loadShader("shader/xyz.shader"))
+        {
+            return false;
+        }
 
         cubeMesh->addMaterial(material_);
         groundMesh->addMaterial(material_);
@@ -66,6 +70,8 @@ public:
             { 1, 0.5f, 0 },
             { 1, 0.5f, 2 },
             { 1, 0.5f, 4 },
+            { -3, 0.5f, 4 },
+            { 3, 0.5f, 4 },
         };
         for (const Vector3 &pos : positions)
         {
@@ -79,6 +85,20 @@ public:
 		setupViewProjMatrix();
 		Renderer::instance()->setCamera(&camera_);
 
+        lightCamera_.setPosition(0, 6, -6);
+        lightCamera_.setRotation(PI_FULL / 6.0f, PI_FULL / 3.0f, 0.0f);
+        lightCamera_.setOrtho(20, 20, 0, 10);
+
+        frameBuffer_ = new FrameBuffer();
+        frameBuffer_->initDepthBuffer(1024, 1024, TextureFormat::Depth);
+        TexturePtr texture = frameBuffer_->getTexture();
+        texture->setQuality(TextureQuality::Nearest);
+        texture->setUWrap(TextureWrap::Clamp);
+        texture->setVWrap(TextureWrap::Clamp);
+
+        material_->setTexture("u_texture0", texture);
+        material_->setTexture("u_texture1", texture);
+
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 		return true;
@@ -91,10 +111,31 @@ public:
 
 	void onDraw(Renderer *renderer) override
 	{
-		Application::onDraw(renderer);
+        renderer->setCamera(&lightCamera_);
+        renderer->setOverwriteMaterial(lightMaterial_);
 
+        frameBuffer_->bind();
+        Vector2 size = frameBuffer_->getSize();
+        glViewport(0, 0, size.x, size.y);
+        glClearColor(0, 0, 0, 0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        //ground_->draw(renderer);
+        casters_->draw(renderer);
+
+        frameBuffer_->unbind();
+        renderer->setOverwriteMaterial(nullptr);
+
+
+        size = getWindowSize();
+        glViewport(0, 0, size.x, size.y);
+        glClearColor(0.15f, 0.24f, 0.24f, 0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        renderer->setCamera(&camera_);
         material_->bindShader();
-        material_->bindUniform("lightDir", -lightTransform_->getForwardVector());
+        material_->bindUniform("lightDir", -lightCamera_.getForwardVector());
+        material_->bindUniform("lightMatrix", lightCamera_.getViewProjMatrix());
 
         ground_->draw(renderer);
         casters_->draw(renderer);
@@ -127,10 +168,10 @@ public:
 			float dx = (float(x) - lastCursorPos_.x) / size.x;
 			float dy = (float(y) - lastCursorPos_.y) / size.y;
 
-			Vector3 rotation = lightTransform_->getRotation();
+			Vector3 rotation = lightCamera_.getRotation();
 			rotation.y -= dx * PI_FULL;
 			rotation.x -= dy * PI_FULL;
-            lightTransform_->setRotation(rotation);
+            lightCamera_.setRotation(rotation);
 		}
 		else
 		{
@@ -152,7 +193,11 @@ public:
 
     TransformPtr    casters_;
     TransformPtr    ground_;
-    TransformPtr    lightTransform_;
+
+    Camera          lightCamera_;
+    MaterialPtr     lightMaterial_;
+
+    FrameBufferPtr  frameBuffer_;
 };
 
 int main()

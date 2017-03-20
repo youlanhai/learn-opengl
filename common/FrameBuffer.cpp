@@ -19,6 +19,7 @@ bool FrameBuffer::initColorBuffer(int width, int height, TextureFormat format, b
 {
 	destroy();
 
+    size_.set(width, height);
 	texture_ = new Texture();
 	if (!texture_->create(0, width, height, format, nullptr, GL_UNSIGNED_BYTE))
 	{
@@ -39,6 +40,7 @@ bool FrameBuffer::initDepthBuffer(int width, int height, TextureFormat format, b
 {
 	destroy();
 
+    size_.set(width, height);
 	texture_ = new Texture();
 	if (!texture_->create(0, width, height, format, nullptr, GL_FLOAT))
 	{

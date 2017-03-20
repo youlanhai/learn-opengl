@@ -1,4 +1,5 @@
 ﻿#include "Mesh.h"
+#include "Renderer.h"
 
 SubMesh::SubMesh()
     : start_(0)
@@ -117,7 +118,12 @@ void Mesh::draw(Renderer *renderer)
 
     for(SubMeshPtr ptr : subMeshs_)
     {
-        MaterialPtr mtl = getMaterial(ptr->getMaterialID());
+        MaterialPtr mtl = renderer->getOverwriteMaterial();
+        if (!mtl)
+        {
+            mtl = getMaterial(ptr->getMaterialID());
+        }
+
         if(mtl && mtl->begin())
         {
             ptr->draw(renderer);

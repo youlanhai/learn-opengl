@@ -3,9 +3,12 @@
 #include "Singleton.h"
 #include "Matrix.h"
 #include "Color.h"
+#include "SmartPointer.h"
 #include <vector>
 
 class Camera;
+class Material;
+typedef SmartPointer<Material> MaterialPtr;
 
 class Renderer : public Singleton<Renderer>
 {
@@ -31,7 +34,7 @@ public:
     const Matrix& getWorldViewProjMatrix() const;
     const Matrix& getViewProjMatrix() const;
 
-	void setCamera(Camera *camera) { camera_ = camera; }
+    void setCamera(Camera *camera);
 	Camera* getCamera() { return camera_; }
 
 	void applyCameraMatrix();
@@ -45,12 +48,17 @@ public:
     bool beginDraw();
     void endDraw();
 
+    void setOverwriteMaterial(MaterialPtr mtl);
+    MaterialPtr getOverwriteMaterial();
+
 private:
     std::vector<Matrix> matrixs_;
     Matrix      matView_;
     Matrix      matProj_;
 	Camera*		camera_;
 	Color		ambientColor_;
+
+    MaterialPtr overwiteMaterial_;
     
     mutable Matrix      matViewProj_;
     mutable Matrix      matWorldViewProj_;

@@ -2,6 +2,7 @@
 #include "ShaderUniformAuto.h"
 #include "Camera.h"
 #include "glconfig.h"
+#include "Material.h"
 
 IMPLEMENT_SINGLETON(Renderer);
 
@@ -96,6 +97,12 @@ const Matrix& Renderer::getViewProjMatrix() const
 	return matViewProj_;
 }
 
+void Renderer::setCamera(Camera * camera)
+{
+    camera_ = camera;
+    applyCameraMatrix();
+}
+
 void Renderer::applyCameraMatrix()
 {
 	if (nullptr == camera_)
@@ -128,4 +135,14 @@ bool Renderer::beginDraw()
 void Renderer::endDraw()
 {
 
+}
+
+void Renderer::setOverwriteMaterial(MaterialPtr mtl)
+{
+    overwiteMaterial_ = mtl;
+}
+
+MaterialPtr Renderer::getOverwriteMaterial()
+{
+    return overwiteMaterial_;
 }

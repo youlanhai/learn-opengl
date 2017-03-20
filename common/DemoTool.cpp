@@ -349,7 +349,11 @@ void createCube(std::vector<MeshVertex> &vertices, std::vector<uint16_t> &indice
 
 		int i = n * 8;
 		v.position.set(buffer[i], buffer[i + 1], buffer[i + 2]);
-		v.normal.set(buffer[i + 3], buffer[i + 4], buffer[i + 5]);
+		
+        v.normal.set(buffer[i + 3], buffer[i + 4], buffer[i + 5]);
+        //v.normal = v.position;
+        //v.normal.normalize();
+
 		v.uv.set(buffer[i + 6], buffer[i + 7]);
 		v.tangent.setZero();
 	}

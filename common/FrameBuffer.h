@@ -3,6 +3,7 @@
 #include "Reference.h"
 #include "SmartPointer.h"
 #include "RenderState.h"
+#include "Vector2.h"
 
 class Texture;
 typedef SmartPointer<Texture> TexturePtr;
@@ -21,11 +22,13 @@ public:
 	void unbind();
 
 	TexturePtr getTexture();
+    Vector2 getSize() const { return size_; }
 
 private:
-	uint32_t oldFBO_;
-	uint32_t fbo_;
-	TexturePtr texture_;
+    Vector2     size_;
+	uint32_t    oldFBO_;
+	uint32_t    fbo_;
+	TexturePtr  texture_;
 };
 
 typedef SmartPointer<FrameBuffer> FrameBufferPtr;
