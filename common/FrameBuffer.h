@@ -26,8 +26,8 @@ public:
 
 private:
     Vector2     size_;
-	uint32_t    oldFBO_;
-	uint32_t    fbo_;
+    uint32_t    fbo_;
+    uint32_t    oldFBO_;
 	TexturePtr  texture_;
 };
 

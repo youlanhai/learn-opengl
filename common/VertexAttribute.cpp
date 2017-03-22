@@ -47,8 +47,8 @@ bool VertexAttribute::init(VertexBuffer * vb, VertexDeclaration * decl)
             return false;
         }
         
-        glCreateVertexArrays(1, &handle_);
-        if (!glIsVertexArray(handle_))
+        glGenVertexArrays(1, &handle_);
+        if (0 == handle_)
         {
             LOG_ERROR("Failed create vertex array");
             return false;

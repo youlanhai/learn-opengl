@@ -254,7 +254,7 @@ bool Model::load(const std::string & path, ShaderProgramPtr shader)
 		MeshPtr newMesh = processMesh(mesh);
 		if (newMesh)
 		{
-			if (mesh->mMaterialIndex >= 0)
+			if (mesh->mMaterialIndex < mtls.size())
 			{
 				newMesh->addMaterial(mtls[mesh->mMaterialIndex]);
 			}

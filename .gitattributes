@@ -1,0 +1,26 @@
+###############################################################################
+# Set default behavior to automatically normalize line endings.
+###############################################################################
+#* text eol=auto
+
+*.sln           text eol=crlf
+*.vcproj        text eol=crlf
+*.vcxproj       text eol=crlf
+*.vcxproj.filters text eol=crlf
+*.rc            text eol=crlf
+*.csproj        text eol=crlf
+*.bat           text eol=crlf
+
+*.py			text eol=lf
+*.h				text eol=lf
+*.hpp			text eol=lf
+*.cxx			text eol=lf
+*.c				text eol=lf
+*.cpp			text eol=lf
+*.cxx			text eol=lf
+*.fsh			text eol=lf
+*.vsh			text eol=lf
+*.shader		text eol=lf
+*.json			text eol=lf
+*.cmake			text eol=lf
+CMakeLists.txt	text eol=lf

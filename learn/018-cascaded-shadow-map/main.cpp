@@ -96,7 +96,7 @@ public:
         texture->setUWrap(TextureWrap::Clamp);
         texture->setVWrap(TextureWrap::Clamp);
 
-        material_->setTexture("u_texture0", texture);
+        //material_->setTexture("u_texture0", texture);
         material_->setTexture("u_texture1", texture);
 
 		glEnable(GL_CULL_FACE);
@@ -127,7 +127,7 @@ public:
         renderer->setOverwriteMaterial(nullptr);
 
 
-        size = getWindowSize();
+        size = getFrameBufferSize();
         glViewport(0, 0, size.x, size.y);
         glClearColor(0.15f, 0.24f, 0.24f, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -149,7 +149,7 @@ public:
 
 	void setupViewProjMatrix()
 	{
-		Vector2 size = getWindowSize();
+		Vector2 size = getFrameBufferSize();
 		camera_.setPerspective(PI_QUARTER, size.x / size.y, 1.0f, 1000.0f);
 	}
 	

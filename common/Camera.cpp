@@ -45,7 +45,7 @@ const Matrix & Camera::getViewProjMatrix() const
 
 bool Camera::handleMouseButton(int button, int action, int mods)
 {
-	if (button = GLFW_MOUSE_BUTTON_RIGHT)
+	if (button == GLFW_MOUSE_BUTTON_RIGHT)
 	{
 		lastCursorPos_ = gApp->getCursorPos();
 	}

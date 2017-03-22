@@ -6,6 +6,7 @@
 #include "Matrix.h"
 #include <vector>
 #include <typeinfo>
+#include <string>
 
 class Component;
 typedef SmartPointer<Component> ComponentPtr;
@@ -64,37 +65,37 @@ public:
 
     void lookAt(const Vector3& position, const Vector3 &target, const Vector3 &up);
 
-public: // ×Ó½áµãÏà¹Ø¹¦ÄÜ
+public: // å­ç»“ç‚¹ç›¸å…³åŠŸèƒ½
 
     void addChild(TransformPtr child);
     int getNumChildren() const { return children_.size(); }
-    /** ·µ»ØËùÓĞÓĞĞ§µÄÖ±Êô×Ó½áµã¡£*/
+    /** è¿”å›æ‰€æœ‰æœ‰æ•ˆçš„ç›´å±å­ç»“ç‚¹ã€‚*/
     std::vector<TransformPtr> getChildren() const;
     TransformPtr getChildByName(const std::string &name);
     TransformPtr getChildByIndex(int index) { return children_[index].second; }
 
-    /** remove²Ù×÷²»»áÁ¢¼´ÉúĞ§£¬»áµÈµ½Ö¡Ä©Î²²ÅÖ´ĞĞ¡£*/
+    /** removeæ“ä½œä¸ä¼šç«‹å³ç”Ÿæ•ˆï¼Œä¼šç­‰åˆ°å¸§æœ«å°¾æ‰æ‰§è¡Œã€‚*/
     void removeChild(TransformPtr child);
     void removeChildByName(const std::string &name);
     void removeChildByIndex(int index);
 
-public: // ×é¼şÏà¹Ø¹¦ÄÜ
+public: // ç»„ä»¶ç›¸å…³åŠŸèƒ½
 
     void addComponent(ComponentPtr com);
 
-    /** ·µ»ØËùÓĞµÄ×é¼şÊıÁ¿¡£°üÀ¨ÎŞĞ§×é¼ş¡£*/
+    /** è¿”å›æ‰€æœ‰çš„ç»„ä»¶æ•°é‡ã€‚åŒ…æ‹¬æ— æ•ˆç»„ä»¶ã€‚*/
     int getNumComponents() const { return components_.size(); }
 
-    /** ·µ»ØËùÓĞÓĞĞ§µÄ×é¼ş¡£*/
+    /** è¿”å›æ‰€æœ‰æœ‰æ•ˆçš„ç»„ä»¶ã€‚*/
     std::vector<ComponentPtr> getComponents() const;
 
-    /** ¸ù¾İÀàĞÍ£¬²éÕÒµÚÒ»¸öÓĞĞ§µÄ×é¼ş¡£*/
+    /** æ ¹æ®ç±»å‹ï¼ŒæŸ¥æ‰¾ç¬¬ä¸€ä¸ªæœ‰æ•ˆçš„ç»„ä»¶ã€‚*/
     ComponentPtr getComponentByType(const std::type_info &info);
 
-    /** ¸ù¾İÃû³Æ£¬²éÕÒµÚÒ»¸öÓĞĞ§µÄ×é¼ş¡£*/
+    /** æ ¹æ®åç§°ï¼ŒæŸ¥æ‰¾ç¬¬ä¸€ä¸ªæœ‰æ•ˆçš„ç»„ä»¶ã€‚*/
     ComponentPtr getComponentByName(const std::string &name);
 
-    /** É¾³ıµÚÒ»¸öÆ¥ÅäµÄÓĞĞ§×é¼ş¡£×¢Òâ£ºremove²Ù×÷²»»áÁ¢¼´ÉúĞ§£¬»áµÈµ½Ö¡Ä©Î²²ÅÖ´ĞĞ¡£*/
+    /** åˆ é™¤ç¬¬ä¸€ä¸ªåŒ¹é…çš„æœ‰æ•ˆç»„ä»¶ã€‚æ³¨æ„ï¼šremoveæ“ä½œä¸ä¼šç«‹å³ç”Ÿæ•ˆï¼Œä¼šç­‰åˆ°å¸§æœ«å°¾æ‰æ‰§è¡Œã€‚*/
     void removeComponent(ComponentPtr com);
 
     void tick(float elapse);

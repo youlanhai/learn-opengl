@@ -26,6 +26,7 @@ public:
 	float getDeltaTime() const { return deltaTime_; }
 
 	Vector2 getWindowSize();
+    Vector2 getFrameBufferSize();
 	Vector2 getCursorPos();
 
 	int getMouseState(int key) { return glfwGetMouseButton(pWindow_, key); }

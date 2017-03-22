@@ -77,7 +77,7 @@ TexturePtr FrameBuffer::getTexture()
 void FrameBuffer::bind()
 {
 	GLint oldFBO = 0;
-	//GL_ASSERT(glGetIntegerv(GL_FRAMEBUFFER, &oldFBO));
+	GL_ASSERT(glGetIntegerv(GL_FRAMEBUFFER_BINDING, &oldFBO));
 	oldFBO_ = oldFBO;
 
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo_);

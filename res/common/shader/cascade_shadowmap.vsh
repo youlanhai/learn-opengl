@@ -1,15 +1,16 @@
-attribute vec3 a_position;
-attribute vec3 a_normal;
-attribute vec2 a_texcoord0;
+#version 330 core
+layout (location = 0) in vec3 a_position;
+layout (location = 1) in vec3 a_normal;
+layout (location = 2) in vec2 a_texcoord0;
 
 uniform mat4 u_matWorld;
 uniform mat4 u_matWorldViewProj;
 uniform mat4 lightMatrix;
 
-varying vec2 v_texcoord;
-varying vec3 v_posInWorld;
-varying vec4 v_posInLight;
-varying vec3 v_normal;
+out vec2 v_texcoord;
+out vec3 v_posInWorld;
+out vec4 v_posInLight;
+out vec3 v_normal;
 
 void main()
 {

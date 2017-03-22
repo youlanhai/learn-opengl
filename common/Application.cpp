@@ -120,6 +120,11 @@ bool Application::createWindow(int width, int height, const std::string &title)
 {
     assert(pWindow_ == nullptr);
     
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    
     pWindow_ = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
     if(nullptr == pWindow_)
     {
@@ -171,6 +176,13 @@ Vector2 Application::getWindowSize()
 	int width, height;
 	glfwGetWindowSize(pWindow_, &width, &height);
 	return Vector2(float(width), float(height));
+}
+
+Vector2 Application::getFrameBufferSize()
+{
+    int width, height;
+    glfwGetFramebufferSize(pWindow_, &width, &height);
+    return Vector2(float(width), float(height));
 }
 
 Vector2 Application::getCursorPos()
