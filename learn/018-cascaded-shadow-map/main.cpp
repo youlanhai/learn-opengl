@@ -45,7 +45,7 @@ public:
 
         MeshPtr cubeMesh = createCube(Vector3(1, 1, 1));
         material_ = new Material();
-        if (!material_->loadShader("shader/cascade_shadowmap.shader"))
+        if (!material_->loadShader("shader/cascade_show_cascade.shader"))
         {
             return false;
         }
@@ -109,6 +109,15 @@ public:
         
         material_->setTexture("cascadeTexture", texture);
         
+        quadMesh_ = createQuad(Vector2(0.4f, 0.4f));
+        quadMaterial_ = new Material();
+        if(!quadMaterial_->loadShader("shader/cascade_texture.shader"))
+        {
+            return false;
+        }
+        quadMaterial_->setTexture("u_texture0", texture);
+        quadMesh_->addMaterial(quadMaterial_);
+        
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 		return true;
@@ -147,7 +156,7 @@ public:
             
             float halfHeight = zNear * tan(halfFov);
             float halfWidth = halfHeight * aspect;
-            Vector3 vNear = forward * zNear;
+            Vector3 vNear = camera_.getPosition() + forward * zNear;
             Vector3 dw = right * halfWidth;
             Vector3 dh = up * halfHeight;
             points[0] = vNear - dw - dh; // left bottom
@@ -155,7 +164,7 @@ public:
             points[2] = vNear + dw + dh; // right top
             points[3] = vNear + dw - dh; // right bottom
             
-            Vector3 vFar = forward * zFar;
+            Vector3 vFar = camera_.getPosition() + forward * zFar;
             halfHeight = zFar * tan(halfFov);
             halfWidth = halfHeight * aspect;
             dw = right * halfWidth;
@@ -185,8 +194,11 @@ public:
                 minV.z = std::min(minV.z, points[i].z);
             }
             
+            float zn = minV.z, zf = maxV.z;
+            //float zn = lightCamera_.getZNear(), zf = lightCamera_.getZFar();
+            
             // 构造灯光投影矩阵
-            cascadeProjMatrices_[i].orthogonalProjectionOffCenterGL(minV.x, maxV.x, minV.y, maxV.y, lightCamera_.getZNear(), lightCamera_.getZFar());
+            cascadeProjMatrices_[i].orthogonalProjectionOffCenterGL(minV.x, maxV.x, minV.y, maxV.y, zn, zf);
             //cascadeProjMatrices_[i] = lightCamera_.getProjMatrix();
         }
       
@@ -205,35 +217,42 @@ public:
 	{
         updateCascades();
         
-        if(true)
+        generateShadow(renderer);
+        drawScene(renderer);
+        drawCascadeTexture(renderer);
+    }
+    
+    void generateShadow(Renderer *renderer)
+    {
+        glDisable(GL_CULL_FACE);
+        renderer->setCamera(&lightCamera_);
+        renderer->setOverwriteMaterial(lightMaterial_);
+        frameBuffer_->bind();
+        glDrawBuffer(0);
+        glReadBuffer(0);
+        
+        Vector2 size = frameBuffer_->getSize();
+        glViewport(0, 0, size.x, size.y);
+        for(int i = 0; i < nCascades; ++i)
         {
-            glDisable(GL_CULL_FACE);
-            renderer->setCamera(&lightCamera_);
-            renderer->setOverwriteMaterial(lightMaterial_);
-            frameBuffer_->bind();
-            glDrawBuffer(0);
-            glReadBuffer(0);
+            GL_ASSERT(glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, cascadeTexture_->getHandle(), 0, i));
             
-            Vector2 size = frameBuffer_->getSize();
-            glViewport(0, 0, size.x, size.y);
-            for(int i = 0; i < nCascades; ++i)
-            {
-                GL_ASSERT(glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, cascadeTexture_->getHandle(), 0, i));
-                
-                renderer->setProjMatrix(cascadeProjMatrices_[i]);
-                
-                glClearColor(0, 0, 0, 0);
-                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                
-                //ground_->draw(renderer);
-                casters_->draw(renderer);
-            }
+            renderer->setProjMatrix(cascadeProjMatrices_[i]);
             
-            frameBuffer_->unbind();
-            renderer->setOverwriteMaterial(nullptr);
-            glEnable(GL_CULL_FACE);
+            glClearColor(0, 0, 0, 0);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            
+            //ground_->draw(renderer);
+            casters_->draw(renderer);
         }
-
+        
+        frameBuffer_->unbind();
+        renderer->setOverwriteMaterial(nullptr);
+        glEnable(GL_CULL_FACE);
+    }
+    
+    void drawScene(Renderer *renderer)
+    {
         Vector2 size = getFrameBufferSize();
         glViewport(0, 0, size.x, size.y);
         glClearColor(0.15f, 0.24f, 0.24f, 0);
@@ -241,13 +260,19 @@ public:
 
         renderer->setCamera(&camera_);
         material_->bindShader();
-        material_->bindUniform("lightDir", -lightCamera_.getForwardVector());
+        
+        Vector3 lightDir = -lightCamera_.getForwardVector();
+        lightDir = camera_.getViewMatrix().transformNormal(lightDir);
+        lightDir.normalize();
+        material_->bindUniform("lightDir", lightDir);
         material_->bindUniform("lightMatrix", lightCamera_.getViewMatrix());
+        
         ShaderUniform *un = material_->findUniform("cascadeProjMatrices");
         if(un)
         {
             un->bindValue(cascadeProjMatrices_, MaxCascades, false);
         }
+        
         un = material_->findUniform("cascadeSplits");
         if(un)
         {
@@ -256,6 +281,28 @@ public:
 
         ground_->draw(renderer);
         casters_->draw(renderer);
+    }
+    
+    // 在屏幕上渲染cascade贴图
+    void drawCascadeTexture(Renderer *renderer)
+    {
+        glDisable(GL_DEPTH_TEST);
+        renderer->setViewMatrix(Matrix::Identity);
+        renderer->setProjMatrix(Matrix::Identity);
+        float startX = -0.8f;
+        for(int i = 0; i < nCascades; ++i)
+        {
+            Matrix world;
+            world.setTranslate(startX, -0.8f, 0.0f);
+            renderer->setWorldMatrix(world);
+            
+            quadMaterial_->bindShader();
+            quadMaterial_->bindUniform("layerIndex", i);
+            quadMesh_->draw(renderer);
+            
+            startX += 0.45f;
+        }
+        glEnable(GL_DEPTH_TEST);
 	}
 
 	void onSizeChange(int width, int height) override
@@ -322,6 +369,10 @@ private:
     Matrix          cascadeProjMatrices_[MaxCascades];
     float           cascadeSplits_[MaxCascades];
     TexturePtr      cascadeTexture_;
+    
+    MaterialPtr     quadMaterial_;
+    MeshPtr         quadMesh_;
+    
 };
 
 int main()

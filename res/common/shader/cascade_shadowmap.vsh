@@ -10,7 +10,7 @@ uniform mat4 lightMatrix;
 
 out vec2 v_texcoord;
 out vec3 v_posInView;
-out vec4 v_posInLight;
+out vec3 v_posInLight;
 out vec3 v_normal;
 
 void main()
@@ -22,5 +22,5 @@ void main()
 	v_normal = (u_matWorldView * vec4(a_normal, 0.0)).xyz;
 	v_posInView = vec3(u_matWorldView * pos);
 
-	v_posInLight = lightMatrix * u_matWorld * pos;
+	v_posInLight = (lightMatrix * u_matWorld * pos).xyz;
 }

@@ -399,16 +399,16 @@ MeshPtr createCube(const Vector3 &size)
 
 MeshPtr createQuad(const Vector2 & size)
 {
-	typedef MeshVertex VertexType;
+	typedef VertexXYZUV VertexType;
 
 	float hx = size.x * 0.5f;
 	float hy = size.y * 0.5f;
 
-	VertexXYZ vertices[4] = {
-		{ { -hx, hy, 0.0f }, }, // left top
-		{ { -hx, -hy, 0.0f }, }, // left bottom
-		{ { hx, hy, 0.0f },}, // right top
-		{ { hx, -hy, 0.0f }, }, // right bottom
+	VertexType vertices[4] = {
+        { { -hx, hy, 0.0f},     { 0.0f, 0.0f}, }, // left top
+        { { -hx, -hy, 0.0f },   { 0.0f, 1.0f} }, // left bottom
+        { { hx, hy, 0.0f },     { 1.0f, 0.0f}}, // right top
+        { { hx, -hy, 0.0f },    { 1.0f, 1.0f}}, // right bottom
 	};
 
 	uint16_t indices[6] = {
@@ -416,7 +416,7 @@ MeshPtr createQuad(const Vector2 & size)
 		2, 1, 3,
 	};
 
-	return createMesh<VertexXYZ, uint16_t>(vertices, 4, indices, 6);
+	return createMesh<VertexType, uint16_t>(vertices, 4, indices, 6);
 }
 
 static uint32_t extractIndex(const char *data, size_t i, size_t stride)

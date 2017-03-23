@@ -3,7 +3,7 @@
 out vec4 FragColor;
 
 in vec2 v_texcoord;
-in vec4 v_posInLight;
+in vec3 v_posInLight;
 in vec3 v_posInView;
 in vec3 v_normal;
 
