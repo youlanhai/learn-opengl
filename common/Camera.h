@@ -24,7 +24,13 @@ public:
 	bool handleMouseMove(float x, float y);
 	bool handleMouseScroll(float xoffset, float yoffset);
 	bool handleCameraMove();
-
+    
+    float getZNear() const { return zNear_; }
+    float getZFar() const { return zFar_; }
+    float getFov() const { return fov_; }
+    float getAspect() const { return aspect_; }
+    const Vector2& getOrthoSize() const { return orthoSize_; }
+    
 private:
 	mutable Matrix	matView_;
 	mutable Matrix  matViewProj_;
@@ -32,4 +38,11 @@ private:
 
 	float	moveSpeed_;
 	Vector2 lastCursorPos_;
+    
+    float   zNear_;
+    float   zFar_;
+    Vector2 orthoSize_;
+    
+    float   fov_;
+    float   aspect_;
 };

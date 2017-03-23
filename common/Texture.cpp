@@ -229,6 +229,10 @@ GLuint Texture::getCurrentBinding() const
 	{
 		glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, &curTexture);
 	}
+    else if(target_ == TextureTarget::Tex2DArray)
+    {
+        glGetIntegerv(GL_TEXTURE_BINDING_2D_ARRAY, &curTexture);
+    }
 	return curTexture;
 }
 

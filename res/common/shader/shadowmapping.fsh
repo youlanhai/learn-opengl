@@ -1,4 +1,4 @@
-
+#version 330 core
 uniform sampler2D u_texture0; // main texture
 uniform sampler2D u_texture1; // shadow map
 uniform vec3 lightDir;
@@ -9,10 +9,11 @@ uniform float specularStrength;
 uniform float shininess;
 uniform vec2 texelSize; // 1 / textureSize
 
-varying vec2 v_texcoord;
-varying vec3 v_normal;
-varying vec3 v_posInWorld;
-varying vec4 v_posInLightSpace;
+out vec4 FragColor;
+in vec2 v_texcoord;
+in vec3 v_normal;
+in vec3 v_posInWorld;
+in vec4 v_posInLightSpace;
 
 float shadowMapping()
 {
@@ -23,7 +24,7 @@ float shadowMapping()
 	projCoord = projCoord * 0.5 + 0.5;
 
 	float currentDepth = projCoord.z;
-	float closestDepth = texture2D(u_texture1, projCoord.xy).r;
+	float closestDepth = texture(u_texture1, projCoord.xy).r;
 
 	// 如果不考虑阴影失真，到这里就可以返回了。
 	// 如果当前的深度值更大，说明当前的点就在阴影中
@@ -37,7 +38,7 @@ float shadowMapping()
 	{
 		for(int y = -1; y <= 1; ++y)
 		{
-			float pcfDepth = texture2D(u_texture1, projCoord.xy + vec2(x, y) * texelSize).r;
+			float pcfDepth = texture(u_texture1, projCoord.xy + vec2(x, y) * texelSize).r;
 			shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
 		}
 	}
@@ -57,5 +58,5 @@ void main()
 
 	vec3 color = u_ambientColor + lightColor * ((diff + spec) * (1.0 - shadowMapping()));
 
-	gl_FragColor = texture2D(u_texture0, v_texcoord) * vec4(color, 1.0);
+	FragColor = texture(u_texture0, v_texcoord) * vec4(color, 1.0);
 }

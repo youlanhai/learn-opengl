@@ -1,15 +1,16 @@
-attribute vec4 a_position;
-attribute vec3 a_normal;
-attribute vec2 a_texcoord0;
+#version 330 core
+in vec4 a_position;
+in vec3 a_normal;
+in vec2 a_texcoord0;
 
 uniform mat4 u_matWorld;
 uniform mat4 u_matWorldViewProj;
 uniform mat4 matLightProj;
 
-varying vec2 v_texcoord;
-varying vec3 v_normal;
-varying vec3 v_posInWorld;
-varying vec4 v_posInLightSpace;
+out vec2 v_texcoord;
+out vec3 v_normal;
+out vec3 v_posInWorld;
+out vec4 v_posInLightSpace;
 
 void main()
 {
@@ -17,6 +18,6 @@ void main()
 	v_texcoord = a_texcoord0;
 	v_normal = normalize(vec3(u_matWorld * vec4(a_normal, 0.0)));
 
-	v_posInWorld = u_matWorld * a_position;
+	v_posInWorld = (u_matWorld * a_position).xyz;
 	v_posInLightSpace = matLightProj * a_position;
 }

@@ -15,11 +15,23 @@ FrameBuffer::~FrameBuffer()
 	destroy();
 }
 
+bool FrameBuffer::init(int width, int height)
+{
+    destroy();
+    
+    size_.set(width, height);
+    
+    glGenFramebuffers(1, &fbo_);
+    return true;
+}
+
 bool FrameBuffer::initColorBuffer(int width, int height, TextureFormat format, bool hasStencilBuffer)
 {
-	destroy();
+    if(!init(width, height))
+    {
+        return false;
+    }
 
-    size_.set(width, height);
 	texture_ = new Texture();
 	if (!texture_->create(0, width, height, format, nullptr, GL_UNSIGNED_BYTE))
 	{
@@ -27,36 +39,41 @@ bool FrameBuffer::initColorBuffer(int width, int height, TextureFormat format, b
 		return false;
 	}
 
-	glGenFramebuffers(1, &fbo_);
 	bind();
-
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture_->getHandle(), 0);
-
 	unbind();
 	return true;
 }
 
 bool FrameBuffer::initDepthBuffer(int width, int height, TextureFormat format, bool hasStencilBuffer)
 {
-	destroy();
+	if(!init(width, height))
+    {
+        return false;
+    }
 
-    size_.set(width, height);
 	texture_ = new Texture();
 	if (!texture_->create(0, width, height, format, nullptr, GL_FLOAT))
 	{
 		texture_ = nullptr;
 		return false;
 	}
+    
+    bind();
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture_->getHandle(), 0);
+    glDrawBuffer(0);
+    glReadBuffer(0);
+    unbind();
+    return true;
+}
 
-	glGenFramebuffers(1, &fbo_);
-	bind();
-
+void FrameBuffer::attachOnlyDepthTexture(TexturePtr tex)
+{
+    texture_ = tex;
+    
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture_->getHandle(), 0);
-	glDrawBuffer(0);
-	glReadBuffer(0);
-
-	unbind();
-	return true;
+	//glDrawBuffer(0);
+	//glReadBuffer(0);
 }
 
 void FrameBuffer::destroy()
@@ -86,4 +103,5 @@ void FrameBuffer::bind()
 void FrameBuffer::unbind()
 {
 	GL_ASSERT(glBindFramebuffer(GL_FRAMEBUFFER, oldFBO_));
+    oldFBO_ = 0;
 }

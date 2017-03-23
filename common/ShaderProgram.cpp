@@ -197,7 +197,7 @@ bool ShaderProgram::parseUniforms()
 		uniform->pEffect_ = this;
 		uniform->location_ = location;
 		uniform->type_ = type;
-		if (type == GL_SAMPLER_2D || type == GL_SAMPLER_CUBE)
+		if (type == GL_SAMPLER_2D || type == GL_SAMPLER_CUBE || type == GL_SAMPLER_2D_ARRAY)
 		{
 			uniform->index_ = samplerIndex++;
 		}

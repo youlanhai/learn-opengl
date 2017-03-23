@@ -133,6 +133,7 @@ public:
 
 		if (frameBuffer_)
 		{
+            glDisable(GL_CULL_FACE);
 			frameBuffer_->bind();
 
 			glViewport(0, 0, frameSize_.x, frameSize_.y);
@@ -145,8 +146,9 @@ public:
 			frameBuffer_->unbind();
 
 			// 恢复视口
-			Vector2 size = getWindowSize();
+			Vector2 size = getFrameBufferSize();
 			glViewport(0, 0, size.x, size.y);
+            glEnable(GL_CULL_FACE);
 		}
 
 		glClearColor(0.15f, 0.24f, 0.24f, 0);
@@ -166,7 +168,7 @@ public:
 
 	void setupViewProjMatrix()
 	{
-		Vector2 size = getWindowSize();
+		Vector2 size = getFrameBufferSize();
 		camera_.setPerspective(PI_QUARTER, size.x / size.y, 1.0f, 1000.0f);
 		//camera_.setOrtho(4, 4, 1.0f, 1000.0f);
 	}

@@ -20,6 +20,7 @@ public:
 	bool begin();
 	void end();
 
+    ShaderUniform* findUniform(const std::string &name){ return shader_->findUniform(name); }
 	template<typename T>
 	bool bindUniform(const std::string &name, const T &value);
 

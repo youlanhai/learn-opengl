@@ -5,6 +5,10 @@
 
 Camera::Camera()
 	: moveSpeed_(1.0f)
+    , zNear_(1.0f)
+    , zFar_(100.0f)
+    , fov_(PI_HALF)
+    , aspect_(1.0f)
 {
 	matRotation_.setIdentity();
 	matProj_.setIdentity();
@@ -16,11 +20,18 @@ Camera::~Camera()
 
 void Camera::setPerspective(float fov, float aspect, float znear, float zfar)
 {
+    zNear_ = znear;
+    zFar_ = zfar;
+    fov_ = fov;
+    aspect_ = aspect;
 	matProj_.perspectiveProjectionGL(fov, aspect, znear, zfar);
 }
 
 void Camera::setOrtho(float w, float h, float zn, float zf)
 {
+    zNear_ = zn;
+    zFar_ = zf;
+    orthoSize_.set(w, h);
 	matProj_.orthogonalProjectionGL(w, h, zn, zf);
 }
 

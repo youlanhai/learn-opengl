@@ -80,12 +80,14 @@ enum class TexType
     Tex2D,
     Tex3D,
     TexCubeMap,
+    Tex2DArray,
 };
 
 enum class TextureTarget
 {
     Tex2D = GL_TEXTURE_2D,
     TexCubeMap = GL_TEXTURE_CUBE_MAP,
+    Tex2DArray = GL_TEXTURE_2D_ARRAY,
 };
 
 enum class TextureParam

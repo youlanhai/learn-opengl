@@ -84,6 +84,8 @@ public:
     void bindValue(const Color & color);
 
     void bindValue(const Texture* texture);
+    
+    void bindValue(const Texture** texture, int count);
 
 private:
 
