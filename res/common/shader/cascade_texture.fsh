@@ -7,5 +7,5 @@ uniform int layerIndex;
 
 void main()
 {
-	FragColor = texture(u_texture0, vec3(v_texcoord, layerIndex));
+	FragColor = vec4(texture(u_texture0, vec3(v_texcoord, layerIndex)).r);
 }

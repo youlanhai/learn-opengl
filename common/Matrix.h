@@ -89,13 +89,27 @@ public:
     void perspectiveProjection( float fov, float aspectRatio,
                                 float nearPlane, float farPlane );
 
-    // GL的视椎体z取值为[-1, 1]，与dx的[0, 1]不同，所以投影矩阵也不同
+    /** GL的视椎体z取值为[-1, 1]，与dx的[0, 1]不同，所以投影矩阵也不同
+     *  @param fov          相机y方向上的张角。
+     *  @param aspectRatio  视口的宽高比
+     *  @param nearPlane    近裁剪面
+     *  @param farPlane     远裁剪面
+     */
     void perspectiveProjectionGL( float fov, float aspectRatio, float nearPlane, float farPlane );
     void orthogonalProjectionGL(float w, float h, float zn, float zf);
     void orthogonalProjectionOffCenterGL(float left, float right, float bottom, float top, float zn, float zfar);
-
-	Vector3 transformPoint(const Vector3 &pos) const;
-	Vector3 transformNormal(const Vector3 &pos) const;
+    
+    /** 变换Vector4，不进行透视除法 */
+    void transformVector(Vector4 &ret, const Vector4 &p) const;
+    
+    /** 变换坐标，并进行透视除法。*/
+    Vector4 transformPoint(const Vector4 &p) const;
+    
+    /** 变换坐标，并进行透视除法。*/
+    Vector3 transformPoint(const Vector3 &p) const;
+    
+    /** 变换向量。*/
+	Vector3 transformNormal(const Vector3 &p) const;
 
 public:
     static Matrix Identity;

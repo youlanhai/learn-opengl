@@ -523,22 +523,32 @@ void Matrix::orthogonalProjectionOffCenterGL(float left, float right, float bott
     _44 = 1;
 }
 
-Vector3 Matrix::transformPoint(const Vector3 & pos) const
+void Matrix::transformVector(Vector4 &ret, const Vector4 &p) const
 {
-	Vector3 ret(
-		pos.dotProduct(*(Vector3*)m[0]),
-		pos.dotProduct(*(Vector3*)m[1]),
-		pos.dotProduct(*(Vector3*)m[2])
-	);
-	ret += *(Vector3*)m[3];
-	return ret;
+    ret.x = p.x * _11 + p.y * _21 + p.z * _31 + p.w * _41;
+    ret.y = p.x * _12 + p.y * _22 + p.z * _32 + p.w * _42;
+    ret.z = p.x * _13 + p.y * _23 + p.z * _33 + p.w * _43;
+    ret.w = p.x * _14 + p.y * _24 + p.z * _34 + p.w * _44;
 }
 
-Vector3 Matrix::transformNormal(const Vector3 & pos) const
+Vector4 Matrix::transformPoint(const Vector4 &p) const
 {
-	return Vector3(
-		pos.dotProduct(*(Vector3*)m[0]),
-		pos.dotProduct(*(Vector3*)m[1]),
-		pos.dotProduct(*(Vector3*)m[2])
-	);
+    Vector4 ret;
+    transformVector(ret, p);
+    ret /= ret.w;
+    return ret;
+}
+
+Vector3 Matrix::transformPoint(const Vector3 & p) const
+{
+    Vector4 ret;
+    transformVector(ret, Vector4(p, 1.0f));
+	return Vector3(ret.x / ret.w, ret.y / ret.w, ret.z / ret.w);
+}
+
+Vector3 Matrix::transformNormal(const Vector3 & p) const
+{
+    Vector4 ret;
+    transformVector(ret, Vector4(p, 0.0f));
+    return Vector3(ret.x, ret.y, ret.z);
 }

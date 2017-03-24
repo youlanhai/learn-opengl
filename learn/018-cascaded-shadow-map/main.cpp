@@ -133,16 +133,14 @@ public:
     {
         float zDistance = camera_.getZFar() - camera_.getZNear();
         float zStep = zDistance / nCascades;
-        float halfFov = camera_.getFov() * 0.5f;
+        float tanHalfFov = tan(camera_.getFov() * 0.5f);
         float aspect = camera_.getAspect();
         
-        Matrix lightMatrix = lightCamera_.getViewMatrix();
+        // 该矩阵用于把点从相机空间下，转换到灯光空间下。
+        Matrix lightSpaceMatrix;
+        lightSpaceMatrix.multiply(camera_.getModelMatrix(), lightCamera_.getViewMatrix());
 
-        Vector3 forward = camera_.getForwardVector();
-        Vector3 up = camera_.getUpVector();
-        Vector3 right = camera_.getRightVector();
-        
-        float lastZ = lightCamera_.getZNear();
+        float lastZ = camera_.getZNear();
         for(int i = 0; i < nCascades; ++i)
         {
             float zNear = lastZ;
@@ -151,33 +149,28 @@ public:
             cascadeSplits_[i] = zFar;
             lastZ = zFar;
             
+            float halfNearHeight = zNear * tanHalfFov;
+            float halfNearWidth = halfNearHeight * aspect;
+            
+            float halfFarHeight = zFar * tanHalfFov;
+            float halfFarWidth = halfFarHeight * aspect;
+            
             // 求子视锥体的8个顶点
-            Vector3 points[8];
-            
-            float halfHeight = zNear * tan(halfFov);
-            float halfWidth = halfHeight * aspect;
-            Vector3 vNear = camera_.getPosition() + forward * zNear;
-            Vector3 dw = right * halfWidth;
-            Vector3 dh = up * halfHeight;
-            points[0] = vNear - dw - dh; // left bottom
-            points[1] = vNear - dw + dh; // left top
-            points[2] = vNear + dw + dh; // right top
-            points[3] = vNear + dw - dh; // right bottom
-            
-            Vector3 vFar = camera_.getPosition() + forward * zFar;
-            halfHeight = zFar * tan(halfFov);
-            halfWidth = halfHeight * aspect;
-            dw = right * halfWidth;
-            dh = up * halfHeight;
-            points[4] = vFar - dw - dh; // left bottom
-            points[5] = vFar - dw + dh; // left top
-            points[6] = vFar + dw + dh; // right top
-            points[7] = vFar + dw - dh; // right bottom
+            Vector3 points[8] = {
+                {-halfNearWidth, -halfNearHeight, zNear}, //left-bottom
+                {-halfNearWidth, halfNearHeight, zNear}, //left-top
+                {halfNearWidth, halfNearHeight, zNear}, //right-top
+                {halfNearWidth, -halfNearHeight, zNear}, //right-bottom
+                {-halfFarWidth, -halfFarHeight, zFar}, //left-bottom
+                {-halfFarWidth, halfFarHeight, zFar}, //left-top
+                {halfFarWidth, halfFarHeight, zFar}, //right-top
+                {halfFarWidth, -halfFarHeight, zFar}, //right-bottom
+            };
             
             // 转换到灯光空间
             for(int i = 0; i < 8; ++i)
             {
-                points[i] = lightMatrix.transformPoint(points[i]);
+                points[i] = lightSpaceMatrix.transformPoint(points[i]);
             }
             
             // 计算包围盒
@@ -194,12 +187,11 @@ public:
                 minV.z = std::min(minV.z, points[i].z);
             }
             
+            //TODO 根据场景物体，计算最小的near和far值
             float zn = minV.z, zf = maxV.z;
-            //float zn = lightCamera_.getZNear(), zf = lightCamera_.getZFar();
             
             // 构造灯光投影矩阵
             cascadeProjMatrices_[i].orthogonalProjectionOffCenterGL(minV.x, maxV.x, minV.y, maxV.y, zn, zf);
-            //cascadeProjMatrices_[i] = lightCamera_.getProjMatrix();
         }
       
         for(int i = nCascades; i < MaxCascades; ++i)
@@ -265,7 +257,7 @@ public:
         lightDir = camera_.getViewMatrix().transformNormal(lightDir);
         lightDir.normalize();
         material_->bindUniform("lightDir", lightDir);
-        material_->bindUniform("lightMatrix", lightCamera_.getViewMatrix());
+        material_->bindUniform("lightViewMatrix", lightCamera_.getViewMatrix());
         
         ShaderUniform *un = material_->findUniform("cascadeProjMatrices");
         if(un)

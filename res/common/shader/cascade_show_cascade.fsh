@@ -41,7 +41,7 @@ vec3 shadow()
 	texcoord.z = index;
 
 	float textureDepth = texture(cascadeTexture, texcoord.xyz).r;
-	float s = textureDepth + 0.01 < currentDepth ? 0.1 : 1.0;
+	float s = textureDepth + 0.005 < currentDepth ? 0.2 : 1.0;
 	return ShadowColors[index] * s;
 }
 
