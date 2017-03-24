@@ -171,6 +171,13 @@ void Application::makeCurrent()
     glfwMakeContextCurrent(pWindow_);
 }
 
+float Application::getAspect() const
+{
+    int width, height;
+    glfwGetWindowSize(pWindow_, &width, &height);
+    return float(width) / float(height);
+}
+
 Vector2 Application::getWindowSize()
 {
 	int width, height;

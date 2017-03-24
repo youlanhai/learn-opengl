@@ -130,7 +130,7 @@ public:
 			frameBuffer_->unbind();
 
 			// 恢复视口
-			Vector2 size = getWindowSize();
+			Vector2 size = getFrameBufferSize();
 			glViewport(0, 0, size.x, size.y);
 		}
 
@@ -149,8 +149,7 @@ public:
 
 	void setupViewProjMatrix()
 	{
-		Vector2 size = getWindowSize();
-		camera_.setPerspective(PI_QUARTER, size.x / size.y, 1.0f, 1000.0f);
+		camera_.setPerspective(PI_QUARTER, getAspect(), 1.0f, 1000.0f);
 	}
 
 	virtual void onMouseButton(int button, int action, int mods) override

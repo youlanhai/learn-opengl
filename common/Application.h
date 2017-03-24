@@ -25,8 +25,19 @@ public:
 
 	float getDeltaTime() const { return deltaTime_; }
 
+    /** 获得屏幕的宽高比。aspect = width / height */
+    float getAspect() const;
+
+    /** 获得窗口（客户区）的尺寸。该尺寸为相对尺寸，所有的鼠标位置都是基于该尺寸的。*/
 	Vector2 getWindowSize();
+
+    /** 获得屏幕帧缓冲区的尺寸。
+     *  该尺寸是真实的像素数，涉及到渲染用的尺寸都使用该尺寸。比如，设置视口(ViewPort)。
+     *  通常情况下，帧缓冲区的大小和窗口大小是相同的，视网膜类型的显示屏会不一致。
+     */
     Vector2 getFrameBufferSize();
+
+    /** 获得鼠标在屏幕中的坐标。左上角为原点，向右为x正轴，向下为y正轴。*/
 	Vector2 getCursorPos();
 
 	int getMouseState(int key) { return glfwGetMouseButton(pWindow_, key); }

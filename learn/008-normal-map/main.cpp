@@ -115,14 +115,12 @@ public:
 
 	void setupViewProjMatrix()
 	{
-		Vector2 size = getWindowSize();
-
 		Matrix matView;
 		matView.lookAt(Vector3(0, 1, -1.8f), Vector3::Zero, Vector3::YAxis);
 
 		Matrix matProj;
 		matProj.setIdentity();
-		matProj.perspectiveProjectionGL(PI / 2.0f, size.x / size.y, 1.0f, 1000.0f);
+		matProj.perspectiveProjectionGL(PI / 2.0f, getAspect(), 1.0f, 1000.0f);
 
 		matViewProj_ = matView * matProj;
 	}

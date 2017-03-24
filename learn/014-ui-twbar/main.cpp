@@ -201,8 +201,7 @@ public:
 
 	void setupViewProjMatrix()
 	{
-		Vector2 size = getWindowSize();
-		camera_.setPerspective(PI_QUARTER, size.x / size.y, 1.0f, 1000.0f);
+		camera_.setPerspective(PI_QUARTER, getAspect(), 1.0f, 1000.0f);
 	}
 	
 	virtual void onKey(int key, int scancode, int action, int mods) override

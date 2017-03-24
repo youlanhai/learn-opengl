@@ -345,8 +345,7 @@ public:
 
 	void setupProjectionMatrix()
 	{
-		Vector2 size = getFrameBufferSize();
-		camera_.setPerspective(PI_QUARTER, size.x / size.y, 1.0f, 20.0f);
+		camera_.setPerspective(PI_QUARTER, getAspect(), 1.0f, 20.0f);
 	}
 	
 	virtual void onMouseButton(int button, int action, int mods) override

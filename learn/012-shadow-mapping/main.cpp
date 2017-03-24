@@ -168,8 +168,7 @@ public:
 
 	void setupViewProjMatrix()
 	{
-		Vector2 size = getFrameBufferSize();
-		camera_.setPerspective(PI_QUARTER, size.x / size.y, 1.0f, 1000.0f);
+		camera_.setPerspective(PI_QUARTER, getAspect(), 1.0f, 1000.0f);
 		//camera_.setOrtho(4, 4, 1.0f, 1000.0f);
 	}
 
