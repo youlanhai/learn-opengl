@@ -36,33 +36,29 @@ public:
         FileSystem::instance()->dumpSearchPath();
 
         Texture::s_defaultQuality = TextureQuality::FourLinear;
+        
+        if(!createFrameBuffer(1024, 1024))
+        {
+            return false;
+        }
+        
+        if(!createMaterials())
+        {
+            return false;
+        }
+        
+        MaterialPtr material = getCurrentMaterial();
+        
+        groundMesh_ = createPlane(Vector2(10, 10), 1);
+        groundMesh_->addMaterial(material);
+        
+        cubeMesh_ = createCube(Vector3(1, 1, 1));
+        cubeMesh_->addMaterial(material);
 
         ground_ = new Transform();
-        MeshPtr groundMesh = createPlane(Vector2(10, 10), 1);
-        ground_->addComponent(groundMesh);
+        ground_->addComponent(groundMesh_);
 
         casters_ = new Transform();
-
-        MeshPtr cubeMesh = createCube(Vector3(1, 1, 1));
-        material_ = new Material();
-        if (!material_->loadShader("shader/cascade_show_cascade.shader"))
-        {
-            return false;
-        }
-        material_->loadTexture("u_texture0", "white.png");
-
-        material_->bindShader();
-        material_->bindUniform("lightColor", Color(1.0f, 1.0f, 1.0f, 1.0f));
-
-        lightMaterial_ = new Material();
-        if (!lightMaterial_->loadShader("shader/xyz.shader"))
-        {
-            return false;
-        }
-
-        cubeMesh->addMaterial(material_);
-        groundMesh->addMaterial(material_);
-
         Vector3 positions[] = {
             { -1, 0.5f, -4 },
             { -1, 0.5f, -2 },
@@ -81,47 +77,85 @@ public:
         {
             TransformPtr t = new Transform();
             t->setPosition(pos);
-            t->addComponent(cubeMesh);
+            t->addComponent(cubeMesh_);
             casters_->addChild(t);
         }
 
 		camera_.lookAt(Vector3(0, 3, -10), Vector3::Zero, Vector3::YAxis);
-		setupViewProjMatrix();
+		setupProjectionMatrix();
 		Renderer::instance()->setCamera(&camera_);
 
         lightCamera_.setPosition(0, 6, -6);
         lightCamera_.setRotation(PI_FULL / 6.0f, PI_FULL / 3.0f, 0.0f);
         lightCamera_.setOrtho(20, 20, 1, 10);
 
-        int frameBufferWidth = 1024;
-        int frameBufferHeight = 1024;
-        
-        frameBuffer_ = new FrameBuffer();
-        frameBuffer_->init(frameBufferWidth, frameBufferHeight);
-        
-        
-        Texture2DArray *texture = new Texture2DArray();
-        cascadeTexture_ = texture;
-        texture->create(0, frameBufferWidth, frameBufferHeight, TextureFormat::Depth, MaxCascades);
-        texture->setQuality(TextureQuality::Nearest);
-        texture->setUWrap(TextureWrap::Clamp);
-        texture->setVWrap(TextureWrap::Clamp);
-        
-        material_->setTexture("cascadeTexture", texture);
         
         quadMesh_ = createQuad(Vector2(0.4f, 0.4f));
-        quadMaterial_ = new Material();
-        if(!quadMaterial_->loadShader("shader/cascade_texture.shader"))
-        {
-            return false;
-        }
-        quadMaterial_->setTexture("u_texture0", texture);
         quadMesh_->addMaterial(quadMaterial_);
         
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 		return true;
 	}
+    
+    bool createFrameBuffer(int width, int height)
+    {
+        int frameBufferWidth = 1024;
+        int frameBufferHeight = 1024;
+        
+        frameBuffer_ = new FrameBuffer();
+        frameBuffer_->init(frameBufferWidth, frameBufferHeight);
+        
+        Texture2DArray *texture = new Texture2DArray();
+        cascadeTexture_ = texture;
+        texture->create(0, frameBufferWidth, frameBufferHeight, TextureFormat::Depth, MaxCascades);
+        texture->setQuality(TextureQuality::Linear);
+        texture->setUWrap(TextureWrap::Clamp);
+        texture->setVWrap(TextureWrap::Clamp);
+        return true;
+    }
+    
+    bool createMaterials()
+    {
+        MaterialPtr material;
+        
+        material = new Material();
+        materials_[0] = material;
+        if (!material->loadShader("shader/cascade_shadowmap.shader"))
+        {
+            return false;
+        }
+        material->loadTexture("u_texture0", "white.png");
+        
+        material = new Material();
+        materials_[1] = material;
+        if (!material->loadShader("shader/cascade_show_cascade.shader"))
+        {
+            return false;
+        }
+        
+        for(MaterialPtr &mtl : materials_)
+        {
+            mtl->bindShader();
+            mtl->bindUniform("lightColor", Color(1.0f, 1.0f, 1.0f, 1.0f));
+            mtl->setTexture("cascadeTexture", cascadeTexture_);
+        }
+        
+        
+        lightMaterial_ = new Material();
+        if (!lightMaterial_->loadShader("shader/xyz.shader"))
+        {
+            return false;
+        }
+        
+        quadMaterial_ = new Material();
+        if(!quadMaterial_->loadShader("shader/cascade_texture.shader"))
+        {
+            return false;
+        }
+        quadMaterial_->setTexture("u_texture0", cascadeTexture_);
+        return true;
+    }
     
     /* 生成步骤
      *  1. 计算相z方向的分割点，划分出子视锥体。
@@ -251,21 +285,27 @@ public:
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         renderer->setCamera(&camera_);
-        material_->bindShader();
+        
+        MaterialPtr material = getCurrentMaterial();
+        groundMesh_->setMaterial(0, material);
+        cubeMesh_->setMaterial(0, material);
+        
+        material->bindShader();
         
         Vector3 lightDir = -lightCamera_.getForwardVector();
         lightDir = camera_.getViewMatrix().transformNormal(lightDir);
         lightDir.normalize();
-        material_->bindUniform("lightDir", lightDir);
-        material_->bindUniform("lightViewMatrix", lightCamera_.getViewMatrix());
+        material->bindUniform("lightDir", lightDir);
+        material->bindUniform("lightViewMatrix", lightCamera_.getViewMatrix());
         
-        ShaderUniform *un = material_->findUniform("cascadeProjMatrices");
+        ShaderUniform *un;
+        un = material->findUniform("cascadeProjMatrices");
         if(un)
         {
             un->bindValue(cascadeProjMatrices_, MaxCascades, false);
         }
         
-        un = material_->findUniform("cascadeSplits");
+        un = material->findUniform("cascadeSplits");
         if(un)
         {
             un->bindValue(cascadeSplits_, MaxCascades);
@@ -300,10 +340,10 @@ public:
 	void onSizeChange(int width, int height) override
 	{
 		Application::onSizeChange(width, height);
-		setupViewProjMatrix();
+		setupProjectionMatrix();
 	}
 
-	void setupViewProjMatrix()
+	void setupProjectionMatrix()
 	{
 		Vector2 size = getFrameBufferSize();
 		camera_.setPerspective(PI_QUARTER, size.x / size.y, 1.0f, 20.0f);
@@ -341,16 +381,52 @@ public:
 	{
 		camera_.handleMouseScroll(xoffset, yoffset);
 	}
+    
+    virtual void onKey(int key, int scancode, int action, int mods) override
+    {
+        Application::onKey(key, scancode, action, mods);
+        
+        if(action == GLFW_RELEASE)
+        {
+            switch(key)
+            {
+                case GLFW_KEY_1:
+                    nCascades = 1;
+                    break;
+                case GLFW_KEY_2:
+                    nCascades = 2;
+                    break;
+                case GLFW_KEY_3:
+                    nCascades = 3;
+                    break;
+                case GLFW_KEY_4:
+                    nCascades = 4;
+                    break;
+                case GLFW_KEY_M:
+                    materialIndex_ = (materialIndex_ + 1) % 2;
+                    break;
+            }
+        }
+    }
+    
+    MaterialPtr getCurrentMaterial()
+    {
+        return materials_[materialIndex_];
+    }
 
 private:
     
 	Camera          camera_;
 	Vector2         lastCursorPos_;
 
-    MaterialPtr     material_;
+    int             materialIndex_ = 0;
+    MaterialPtr     materials_[2];
 
     TransformPtr    casters_;
     TransformPtr    ground_;
+    
+    MeshPtr         groundMesh_;
+    MeshPtr         cubeMesh_;
 
     Camera          lightCamera_;
     MaterialPtr     lightMaterial_;
