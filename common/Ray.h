@@ -19,6 +19,11 @@ public:
      */
     bool intersectPlane(const Vector3 &N, float D, float *distance = nullptr) const;
     
+    /** 判断射线与三角形相交
+     *  @param a,b,c    为三角形的3个顶点。
+     *  @param t        t为射线起点到交点的距离
+     *  @param u,v      交点在三角形的重心坐标
+     */
     bool intersectTriangle(const Vector3 &a, const Vector3 &b, const Vector3 &c, float* t, float* u, float* v) const;
 
     bool intersectTriangle(const Vector3 &a, const Vector3 &b, const Vector3 &c, float *distance = nullptr) const;
