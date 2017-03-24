@@ -180,8 +180,6 @@ void createSimpleGround(std::vector<MeshVertex> &vertices, std::vector<uint16_t>
 	float halfX = XLength * 0.5f;
 	float halfZ = ZLength * 0.5f;
     
-    float pi = 3.141592654f;
-    
     typedef MeshVertex VertexType;
     vertices.clear();
     indices.clear();
@@ -195,10 +193,14 @@ void createSimpleGround(std::vector<MeshVertex> &vertices, std::vector<uint16_t>
             v.position.x = c * gridSize - halfX;
             v.position.z = halfZ - r * gridSize;
             
-            float hx = sin(c * gridSize / waveSize * pi * 2);
-            float hz = sin(r * gridSize / waveSize * pi * 2);
+            float centerX = floor(c * gridSize / waveSize) + waveSize * 0.5f;
+            float centerZ = floor(r * gridSize / waveSize) + waveSize * 0.5f;
+            float dx = c * gridSize / waveSize - centerX;
+            float dz = r * gridSize / waveSize - centerZ;
             
-            v.position.y = std::min(hx, hz) * height;
+            float radius = sqrt(dx * dx + dz * dz);
+            
+            v.position.y = std::max(0.0, cos(radius / waveSize * PI_FULL)) * height;
             v.uv.x = (c * gridSize) / XLength;
             v.uv.y = (r * gridSize) / ZLength;
             
