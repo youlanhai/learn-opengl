@@ -14,6 +14,8 @@ in vec3 v_lightDir;
 
 void main()
 {
+	vec4 albedo = texture(u_texture0, v_texcoord0);
+
 	vec3 normal = texture(u_texture1, v_texcoord0).rgb;
 	normal = normalize(normal * 2.0 - 1.0);
 
@@ -30,6 +32,6 @@ void main()
 #endif
 	vec3 specular = lightColor * (specularStrength * spec);
 
-	vec3 color = u_ambientColor + diffuse + specular;
-	FragColor = texture(u_texture0, v_texcoord0) * vec4(color, 1.0);
+	vec3 color = (u_ambientColor + diffuse) * albedo.rgb + specular;
+	FragColor = vec4(color, albedo.a);
 }

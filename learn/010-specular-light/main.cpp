@@ -52,8 +52,8 @@ public:
 		bindShaderUniform(shader_.get(), "lightDir", lightDir);
 		bindShaderUniform(shader_.get(), "lightColor", Vector3(1.5f));
 		bindShaderUniform(shader_.get(), "u_ambientColor", Vector3(0.5f));
-		bindShaderUniform(shader_.get(), "shininess", 64.0f);
-		bindShaderUniform(shader_.get(), "specularStrength", 4.0f);
+		bindShaderUniform(shader_.get(), "shininess", 32.0f);
+		bindShaderUniform(shader_.get(), "specularStrength", 2.0f);
 		shader_->unbind();
 
 		mesh_ = createCube(Vector3(1.0f, 1.0f, 1.0f));
