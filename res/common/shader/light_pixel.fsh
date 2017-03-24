@@ -1,5 +1,7 @@
-varying vec2 v_texcoord;
-varying vec3 v_normal;
+#version 330 core
+out vec4 FragColor;
+in vec2 v_texcoord;
+in vec3 v_normal;
 
 uniform sampler2D u_texture0;
 
@@ -17,5 +19,5 @@ vec3 light()
 void main()
 {
 	vec4 color = vec4(light(), 1.0);
-	gl_FragColor = texture2D(u_texture0, v_texcoord) * color;
+	FragColor = texture(u_texture0, v_texcoord) * color;
 }

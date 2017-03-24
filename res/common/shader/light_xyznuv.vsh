@@ -1,6 +1,7 @@
-attribute vec4 a_position;
-attribute vec3 a_normal;
-attribute vec2 a_texcoord0;
+#version 330 core
+in vec4 a_position;
+in vec3 a_normal;
+in vec2 a_texcoord0;
 
 uniform mat4 u_matWorld;
 uniform mat4 u_matWorldViewProj;
@@ -10,8 +11,8 @@ uniform vec3 u_ambientColor;
 uniform vec3 lightDir;
 uniform vec3 lightColor;
 
-varying vec2 v_texcoord;
-varying vec4 v_color;
+out vec2 v_texcoord;
+out vec4 v_color;
 
 vec3 light(vec3 normal)
 {

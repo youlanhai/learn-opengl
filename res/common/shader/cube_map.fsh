@@ -1,9 +1,10 @@
-
+#version 330 core
+out vec4 FragColor;
 uniform samplerCube u_texture0;
 
-varying vec3 texCoord;
+in vec3 texCoord;
 
 void main()
 {
-	gl_FragColor = texture(u_texture0, texCoord);
+	FragColor = texture(u_texture0, texCoord);
 }

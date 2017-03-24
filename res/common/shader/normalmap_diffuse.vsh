@@ -1,14 +1,15 @@
-attribute vec4 a_position;
-attribute vec3 a_normal;
-attribute vec2 a_texcoord0;
-attribute vec3 a_tangent;
+#version 330 core
+in vec4 a_position;
+in vec3 a_normal;
+in vec2 a_texcoord0;
+in vec3 a_tangent;
 
 uniform mat4 u_matWorld;
 uniform mat4 u_matWorldViewProj;
 uniform vec3 lightDir;
 
-varying vec3 v_lightDir;
-varying vec2 v_texcoord;
+out vec3 v_lightDir;
+out vec2 v_texcoord;
 
 void main()
 {

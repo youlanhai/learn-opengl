@@ -1,8 +1,9 @@
-attribute vec4 a_position;
+#version 330 core
+in vec4 a_position;
 
 uniform mat4 u_matWorldViewProj;
 
-varying vec3 texCoord;
+out vec3 texCoord;
 
 void main()
 {

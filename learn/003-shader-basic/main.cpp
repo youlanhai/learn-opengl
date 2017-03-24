@@ -74,6 +74,7 @@ public:
 		glEnableVertexAttribArray(crLocation);
 		glVertexAttribPointer(crLocation, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(sizeof(float) * 3));
 
+        glDisable(GL_CULL_FACE);
 		return true;
     }
     

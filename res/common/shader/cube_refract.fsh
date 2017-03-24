@@ -1,8 +1,10 @@
+#version 330 core
+out vec4 FragColor;
 uniform samplerCube u_texture0;
 uniform vec3 u_cameraPos;
 
-varying vec3 v_position;
-varying vec3 v_normal;
+in vec3 v_position;
+in vec3 v_normal;
 
 void main()
 {
@@ -11,5 +13,5 @@ void main()
 	// 计算折射方向
 	vec3 refractDir = refract(viewDir, normalize(v_normal), ratio);
 
-	gl_FragColor = texture(u_texture0, refractDir);
+	FragColor = texture(u_texture0, refractDir);
 }
