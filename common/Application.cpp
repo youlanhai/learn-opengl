@@ -119,12 +119,12 @@ Application::~Application()
 bool Application::createWindow(int width, int height, const std::string &title)
 {
     assert(pWindow_ == nullptr);
-    
+   
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    
+
     pWindow_ = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
     if(nullptr == pWindow_)
     {
@@ -139,7 +139,7 @@ bool Application::createWindow(int width, int height, const std::string &title)
         return false;
     }
 	LOG_INFO("GL Version: %d.%d", GLVersion.major, GLVersion.minor);
-    if(GLVersion.major < 2)
+    if(GLVersion.major < 3)
     {
         LOG_ERROR("Unsupported OpenGL version.");
         return false;

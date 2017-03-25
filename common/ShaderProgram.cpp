@@ -235,17 +235,6 @@ int ShaderProgram::getAttribLocation(const char *name)
     return glGetAttribLocation(handle_, name);
 }
 
-void ShaderProgram::setMatrix(int location, const float *data)
-{
-    //4.1及以上版本才支持 glProgramUniformMatrix4fv
-	glUniformMatrix4fv(location, 1, false, data);
-}
-
-void ShaderProgram::setMatrixTranspose(int location, const float * data)
-{
-	glUniformMatrix4fv(location, 1, true, data);
-}
-
 ShaderUniform* ShaderProgram::findUniform(const std::string &name)
 {
     return uniformRoot_->getChild(name);

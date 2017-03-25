@@ -90,19 +90,13 @@ void ShaderUniform::bindValue(const Matrix* values, int count, bool needTranspos
 {
     assert(values && count > 0);
 
-    if(!needTranspos)
+    if(needTranspos)
     {
-        glUniformMatrix4fv(location_, count, GL_FALSE, (GLfloat*) values);
+        glUniformMatrix4fv(location_, count, GL_TRUE, (GLfloat*) values);
     }
     else
     {
-        Matrix * pBuffer = new Matrix[count];
-        for (int i = 0; i < count; ++i)
-            pBuffer[i].transpose(values[i]);
-
-        glUniformMatrix4fv(location_, count, GL_FALSE, (GLfloat*) pBuffer);
-
-        delete [] pBuffer;
+        glUniformMatrix4fv(location_, count, GL_FALSE, (GLfloat*)values);
     }
 }
 

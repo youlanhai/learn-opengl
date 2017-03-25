@@ -1,4 +1,4 @@
-#include "Application.h"
+﻿#include "Application.h"
 #include "ShaderProgram.h"
 #include "ShaderProgramMgr.h"
 #include "ShaderUniform.h"
@@ -15,6 +15,7 @@
 #include "title.h"
 #include "FrameBuffer.h"
 #include "Texture2DArray.h"
+#include <algorithm>
 
 const int MaxCascades = 4;
 

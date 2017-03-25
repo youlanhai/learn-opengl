@@ -29,9 +29,6 @@ public:
     int getUniformLocation(const char *name);
     int getAttribLocation(const char *name);
     int getAttribLocation(VertexUsage usage){ return attributes_[(int)usage]; }
-
-	void setMatrix(int location, const float *data);
-	void setMatrixTranspose(int location, const float *data);
     
     ShaderUniform* findUniform(const std::string &name);
 

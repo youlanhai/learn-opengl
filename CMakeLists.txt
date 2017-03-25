@@ -13,6 +13,10 @@ include(common.cmake)
 
 use_cxx11()
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG -D_DEBUG")
+if(WIN32)
+	add_definitions(-DNOMINMAX)
+endif()
+
 include_directories(common dependency/include)
 link_directories(dependency/lib)
 

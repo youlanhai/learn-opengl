@@ -1,5 +1,6 @@
 #include "AABB.h"
 #include <float.h>
+#include <algorithm>
 
 void AABB::setEmpty()
 {
