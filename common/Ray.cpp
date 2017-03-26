@@ -49,6 +49,8 @@ bool Ray::intersectTriangle(const Vector3& a, const Vector3& b, const Vector3& c
     
     // Calculate t, scale parameters, ray intersects triangle
     *t = E2.dotProduct(Q);
+    if (*t < 0.0f)
+        return false;
     
     float fInvDet = 1.0f / det;
     *t *= fInvDet;
@@ -190,8 +192,8 @@ bool Ray::intersectSphere(const Vector3 &center, float radius, float *out1, floa
 
 void Ray::applyMatrix(const Matrix &m)
 {
-    m.transformPoint(origin_);
+    origin_ = m.transformPoint(origin_);
 
-    m.transformNormal(direction_);
+    direction_ = m.transformNormal(direction_);
     direction_.normalize();
 }

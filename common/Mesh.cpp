@@ -163,6 +163,11 @@ void Mesh::setSubMeshes(const Mesh::SubMeshes & subMeshes)
     subMeshs_ = subMeshes;
 }
 
+void Mesh::clearSubMeshes()
+{
+    subMeshs_.clear();
+}
+
 void Mesh::addSubMesh(SubMeshPtr subMesh)
 {
     subMeshs_.push_back(subMesh);
@@ -254,11 +259,15 @@ void Mesh::iterateFaces(MeshFaceVisitor & visitor) const
         for (int i = 0; i < subMeshs_.size() && ok; ++i)
         {
             SubMesh *sub = subMeshs_[i].get();
-            for (uint32_t i = 0; i < sub->count_ && ok; i += 3)
+            if (sub->primitiveType_ != PrimitiveType::TriangleList)
             {
-                uint32_t a = extractIndex(indexData, indexBuffer_->stride(), sub->start_ + i + 0);
-                uint32_t b = extractIndex(indexData, indexBuffer_->stride(), sub->start_ + i + 1);
-                uint32_t c = extractIndex(indexData, indexBuffer_->stride(), sub->start_ + i + 2);
+                continue;
+            }
+            for (uint32_t k = 0; k < sub->count_ && ok; k += 3)
+            {
+                uint32_t a = extractIndex(indexData, indexBuffer_->stride(), sub->start_ + k + 0);
+                uint32_t b = extractIndex(indexData, indexBuffer_->stride(), sub->start_ + k + 1);
+                uint32_t c = extractIndex(indexData, indexBuffer_->stride(), sub->start_ + k + 2);
                 const char* triangle[3] = {
                     vertexData + a * vertexStride,
                     vertexData + b * vertexStride,
@@ -275,12 +284,16 @@ void Mesh::iterateFaces(MeshFaceVisitor & visitor) const
         for (int i = 0; i < subMeshs_.size() && ok; ++i)
         {
             SubMesh *sub = subMeshs_[i].get();
-            for (uint32_t i = 0; i < sub->count_ && ok; i += 3)
+            if (sub->primitiveType_ != PrimitiveType::TriangleList)
+            {
+                continue;
+            }
+            for (uint32_t k = 0; k < sub->count_ && ok; k += 3)
             {
                 const char* triangle[3] = {
-                    vertexData + i * vertexStride,
-                    vertexData + (i + 1) * vertexStride,
-                    vertexData + (i + 2) * vertexStride,
+                    vertexData + k * vertexStride,
+                    vertexData + (k + 1) * vertexStride,
+                    vertexData + (k + 2) * vertexStride,
                 };
                 ok = visitor.visit(sub, triangle);
             }

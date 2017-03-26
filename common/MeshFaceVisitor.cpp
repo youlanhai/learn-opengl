@@ -20,6 +20,7 @@ bool MeshBoundingBoxVisitor::visit(const SubMesh *pSubMesh, const char **triangl
 
 MeshRayVisitor::MeshRayVisitor(const Ray & ray)
     : ray_(ray)
+    , pSubMesh_(nullptr)
     , t_(FLT_MAX)
     , u_(0.0f)
     , v_(0.0f)
@@ -41,9 +42,10 @@ bool MeshRayVisitor::visit(const SubMesh * pSubMesh, const char ** triangle)
         &t, &u, &v) && t < t_)
     {
         intersected_ = true;
-        t = t_;
-        u = u_;
-        v = v_;
+        pSubMesh_ = pSubMesh;
+        t_ = t;
+        u_ = u;
+        v_ = v;
         triangle_[0] = triangle[0];
         triangle_[1] = triangle[1];
         triangle_[2] = triangle[2];

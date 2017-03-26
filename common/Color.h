@@ -18,10 +18,10 @@ public:
     void fromARGB(uint32_t cr);
     void fromRGB(uint32_t cr);
 
-    int r255() const { return clamp((int)r * 255, 0, 255); }
-    int g255() const { return clamp((int)g * 255, 0, 255); }
-    int b255() const { return clamp((int)b * 255, 0, 255); }
-    int a255() const { return clamp((int)a * 255, 0, 255); }
+    int r255() const { return clamp(int(r * 255), 0, 255); }
+    int g255() const { return clamp(int(g * 255), 0, 255); }
+    int b255() const { return clamp(int(b * 255), 0, 255); }
+    int a255() const { return clamp(int(a * 255), 0, 255); }
 
 public:
     static Color White;

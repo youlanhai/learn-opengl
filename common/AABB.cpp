@@ -1,4 +1,5 @@
 #include "AABB.h"
+#include "Matrix.h"
 #include <float.h>
 #include <algorithm>
 
@@ -59,8 +60,9 @@ void AABB::applyMatrix(const Matrix &matrix)
     
     setEmpty();
     
-    for(const Vector3 &p : points)
+    for(Vector3 &p : points)
     {
+        p = matrix.transformPoint(p);
         addPoint(p);
     }
 }

@@ -24,6 +24,9 @@ public:
 	float lengthSq() const { return x * x + y * y + z *z; }
 	float length() const { return sqrtf(lengthSq()); }
 
+    float distanceToSq(const Vector3 &v) const { return x * v.x + y * v.y + z * v.z; }
+    float distanceTo(const Vector3 &v) const { return sqrtf(distanceToSq(v)); }
+
 	void setZero() { *this = Zero; }
 	void set(float _x, float _y, float _z){ x = _x; y = _y; z = _z; }
 

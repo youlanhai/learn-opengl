@@ -67,6 +67,7 @@ public:
 
     const SubMeshes & getSubMeshes() const;
     void setSubMeshes(const SubMeshes & subMeshes);
+    void clearSubMeshes();
     void addSubMesh(SubMeshPtr subMesh);
     size_t getNbSubMesh() const;
     SubMeshPtr getSubMesh(size_t i) const;

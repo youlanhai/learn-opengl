@@ -26,6 +26,7 @@ class MeshRayVisitor : public MeshFaceVisitor
 {
     const Ray &ray_;
 public:
+    const SubMesh* pSubMesh_;
     const char *triangle_[3];
     float   t_;
     float   u_;

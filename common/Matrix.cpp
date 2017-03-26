@@ -245,6 +245,7 @@ bool Matrix::invert( const Matrix& matrix)
     float determinant = matrix.getDeterminant();
     if (determinant == 0.f)
     {
+        this->setIdentity();
         return false;
     }
 
@@ -255,12 +256,15 @@ bool Matrix::invert( const Matrix& matrix)
     _11 = matrix._22 * matrix._33 - matrix._23 * matrix._32;
     _12 = matrix._13 * matrix._32 - matrix._12 * matrix._33;
     _13 = matrix._12 * matrix._23 - matrix._13 * matrix._22;
+    _14 = 0.0f;
     _21 = matrix._23 * matrix._31 - matrix._21 * matrix._33;
     _22 = matrix._11 * matrix._33 - matrix._13 * matrix._31;
     _23 = matrix._13 * matrix._21 - matrix._11 * matrix._23;
+    _24 = 0.0f;
     _31 = matrix._21 * matrix._32 - matrix._22 * matrix._31;
     _32 = matrix._12 * matrix._31 - matrix._11 * matrix._32;
     _33 = matrix._11 * matrix._22 - matrix._12 * matrix._21;
+    _34 = 0.0f;
 
     _11 *= rcp;
     _12 *= rcp;
@@ -277,11 +281,7 @@ bool Matrix::invert( const Matrix& matrix)
     _41 = -(matrix._41 * _11 + matrix._42 * _21 + matrix._43 * _31);
     _42 = -(matrix._41 * _12 + matrix._42 * _22 + matrix._43 * _32);
     _43 = -(matrix._41 * _13 + matrix._42 * _23 + matrix._43 * _33);
-
-    if (determinant == 0)
-    {
-        this->setIdentity();
-    }
+    _44 = 1.0f;
 
     return true;
 }

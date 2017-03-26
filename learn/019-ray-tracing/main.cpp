@@ -17,6 +17,9 @@
 #include "Texture2DArray.h"
 #include "Ray.h"
 #include "MeshFaceVisitor.h"
+#include "DebugDraw.h"
+
+#include <algorithm>
 
 
 class MyApplication : public Application
@@ -87,7 +90,7 @@ public:
         lightCamera_.setOrtho(20, 20, 1, 10);
 
         
-        quadMesh_ = createQuad(Vector2(0.4f, 0.4f));
+        quadMesh_ = createQuad(Vector2(0.6f, 0.6f));
         quadMesh_->addMaterial(quadMaterial_);
         
 		glEnable(GL_CULL_FACE);
@@ -139,22 +142,69 @@ public:
         Application::onDraw(renderer);
         
         drawScene(renderer);
+        drawPick(renderer);
         drawScreenTexture(renderer);
     }
     
     void drawScene(Renderer *renderer)
     {
         renderer->setCamera(&camera_);
-        
+
         MaterialPtr material = getCurrentMaterial();
         material->bindShader();
-        
+
         Vector3 lightDir = -lightCamera_.getForwardVector();
-        lightDir = camera_.getViewMatrix().transformNormal(lightDir);
         lightDir.normalize();
         material->bindUniform("lightDir", lightDir);
-       
+
         objects_->draw(renderer);
+    }
+
+    void drawPick(Renderer *renderer)
+    {
+        Vector2 cursorPos = getCursorPos();
+        Ray ray = camera_.screenPosToWorldRay(cursorPos.x, cursorPos.y);
+        for (int i = 0; i < objects_->getNumChildren(); ++i)
+        {
+            TransformPtr child = objects_->getChildByIndex(i);
+            for (int k = 0; k < child->getNumComponents(); ++k)
+            {
+                Mesh *pMesh = dynamic_cast<Mesh*>(child->getComponentByIndex(k).get());
+                if (pMesh == nullptr)
+                {
+                    continue;
+                }
+                Matrix localToWorld = child->getLocalToWorldMatrix();
+
+                Matrix worldToLocal;
+                worldToLocal.invert(localToWorld);
+
+                Ray localRay = ray;
+                localRay.applyMatrix(worldToLocal);
+                if (!localRay.intersectAABB(pMesh->getBoundingBox()))
+                {
+                    continue;
+                }
+
+                DebugDraw::instance()->drawAABB(pMesh->getBoundingBox(), localToWorld, Color::Red);
+
+                MeshRayVisitor visitor(localRay);
+                pMesh->iterateFaces(visitor);
+                if (!visitor.intersected_)
+                {
+                    continue;
+                }
+
+                DebugDraw::instance()->drawFilledTriangle(
+                    *(Vector3*)visitor.triangle_[0],
+                    *(Vector3*)visitor.triangle_[1],
+                    *(Vector3*)visitor.triangle_[2],
+                    Color::Red,
+                    localToWorld);
+            }
+        }
+
+        DebugDraw::instance()->draw(renderer);
     }
     
     void drawScreenTexture(Renderer *renderer)
@@ -164,7 +214,7 @@ public:
         renderer->setProjMatrix(Matrix::Identity);
         
         Matrix world;
-        world.setTranslate(-0.8, -0.8f, 0.0f);
+        world.setTranslate(-0.7, -0.7f, 0.0f);
         renderer->setWorldMatrix(world);
         
         quadMaterial_->bindShader();
@@ -240,6 +290,23 @@ public:
     {
         return materials_[materialIndex_];
     }
+
+    class TraceInfo
+    {
+    public:
+        TransformPtr transform;
+        MeshPtr     mesh;
+        SubMeshPtr  subMesh;
+        const char* triangles[3];
+        float t, u, v;
+        float worldT;
+
+        TraceInfo()
+            : worldT(FLT_MAX)
+        {}
+
+        bool isValid() const { return transform.exists(); }
+    };
     
     void doRayTracing()
     {
@@ -252,8 +319,16 @@ public:
                 float px = float(c) / float(winWidth_) * 2.0f - 1.0f;
                 float py = 1.0f - float(r) / float(winHeight_) * 2.0f;
                 Ray ray = camera_.projectionPosToWorldRay(px, py);
-                Color cr(0x7f7f7fff);
-                rayTrace(cr, objects_, ray, 1);
+                TraceInfo info;
+                rayTrace(info, objects_, ray, 1);
+
+                Color cr(0x222222ff);
+                if (info.isValid())
+                {
+                    cr.r = 1.0f - std::min(0.7f, info.worldT / 20.0f);
+                    cr.g = cr.r;
+                    cr.b = cr.r;
+                }
 
                 pixels_[index + 0] = cr.r255();
                 pixels_[index + 1] = cr.g255();
@@ -276,32 +351,55 @@ public:
         glPixelStorei(GL_PACK_ALIGNMENT, oldAlignment);
     }
     
-    void rayTrace(Color &color, TransformPtr object, const Ray &ray, int depth)
+    void rayTrace(TraceInfo &info, TransformPtr object, const Ray &ray, int depth)
     {
         for (int i = 0; i < object->getNumComponents(); ++i)
         {
             ComponentPtr com = object->getComponentByIndex(i);
             Mesh *pMesh = dynamic_cast<Mesh*>(com.get());
-            if (pMesh != nullptr)
+            if (nullptr == pMesh)
             {
-                Matrix worldToLocal = object->getWorldToLocalMatrix();
-                Ray localRay = ray;
-                localRay.applyMatrix(worldToLocal);
-                if (localRay.intersectAABB(pMesh->getBoundingBox()))
-                {
-                    MeshRayVisitor visitor(localRay);
-                    pMesh->iterateFaces(visitor);
-                    if (visitor.intersected_)
-                    {
-                        color = Color::Red;
-                    }
-                }
+                continue;
             }
+
+            Matrix localToWorld = object->getLocalToWorldMatrix();
+            Matrix worldToLocal;
+            worldToLocal.invert(localToWorld);
+
+            Ray localRay = ray;
+            localRay.applyMatrix(worldToLocal);
+            if (!localRay.intersectAABB(pMesh->getBoundingBox()))
+            {
+                continue;
+            }
+
+            MeshRayVisitor visitor(localRay);
+            pMesh->iterateFaces(visitor);
+            if (!visitor.intersected_)
+            {
+                continue;
+            }
+            
+            Vector3 cross = localRay.origin_ + localRay.direction_ * visitor.t_;
+            cross = localToWorld.transformPoint(cross);
+            float worldDistance = cross.distanceTo(ray.origin_);
+            if (worldDistance > info.worldT)
+            {
+                continue;
+            }
+
+            info.transform = object;
+            info.mesh = pMesh;
+            info.subMesh = const_cast<SubMesh*>(visitor.pSubMesh_);
+            info.t = visitor.t_;
+            info.u = visitor.u_;
+            info.v = visitor.v_;
+            info.worldT = worldDistance;
         }
 
         for (int i = 0; i < object->getNumChildren(); ++i)
         {
-            rayTrace(color, object->getChildByIndex(i), ray, depth);
+            rayTrace(info, object->getChildByIndex(i), ray, depth);
         }
     }
 

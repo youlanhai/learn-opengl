@@ -128,6 +128,7 @@ void Renderer::setColorWriteEnable(bool enable)
 
 bool Renderer::beginDraw()
 {
+    setWorldMatrix(Matrix::Identity);
     applyCameraMatrix();
     return true;
 }

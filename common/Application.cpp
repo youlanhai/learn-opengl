@@ -9,6 +9,8 @@
 #include "TextureMgr.h"
 #include "ShaderProgramMgr.h"
 #include "Renderer.h"
+#include "DebugDraw.h"
+#include "Mesh.h"
 
 Application *gApp = nullptr;
 
@@ -93,6 +95,7 @@ Application::Application()
     TextureMgr::initInstance();
 	ShaderProgramMgr::initInstance();
 	Renderer::initInstance();
+    DebugDraw::initInstance();
 }
 
 Application::~Application()
@@ -102,6 +105,7 @@ Application::~Application()
     VertexDeclMgr::finiInstance();
     FileSystem::finiInstance();
 	Renderer::finiInstance();
+    DebugDraw::finiInstance();
     
     if(pWindow_ != nullptr)
     {
@@ -163,6 +167,11 @@ bool Application::createWindow(int width, int height, const std::string &title)
 	glClearDepth(1.0f);
     
 	glEnable(GL_DEPTH_TEST);
+
+    if (!DebugDraw::instance()->init())
+    {
+        return false;
+    }
     return onCreate();
 }
 
@@ -214,6 +223,7 @@ void Application::mainLoop()
         if (renderer->beginDraw())
         {
             onDraw(renderer);
+            DebugDraw::instance()->draw(renderer);
             renderer->endDraw();
         }
 
