@@ -2,6 +2,12 @@
 #include <float.h>
 #include <algorithm>
 
+void AABB::setZero()
+{
+    min_ = Vector3::Zero;
+    max_ = Vector3::Zero;
+}
+
 void AABB::setEmpty()
 {
     min_.set(FLT_MAX, FLT_MAX, FLT_MAX);

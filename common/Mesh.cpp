@@ -1,5 +1,6 @@
 ﻿#include "Mesh.h"
 #include "Renderer.h"
+#include "MeshFaceVisitor.h"
 
 SubMesh::SubMesh()
     : start_(0)
@@ -210,3 +211,81 @@ int Mesh::addMaterial(MaterialPtr mtl)
     return index;
 }
 
+void Mesh::generateBoundingBox()
+{
+    iterateFaces(MeshBoundingBoxVisitor(boundingBox_));
+
+    if (!boundingBox_.isValid())
+    {
+        boundingBox_.setZero();
+    }
+}
+
+static uint32_t extractIndex(const char *pData, int stride, int index)
+{
+    const char *p = pData + index * stride;
+    uint32_t ret = 0;
+    switch (stride)
+    {
+    case 1:
+        ret = *(uint8_t*)p;
+        break;
+    case 2:
+        ret = *(uint16_t*)p;
+        break;
+    case 4:
+        ret = *(uint32_t*)p;
+        break;
+    default:
+        break;
+    }
+    return ret;
+}
+
+void Mesh::iterateFaces(MeshFaceVisitor & visitor) const
+{
+    const char* vertexData = vertexBuffer_->lock(true);
+    size_t vertexStride = vertexBuffer_->stride();
+
+    if (indexBuffer_)
+    {
+        const char* indexData = indexBuffer_->lock(true);
+        bool ok = true;
+        for (int i = 0; i < subMeshs_.size() && ok; ++i)
+        {
+            SubMesh *sub = subMeshs_[i].get();
+            for (uint32_t i = 0; i < sub->count_ && ok; i += 3)
+            {
+                uint32_t a = extractIndex(indexData, indexBuffer_->stride(), sub->start_ + i + 0);
+                uint32_t b = extractIndex(indexData, indexBuffer_->stride(), sub->start_ + i + 1);
+                uint32_t c = extractIndex(indexData, indexBuffer_->stride(), sub->start_ + i + 2);
+                const char* triangle[3] = {
+                    vertexData + a * vertexStride,
+                    vertexData + b * vertexStride,
+                    vertexData + c * vertexStride,
+                };
+                ok = visitor.visit(sub, triangle);
+            }
+        }
+        indexBuffer_->unlock();
+    }
+    else
+    {
+        bool ok = true;
+        for (int i = 0; i < subMeshs_.size() && ok; ++i)
+        {
+            SubMesh *sub = subMeshs_[i].get();
+            for (uint32_t i = 0; i < sub->count_ && ok; i += 3)
+            {
+                const char* triangle[3] = {
+                    vertexData + i * vertexStride,
+                    vertexData + (i + 1) * vertexStride,
+                    vertexData + (i + 2) * vertexStride,
+                };
+                ok = visitor.visit(sub, triangle);
+            }
+        }
+    }
+
+    vertexBuffer_->unlock();
+}

@@ -210,6 +210,11 @@ std::vector<ComponentPtr> Transform::getComponents() const
     return ret;
 }
 
+ComponentPtr Transform::getComponentByIndex(int index)
+{
+    return components_[index].second;
+}
+
 ComponentPtr Transform::getComponentByType(const std::type_info & info)
 {
     for (ComponentPair &pair : components_)

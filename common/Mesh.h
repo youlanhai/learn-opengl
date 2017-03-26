@@ -6,11 +6,14 @@
 #include "VertexAttribute.h"
 #include "Material.h"
 #include "Component.h"
+#include "AABB.h"
 
 #include <vector>
 
 class Mesh;
 typedef SmartPointer<Mesh> MeshPtr;
+
+class MeshFaceVisitor;
 
 class SubMesh : public ReferenceCount
 {
@@ -31,9 +34,9 @@ public:
         uint32_t start, uint32_t count, int mtlID,
         bool useIndex = true);
 
-private:
-    uint32_t          start_;
-    uint32_t          count_;
+public:
+    uint32_t        start_;
+    uint32_t        count_;
     PrimitiveType   primitiveType_;
     int             mtlID_;
     bool            useIndex_;
@@ -82,6 +85,11 @@ public:
     VertexDeclarationPtr getVertexDecl() const { return vertexDecl_; }
     IndexBufferPtr getIndexBuffer() const { return indexBuffer_; }
 
+    void generateBoundingBox();
+    const AABB& getBoundingBox() const { return boundingBox_; }
+
+    void iterateFaces(MeshFaceVisitor &visitor) const;
+
 private:
     MeshPtr                 source_;
     std::string             resource_;
@@ -93,6 +101,7 @@ private:
 
     SubMeshes               subMeshs_;
     Materials               materials_;
+    AABB                    boundingBox_;
 };
 
 #endif //H__MESH_H

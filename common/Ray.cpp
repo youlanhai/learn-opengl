@@ -1,5 +1,6 @@
 ﻿#include "Ray.h"
 #include "AABB.h"
+#include "Matrix.h"
 #include <float.h>
 
 // 算法参考：http://www.cnblogs.com/graphics/archive/2010/08/09/1795348.html
@@ -185,4 +186,12 @@ bool Ray::intersectSphere(const Vector3 &center, float radius, float *out1, floa
         }
     }
     return true;
+}
+
+void Ray::applyMatrix(const Matrix &m)
+{
+    m.transformPoint(origin_);
+
+    m.transformNormal(direction_);
+    direction_.normalize();
 }

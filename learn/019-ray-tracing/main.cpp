@@ -15,6 +15,8 @@
 #include "title.h"
 #include "FrameBuffer.h"
 #include "Texture2DArray.h"
+#include "Ray.h"
+#include "MeshFaceVisitor.h"
 
 
 class MyApplication : public Application
@@ -53,6 +55,7 @@ public:
  
         cubeMesh_ = createCube(Vector3(1, 1, 1));
         cubeMesh_->addMaterial(material);
+        cubeMesh_->generateBoundingBox();
 
         objects_ = new Transform();
         Vector4 positions[] = {
@@ -245,10 +248,17 @@ public:
             for(int c = 0; c < winWidth_; ++c)
             {
                 int index = (r * winWidth_ + c) * 4;
-                pixels_[index + 0] = rand() % 256;
-                pixels_[index + 1] = rand() % 256;
-                pixels_[index + 2] = rand() % 256;
-                pixels_[index + 3] = 255;
+
+                float px = float(c) / float(winWidth_) * 2.0f - 1.0f;
+                float py = 1.0f - float(r) / float(winHeight_) * 2.0f;
+                Ray ray = camera_.projectionPosToWorldRay(px, py);
+                Color cr(0x7f7f7fff);
+                rayTrace(cr, objects_, ray, 1);
+
+                pixels_[index + 0] = cr.r255();
+                pixels_[index + 1] = cr.g255();
+                pixels_[index + 2] = cr.b255();
+                pixels_[index + 3] = cr.a255();
             }
         }
         
@@ -266,8 +276,33 @@ public:
         glPixelStorei(GL_PACK_ALIGNMENT, oldAlignment);
     }
     
-    void rayTrace()
+    void rayTrace(Color &color, TransformPtr object, const Ray &ray, int depth)
     {
+        for (int i = 0; i < object->getNumComponents(); ++i)
+        {
+            ComponentPtr com = object->getComponentByIndex(i);
+            Mesh *pMesh = dynamic_cast<Mesh*>(com.get());
+            if (pMesh != nullptr)
+            {
+                Matrix worldToLocal = object->getWorldToLocalMatrix();
+                Ray localRay = ray;
+                localRay.applyMatrix(worldToLocal);
+                if (localRay.intersectAABB(pMesh->getBoundingBox()))
+                {
+                    MeshRayVisitor visitor(localRay);
+                    pMesh->iterateFaces(visitor);
+                    if (visitor.intersected_)
+                    {
+                        color = Color::Red;
+                    }
+                }
+            }
+        }
+
+        for (int i = 0; i < object->getNumChildren(); ++i)
+        {
+            rayTrace(color, object->getChildByIndex(i), ray, depth);
+        }
     }
 
 private:

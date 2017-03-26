@@ -13,6 +13,8 @@ public:
     AABB(){}
     ~AABB(){}
 
+    void setZero();
+
     void setEmpty();
     bool isValid() const;
     

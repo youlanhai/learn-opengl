@@ -89,6 +89,8 @@ public: // 组件相关功能
     /** 返回所有有效的组件。*/
     std::vector<ComponentPtr> getComponents() const;
 
+    ComponentPtr getComponentByIndex(int index);
+
     /** 根据类型，查找第一个有效的组件。*/
     ComponentPtr getComponentByType(const std::type_info &info);
 

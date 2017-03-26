@@ -1,7 +1,8 @@
-#pragma once
+﻿#pragma once
 #include "Vector3.h"
 
 class AABB;
+class Matrix;
 
 class Ray
 {
@@ -39,4 +40,6 @@ public:
      *  如果只有一个交点（相切或者射线起点在球体内），out1与out2相等。
      */
     bool intersectSphere(const Vector3 &center, float radius, float *out1 = nullptr, float *out2 = nullptr) const;
+
+    void applyMatrix(const Matrix &m);
 };

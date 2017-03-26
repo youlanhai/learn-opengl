@@ -4,6 +4,8 @@
 #include "Vector2.h"
 #include <cstdint>
 
+class Ray;
+
 class Camera : public Transform
 {
 public:
@@ -31,6 +33,9 @@ public:
     float getAspect() const { return aspect_; }
     const Vector2& getOrthoSize() const { return orthoSize_; }
     
+    Ray screenPosToWorldRay(float x, float y) const;
+    Ray projectionPosToWorldRay(float x, float y) const;
+
 private:
 	mutable Matrix	matView_;
 	mutable Matrix  matViewProj_;

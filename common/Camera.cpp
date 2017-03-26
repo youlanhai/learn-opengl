@@ -1,7 +1,7 @@
 #include "Camera.h"
 #include "MathDef.h"
 #include "Application.h"
-
+#include "Ray.h"
 
 Camera::Camera()
 	: moveSpeed_(1.0f)
@@ -120,4 +120,29 @@ bool Camera::handleCameraMove()
 		return true;
 	}
 	return false;
+}
+
+
+Ray Camera::screenPosToWorldRay(float x, float y) const
+{
+    Vector2 winSize = gApp->getWindowSize();
+    x = x / winSize.x * 2.0f - 1.0f;
+    y = 1.0f - y / winSize.y * 2.0f;
+    return projectionPosToWorldRay(x, y);
+}
+
+Ray Camera::projectionPosToWorldRay(float x, float y) const
+{
+    float halfHeight = zNear_ * tan(fov_ / 2.0f);
+    float halfWidth = halfHeight * aspect_;
+
+    Vector3 dirInView(x * halfWidth, y * halfHeight, zNear_);
+
+    Matrix mat = getLocalToWorldMatrix();
+
+    Ray ray;
+    ray.direction_ = mat.transformNormal(dirInView);
+    ray.direction_.normalize();
+    ray.origin_ = mat.transformPoint(Vector3::Zero);
+    return ray;
 }

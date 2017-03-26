@@ -2,6 +2,7 @@
 #define COLOR_H
 
 #include <cstdint>
+#include "MathDef.h"
 
 class Color
 {
@@ -16,6 +17,19 @@ public:
     void fromRGBA(uint32_t cr);
     void fromARGB(uint32_t cr);
     void fromRGB(uint32_t cr);
+
+    int r255() const { return clamp((int)r * 255, 0, 255); }
+    int g255() const { return clamp((int)g * 255, 0, 255); }
+    int b255() const { return clamp((int)b * 255, 0, 255); }
+    int a255() const { return clamp((int)a * 255, 0, 255); }
+
+public:
+    static Color White;
+    static Color Black;
+    static Color Red;
+    static Color Green;
+    static Color Blue;
+    static Color Yellow;
 };
 
 inline Color::Color(float _r, float _g, float _b, float _a)
