@@ -20,6 +20,7 @@
 #include "DebugDraw.h"
 
 #include <algorithm>
+#include <float.h>
 
 
 class MyApplication : public Application

@@ -218,7 +218,8 @@ int Mesh::addMaterial(MaterialPtr mtl)
 
 void Mesh::generateBoundingBox()
 {
-    iterateFaces(MeshBoundingBoxVisitor(boundingBox_));
+    MeshBoundingBoxVisitor visitor(boundingBox_);
+    iterateFaces(visitor);
 
     if (!boundingBox_.isValid())
     {

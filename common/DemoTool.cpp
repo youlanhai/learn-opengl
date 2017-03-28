@@ -201,7 +201,7 @@ void createSimpleGround(std::vector<MeshVertex> &vertices, std::vector<uint16_t>
             
             float radius = sqrt(dx * dx + dz * dz);
             
-            v.position.y = std::max(0.0f, cos(radius / waveSize * PI_FULL)) * height;
+            v.position.y = std::max(0.0f, std::cos(radius / waveSize * PI_FULL)) * height;
             v.uv.x = (c * gridSize) / XLength;
             v.uv.y = (r * gridSize) / ZLength;
             
