@@ -25,18 +25,37 @@
 class MeshInfo : public ReferenceCount
 {
 public:
+    /// 测试材质
+    struct Material
+    {
+        // 表面颜色
+        Vector4 color;
+        // 反射系数
+        float   reflection;
+        // 折射系数
+        float   refraction;
+    };
+
     TransformPtr    transform_;
     MeshPtr         mesh_;
+    Material        material_;
+
+    struct Face
+    {
+        int i[3];
+        Vector3 normal;
+    };
 
     std::vector<Vector3>    vertices_;
-    std::vector<int>        indices_;
+    std::vector<Face>       faces_;
     AABB            boundingBox_;
 
 public:
-    MeshInfo(TransformPtr t, MeshPtr m, const Matrix &localToWorld)
+    MeshInfo(TransformPtr t, MeshPtr m, const Material &mtl, const Matrix &localToWorld)
     {
         transform_ = t;
         mesh_ = m;
+        material_ = mtl;
 
         VertexBufferPtr vb = m->getVertexBuffer();
         IndexBufferPtr ib = m->getIndexBuffer();
@@ -55,42 +74,65 @@ public:
 
         if (ib)
         {
-            indices_.resize(ib->count());
+            faces_.resize(ib->count() / 3);
             const char *data = ib->lock(true);
-            for (size_t i = 0; i < ib->count(); ++i)
+            for (size_t i = 0; i < faces_.size(); ++i)
             {
-                indices_[i] = Mesh::extractIndex(data, ib->stride(), i);
+                Face &f = faces_[i];
+                f.i[0] = Mesh::extractIndex(data, ib->stride(), i * 3 + 0);
+                f.i[1] = Mesh::extractIndex(data, ib->stride(), i * 3 + 1);
+                f.i[2] = Mesh::extractIndex(data, ib->stride(), i * 3 + 2);
             }
             ib->unlock();
         }
         else
         {
-            indices_.resize(vertices_.size());
-            for (int i = 0; i < (int)vertices_.size(); ++i)
+            faces_.resize(vertices_.size() / 3);
+            for (size_t i = 0; i < faces_.size(); ++i)
             {
-                indices_[i] = i;
+                Face &f = faces_[i];
+                f.i[0] = i * 3 + 0;
+                f.i[1] = i * 3 + 1;
+                f.i[2] = i * 3 + 2;
             }
         }
 
         boundingBox_ = caculateBoundingBox();
+
+        for (Face &face : faces_)
+        {
+            calculateNormal(face);
+        }
     }
 
     AABB caculateBoundingBox()
     {
         AABB aabb;
-        if (indices_.empty())
+        if (faces_.empty())
         {
             aabb.max_ = aabb.min_ = transform_->getPosition();
         }
         else
         {
             aabb.setEmpty();
-            for (int index : indices_)
+            for (Face &f : faces_)
             {
-                aabb.addPoint(vertices_[index]);
+                aabb.addPoint(vertices_[f.i[0]]);
+                aabb.addPoint(vertices_[f.i[1]]);
+                aabb.addPoint(vertices_[f.i[2]]);
             }
         }
         return aabb;
+    }
+
+    void calculateNormal(Face &face)
+    {
+        Vector3 &a = vertices_[face.i[0]];
+        Vector3 &b = vertices_[face.i[1]];
+        Vector3 &c = vertices_[face.i[2]];
+
+        face.normal.crossProduct(c - a, b - a);
+        face.normal.normalize();
     }
 };
 
@@ -102,11 +144,11 @@ public:
     Ray     ray_;
     int     pixelIndex_ = 0;
     int     meshIndex_ = -1;
-    int     triangles_[3];
+    int     face_;
     float   t_ = FLT_MAX;
     float   u_ = 0.0f;
     float   v_ = 0.0f;
-    float   distanceToLight_ = 0.0f;
+    Vector4 color_;
     bool    bShadow_ = false;
 
     TraceInfo()
@@ -126,11 +168,17 @@ public:
     std::vector<char>       pixels_;
 
     size_t      totalRays_ = 0;
+    Vector4     lightColor_;
     Vector3     lightPosition_;
-    float       lightRange_ = 20.0f;
+    Vector3     viewPosition_;
+    Vector4     ambientColor_;
+    /// 每次反射后的衰减
+    float       bounceAttenuation_ = 1.0f;
 
 public:
     TraceManager()
+        : lightColor_(1.0f, 1.0f, 1.0f, 1.0f)
+        , ambientColor_(0.2f, 0.2f, 0.2f, 1.0f)
     {
 
     }
@@ -139,8 +187,12 @@ public:
 
     void initTrace(int winWidth, int winHeight, Camera *camera)
     {
+        viewPosition_ = camera->getPosition();
+
         pixels_.resize(winWidth * winHeight * 4);
         memset(pixels_.data(), 0, pixels_.size());
+
+        pendingRays_.clear();
 
         for (int r = 0; r < winHeight; ++r)
         {
@@ -180,23 +232,18 @@ public:
 
         rayTrace(info, 1);
 
-        Color cr(0.1f, 0.1f, 0.1f);
+        Vector4 cr = ambientColor_;
         if (info.isValid())
         {
-            float gray = 0.2f;
-            if (!info.bShadow_)
-            {
-                float f = 1.0f / (0.1f + info.distanceToLight_);
-                gray += f * 1.2f;
-            }
-            cr.set(gray, gray, gray);
+            cr = info.color_;
+            cr += ambientColor_ * meshs_[info.meshIndex_]->material_.color;
         }
 
         int index = info.pixelIndex_;
-        pixels_[index + 0] = (char)cr.r255();
-        pixels_[index + 1] = (char)cr.g255();
-        pixels_[index + 2] = (char)cr.b255();
-        pixels_[index + 3] = (char)cr.a255();
+        pixels_[index + 0] = (char)clamp(int(cr.x * 255), 0, 255);
+        pixels_[index + 1] = (char)clamp(int(cr.y * 255), 0, 255);
+        pixels_[index + 2] = (char)clamp(int(cr.z * 255), 0, 255);
+        pixels_[index + 3] = (char)clamp(int(cr.w * 255), 0, 255);
 
         if (isFinished())
         {
@@ -213,22 +260,62 @@ public:
             return;
         }
 
+        const Ray &ray = info.ray_;
+
+        // 添加一点偏移，防止拾取到自己
+        const float epsilon = 0.01f;
+        Vector3 position = ray.origin_ + ray.direction_ * info.t_;
+       
+        MeshInfoPtr &mesh = meshs_[info.meshIndex_];
+        MeshInfo::Face &face = mesh->faces_[info.face_];
+
         // 检测是否对光源可见
-        Vector3 cross = info.ray_.origin_ + info.ray_.direction_ * (info.t_ - 0.1f);
-        Vector3 normal = lightPosition_ - cross;
-        float distanceToLight = normal.length();
-        normal /= distanceToLight; // normalize
+        do
+        {
+            Vector3 lightDir = lightPosition_ - position;
+            float distanceToLight = lightDir.length();
+            lightDir /= distanceToLight; // normalize
 
-        info.distanceToLight_ = distanceToLight;
+            TraceInfo lightTrace;
+            lightTrace.ray_.origin_ = position + lightDir * epsilon;
+            lightTrace.ray_.direction_ = lightDir;
+            distanceToLight -= epsilon;
 
-        TraceInfo infoToLight;
-        infoToLight.ray_.origin_ = cross;
-        infoToLight.ray_.direction_ = normal;
+            rayIntersect(lightTrace);
 
-        rayIntersect(infoToLight);
+            // 交点到灯光之间，有障碍物
+            info.bShadow_ = lightTrace.isValid() && lightTrace.t_ < distanceToLight;
+            if (!info.bShadow_)
+            {
+                info.color_ += lightVertex(position, face.normal, lightPosition_, lightColor_,
+                    viewPosition_, mesh->material_, 1.0f, 0.2f, 0.0f);
+            }
+        } while (0);
 
-        // 交点到灯光之间，有障碍物
-        info.bShadow_ = infoToLight.isValid() && infoToLight.t_ < distanceToLight;
+        // 反射光线
+        if(depth-- > 0 && mesh->material_.reflection > 0.0f)
+        {
+            Vector3 reflactDir = reflect(-ray.direction_, face.normal); 
+
+            TraceInfo reflectTrace;
+            reflectTrace.ray_.origin_ = position + reflactDir * epsilon; // 添加一点偏移，防止拾取到自己
+            reflectTrace.ray_.direction_ = reflactDir;
+
+            rayTrace(reflectTrace, depth);
+
+            if (reflectTrace.isValid())
+            {
+                // 以相交点为灯光，照射当前点
+                MeshInfo::Material &lightMtl = meshs_[reflectTrace.meshIndex_]->material_;
+                Vector3 lightPos = reflectTrace.ray_.origin_ + reflactDir * reflectTrace.t_;
+                // 加上环境光颜色
+                Vector4 lightColor = reflectTrace.color_ + lightMtl.color * ambientColor_;
+
+                Vector4 color = lightVertex(position, face.normal, lightPos, lightColor,
+                    viewPosition_, mesh->material_, 1.0f, 1.0f, 0.1f);
+                info.color_ += color * (lightMtl.reflection * bounceAttenuation_);
+            }
+        }
     }
 
     void rayIntersect(TraceInfo &info)
@@ -242,51 +329,79 @@ public:
                 continue;
             }
 
-            for (size_t i = 0; i < mesh->indices_.size(); i += 3)
+            for (size_t i = 0; i < mesh->faces_.size(); ++i)
             {
-                int i0 = mesh->indices_[i + 0];
-                int i1 = mesh->indices_[i + 1];
-                int i2 = mesh->indices_[i + 2];
+                MeshInfo::Face &f = mesh->faces_[i];
                 float t, u, v;
                 if (ray.intersectTriangle(
-                    mesh->vertices_[i0],
-                    mesh->vertices_[i1],
-                    mesh->vertices_[i2],
+                    mesh->vertices_[f.i[0]],
+                    mesh->vertices_[f.i[1]],
+                    mesh->vertices_[f.i[2]],
                     &t, &u, &v) && t < info.t_)
                 {
                     info.meshIndex_ = meshIndex;
                     info.t_ = t;
                     info.u_ = u;
                     info.v_ = v;
-                    info.triangles_[0] = i0;
-                    info.triangles_[1] = i1;
-                    info.triangles_[2] = i2;
+                    info.face_ = (int)i;
                 }
             }
         }
     }
 
-    /// 递归收集transform上的所有mesh组件
-    void collectMesh(TransformPtr &transform)
+    /** 计算反射向量
+    *   @param  ray     输入向量的负方向向量
+    *   @param  normal  平面的法向量
+    */
+    static Vector3 reflect(const Vector3 &ray, const Vector3 &normal)
     {
-        for (int i = 0; i < transform->getNumComponents(); ++i)
-        {
-            ComponentPtr com = transform->getComponentByIndex(i);
-            Mesh *pMesh = dynamic_cast<Mesh*>(com.get());
-            if (nullptr == pMesh)
-            {
-                continue;
-            }
+        Vector3 ret = normal * (normal.dotProduct(ray) * 2.0f) - ray;
+        ret.normalize();
+        return ret;
+    }
 
-            Matrix localToWorld = transform->getLocalToWorldMatrix();
-            MeshInfoPtr info = new MeshInfo(transform, pMesh, localToWorld);
-            meshs_.push_back(info);
+    /** 顶点光照计算
+    *   @param  position    顶点位置
+    *   @param  normal      顶点的法线
+    *   @param  lightPos    灯光位置
+    */
+    static Vector4 lightVertex(
+        const Vector3 &position,
+        const Vector3 &normal,
+        const Vector3 &lightPos,
+        const Vector4 &lightColor,
+        const Vector3 &viewPos,
+        const MeshInfo::Material &material,
+        float attK0, float attk1, float attK2)
+    {
+        Vector3 lightDir = lightPos - position;
+        float distanceToLight = lightDir.length();
+        lightDir /= distanceToLight;
+
+        Vector4 ret;
+        // 漫反射
+        float diffuse = normal.dotProduct(lightDir);
+        if (diffuse <= 0.0f)
+        {
+            return ret;
         }
 
-        for (int i = 0; i < transform->getNumChildren(); ++i)
+        float indensity = diffuse;
+
+        // 镜面反射
+        Vector3 reflectDir = reflect(lightDir, normal);
+        Vector3 viewDir = viewPos - position;
+        viewDir.normalize();
+
+        float specular = reflectDir.dotProduct(viewDir);
+        if (specular > 0)
         {
-            collectMesh(transform->getChildByIndex(i));
+            indensity += std::pow(specular, 32);
         }
+
+        float attenuation = 1.0f / (1.0f + distanceToLight * 0.1f + distanceToLight * distanceToLight * attK2);
+        ret = material.color * lightColor * (indensity * attenuation);
+        return ret;
     }
 };
 
@@ -328,41 +443,54 @@ public:
         cubeMesh_->generateBoundingBox();
 
         objects_ = new Transform();
-        Vector4 positions[] = {
-            {0, -5, 0, 10}, // bottom
-            {0, 15, 0, 10}, // top
-            {-10, 5, 0, 10}, // left
-            {10, 5, 0, 10}, // right
-            {0, 5, 10, 10}, // back
-            {0, 0.5f, 0, 1},
-            {0, 1.0f + 0.25f, 0, 0.5f},
-            {-1.5f, 0.5f, 0, 1},
-            {1.8f, 0.5f, 0, 1},
+
+        MeshInfo::Material materials[] = {
+            { { 1.0f, 1.0f, 1.0f, 1.0f }, 1.0f, 0.0f }, // 0 白色 反射
+            { { 1.0f, 1.0f, 1.0f, 1.0f }, 0.1f, 0.0f }, // 1 白色
+            { { 0.5f, 0.0f, 0.0f, 1.0f }, 0.1f, 0.0f }, // 2 红色
+            { { 1.0f, 0.0f, 0.0f, 1.0f }, 0.3f, 0.0f }, // 3 红色 反射
+            { { 0.0f, 0.0f, 1.0f, 1.0f }, 0.3f, 1.0f }, // 4 蓝色 折射
+            { { 0.0f, 1.0f, 0.0f, 1.0f }, 0.3f, 0.0f }, // 5 绿色
         };
-        for (const Vector4 &pos4 : positions)
+
+        float objectDatas[][5] = {
+            {0,  -5, 0, 10, 0}, // bottom
+            {0,  15, 0, 10, 1}, // top
+            {-10, 5, 0, 10, 1}, // left
+            {10,  5, 0, 10, 2}, // right
+            {0,  5, 10, 10, 0}, // back
+            {0, 0.50f, 0, 1.0f, 1}, // 中心
+            {0, 1.25f, 0, 0.5f, 3}, // 上侧
+            {-1.5f, 0.5f, 0, 1, 4}, // 左侧
+            { 2.5f, 0.5f, 0, 1.2, 5}, // 右侧
+        };
+
+        for (float *p : objectDatas)
         {
             TransformPtr t = new Transform();
-            t->setPosition(Vector3(pos4));
-            t->setScale(pos4.w);
+            t->setPosition(Vector3(p[0], p[1], p[2]));
+            t->setScale(p[3]);
             t->addComponent(cubeMesh_);
             objects_->addChild(t);
+
+            int mtlIndex = (int)p[4];
+            MeshInfoPtr m = new MeshInfo(t, cubeMesh_, materials[mtlIndex], t->getLocalToWorldMatrix());
+            traceMgr_.meshs_.push_back(m);
         }
 
         camera_.lookAt(Vector3(0, 3, -10), Vector3::Zero, Vector3::YAxis);
         setupProjectionMatrix();
         Renderer::instance()->setCamera(&camera_);
 
-        lightCamera_.setPosition(0, 6, -6);
+        lightCamera_.setPosition(-2, 5, -4);
         lightCamera_.setRotation(PI_FULL / 6.0f, PI_FULL / 3.0f, 0.0f);
         lightCamera_.setOrtho(20, 20, 1, 10);
 
 
-        quadMesh_ = createQuad(Vector2(0.6f, 0.6f));
+        quadMesh_ = createQuad(Vector2(2.0f, 2.0f));
         quadMesh_->addMaterial(quadMaterial_);
 
-        traceMgr_.lightPosition_.set(-2, 5, 0);
-        traceMgr_.lightRange_ = 50.0f;
-        traceMgr_.collectMesh(objects_);
+        traceMgr_.lightPosition_ = lightCamera_.getPosition();
 
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
@@ -421,9 +549,15 @@ public:
     {
         Application::onDraw(renderer);
 
-        drawScene(renderer);
-        drawPick(renderer);
-        drawScreenTexture(renderer);
+        if (bShowRayTrace_)
+        {
+            drawScreenTexture(renderer);
+        }
+        else
+        {
+            drawScene(renderer);
+            drawPick(renderer);
+        }
     }
 
     void drawScene(Renderer *renderer)
@@ -453,10 +587,12 @@ public:
         {
             MeshInfoPtr mesh = traceMgr_.meshs_[info.meshIndex_];
 
+            MeshInfo::Face &f = mesh->faces_[info.face_];
+
             DebugDraw::instance()->drawFilledTriangle(
-                mesh->vertices_[info.triangles_[0]],
-                mesh->vertices_[info.triangles_[1]],
-                mesh->vertices_[info.triangles_[2]],
+                mesh->vertices_[f.i[0]],
+                mesh->vertices_[f.i[1]],
+                mesh->vertices_[f.i[2]],
                 Color::Red,
                 Matrix::Identity);
         }
@@ -471,7 +607,7 @@ public:
         renderer->setProjMatrix(Matrix::Identity);
 
         Matrix world;
-        world.setTranslate(-0.7, -0.7f, 0.0f);
+        world.setIdentity();
         renderer->setWorldMatrix(world);
 
         quadMaterial_->bindShader();
@@ -539,6 +675,10 @@ public:
             case GLFW_KEY_SPACE:
                 doRayTracing();
                 break;
+
+            case GLFW_KEY_R:
+                bShowRayTrace_ = !bShowRayTrace_;
+                break;
             }
         }
     }
@@ -552,6 +692,8 @@ public:
     {
         LOG_DEBUG("start ray tracing...");
         traceMgr_.initTrace(winWidth_, winHeight_, &camera_);
+
+        bShowRayTrace_ = true;
     }
 
     void savePixelToTexture()
@@ -569,7 +711,6 @@ public:
         
         glPixelStorei(GL_PACK_ALIGNMENT, oldAlignment);
     }
-    
 
 private:
     
@@ -592,6 +733,7 @@ private:
     int             winWidth_;
     int             winHeight_;
     TraceManager    traceMgr_;
+    bool            bShowRayTrace_ = false;
 };
 
 int main()
