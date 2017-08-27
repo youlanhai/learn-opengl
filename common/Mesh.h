@@ -91,6 +91,8 @@ public:
 
     void iterateFaces(MeshFaceVisitor &visitor) const;
 
+    static uint32_t extractIndex(const char *pData, int stride, int index);
+
 private:
     MeshPtr                 source_;
     std::string             resource_;

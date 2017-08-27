@@ -227,7 +227,7 @@ void Mesh::generateBoundingBox()
     }
 }
 
-static uint32_t extractIndex(const char *pData, int stride, int index)
+uint32_t Mesh::extractIndex(const char *pData, int stride, int index)
 {
     const char *p = pData + index * stride;
     uint32_t ret = 0;
